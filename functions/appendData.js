@@ -24,7 +24,11 @@ export const appendData = (data, parent, handleAddToCart, handleRemoveOne, cartD
     btnDiv.setAttribute("id", "btnDiv");
     btnDiv.style="display: flex; flex-direction: row;"
     const img = document.createElement("img");
-    img.src = thumb;
+    img.src = `${window.location.origin}${window.location.pathname.replace(
+      /\/[^\/]*$/,
+      "/"
+    )}${thumb.replace(/^(\.\.\/)+/, "")}`;
+    console.log("img.src ==> ", img.src);
     img.style="width:100%;"
     const name = document.createElement("p");
     name.textContent = shortString(brand, 20).toUpperCase();

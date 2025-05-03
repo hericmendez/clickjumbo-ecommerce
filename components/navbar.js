@@ -8,10 +8,10 @@ export const navigationBar = (token, name) => {
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div   class="navbar-nav">
                         <a style="    color: #ffcc2a; font-weight: bold;"  class="nav-link" href="index.html">Penitenciárias</a>
-                        <a style="    color: #ffcc2a; font-weight: bold;" class="nav-link" href="html/cart.html">Carrinho</a> 
+                        <a style="    color: #ffcc2a; font-weight: bold;" class="nav-link" href="cart.html">Carrinho</a> 
                         <a style="    color: #ffcc2a; font-weight: bold;" style="display:${
                           !token ? "block" : "none"
-                        }" class="nav-link" href="../html/login.html">Login</a>
+                        }" class="nav-link" href="../login.html">Login</a>
                         <li style="display:${
                           token ? "block" : "none"
                         }" class="nav-item dropdown">
