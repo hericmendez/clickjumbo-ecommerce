@@ -41,7 +41,7 @@ form.addEventListener("submit", (e) => {
 
   if (!getItem("token")) {
     alert("Please login first");
-    window.location.href = "../html/login.html";
+    window.location.href = "login.html";
     return;
   }
 
@@ -68,7 +68,7 @@ form.addEventListener("submit", (e) => {
 
   if (user.isFilled().status) {
     setTimeout(() => {
-      window.location.href = "../html/orderPlaced.html";
+      window.location.href = "orderPlaced.html";
     }, 2000);
   }
 });
