@@ -19,7 +19,7 @@ const mock = {
       weight: 0.1,
       price: 6.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/adocante_adocyl.png",
+      thumb: "../mock/images/adocante_adocyl.png",
     },
     {
       id: 2,
@@ -29,7 +29,7 @@ const mock = {
       weight: 0.1,
       price: 8.93,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/adocante_zero_cal.png",
+      thumb: "../mock/images/adocante_zero_cal.png",
     },
     {
       id: 3,
@@ -39,7 +39,7 @@ const mock = {
       weight: 0.35,
       price: 7.93,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/bolacha_vitarella.png",
+      thumb: "../mock/images/bolacha_vitarella.png",
     },
     {
       id: 4,
@@ -49,7 +49,7 @@ const mock = {
       weight: 0.5,
       price: 8.97,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/bolacha_mabel.png",
+      thumb: "../mock/images/bolacha_mabel.png",
     },
     {
       id: 5,
@@ -59,7 +59,7 @@ const mock = {
       weight: 0.35,
       price: 9.25,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/bolacha_marilan.png",
+      thumb: "../mock/images/bolacha_marilan.png",
     },
     {
       id: 6,
@@ -69,7 +69,7 @@ const mock = {
       weight: 0.4,
       price: 9.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/paodeforma_tradicional.png",
+      thumb: "../mock/images/paodeforma_tradicional.png",
     },
     {
       id: 7,
@@ -79,7 +79,7 @@ const mock = {
       weight: 0.25,
       price: 9.9,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/bolo_kim_laranja.png",
+      thumb: "../mock/images/bolo_kim_laranja.png",
     },
     {
       id: 8,
@@ -89,7 +89,7 @@ const mock = {
       weight: 0.25,
       price: 9.9,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/bolo_kim_abacaxi.png",
+      thumb: "../mock/images/bolo_kim_abacaxi.png",
     },
     {
       id: 9,
@@ -99,7 +99,7 @@ const mock = {
       weight: 0.25,
       price: 9.9,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/bolo_kim_coco.png",
+      thumb: "../mock/images/bolo_kim_coco.png",
     },
 
     {
@@ -110,7 +110,7 @@ const mock = {
       weight: 0.082,
       price: 9.47,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/chocolate_hersheys.png",
+      thumb: "../mock/images/chocolate_hersheys.png",
     },
     {
       id: 12,
@@ -120,7 +120,7 @@ const mock = {
       weight: 0.08,
       price: 12.5,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/chocolate_nestle_classic.png",
+      thumb: "../mock/images/chocolate_nestle_classic.png",
     },
     {
       id: 13,
@@ -130,7 +130,7 @@ const mock = {
       weight: 0.08,
       price: 12.5,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/chocolate_nestle_meioamargo.png",
+      thumb: "../mock/images/chocolate_nestle_meioamargo.png",
     },
     {
       id: 15,
@@ -140,7 +140,7 @@ const mock = {
       weight: 0.5,
       price: 16.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/bala_sweet_kiss.png",
+      thumb: "../mock/images/bala_sweet_kiss.png",
     },
     {
       id: 17,
@@ -150,7 +150,7 @@ const mock = {
       weight: 0.4,
       price: 19.73,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/leiteempo_aurora.png",
+      thumb: "../mock/images/leiteempo_aurora.png",
     },
     {
       id: 19,
@@ -160,7 +160,7 @@ const mock = {
       weight: 0.06,
       price: 8.37,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/tempero_sazon_carne.png",
+      thumb: "../mock/images/tempero_sazon_carne.png",
     },
     {
       id: 20,
@@ -170,7 +170,7 @@ const mock = {
       weight: 0.06,
       price: 8.37,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/tempero_sazon_frango.png",
+      thumb: "../mock/images/tempero_sazon_frango.png",
     },
     //Higiene
     {
@@ -181,7 +181,7 @@ const mock = {
       weight: 0.06,
       price: 8.37,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/protetor_sunday.png",
+      thumb: "../mock/images/protetor_sunday.png",
     },
     {
       id: 22,
@@ -191,7 +191,7 @@ const mock = {
       weight: 0.325,
       price: 9.5,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/shampoo_tokbotanico.png",
+      thumb: "../mock/images/shampoo_tokbotanico.png",
     },
     {
       id: 23,
@@ -201,7 +201,7 @@ const mock = {
       weight: 0.325,
       price: 19.87,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/shampoo_seda.png",
+      thumb: "../mock/images/shampoo_seda.png",
     },
     {
       id: 24,
@@ -211,7 +211,7 @@ const mock = {
       weight: 0.085,
       price: 3.95,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/sabonete_lux.png",
+      thumb: "../mock/images/sabonete_lux.png",
     },
     {
       id: 25,
@@ -221,7 +221,7 @@ const mock = {
       weight: 0.085,
       price: 3.25,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/sabonete_albany.png",
+      thumb: "../mock/images/sabonete_albany.png",
     },
     {
       id: 26,
@@ -231,7 +231,7 @@ const mock = {
       weight: 0.05,
       price: 5.3,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/esponja_enlace.png",
+      thumb: "../mock/images/esponja_enlace.png",
     },
     {
       id: 27,
@@ -241,7 +241,7 @@ const mock = {
       weight: 0.09,
       price: 9.15,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/escova_colgate.png",
+      thumb: "../mock/images/escova_colgate.png",
     },
     {
       id: 28,
@@ -251,7 +251,7 @@ const mock = {
       weight: 0.07,
       price: 8.3,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/escova_oralb.png",
+      thumb: "../mock/images/escova_oralb.png",
     },
     {
       id: 29,
@@ -261,7 +261,7 @@ const mock = {
       weight: 0.09,
       price: 6.15,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/pasta_colgate.png",
+      thumb: "../mock/images/pasta_colgate.png",
     },
     {
       id: 30,
@@ -271,7 +271,7 @@ const mock = {
       weight: 0.07,
       price: 4.3,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/pasta_oralb.png",
+      thumb: "../mock/images/pasta_oralb.png",
     },
     {
       id: 31,
@@ -281,7 +281,7 @@ const mock = {
       weight: 0.05,
       price: 9.73,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/desodorante_skala.png",
+      thumb: "../mock/images/desodorante_skala.png",
     },
     {
       id: 32,
@@ -291,7 +291,7 @@ const mock = {
       weight: 0.05,
       price: 26.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/desodorante_nivea.png",
+      thumb: "../mock/images/desodorante_nivea.png",
     },
     {
       id: 33,
@@ -301,7 +301,7 @@ const mock = {
       weight: 0.01,
       price: 4.37,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/barbeador_bic2laminas.png",
+      thumb: "../mock/images/barbeador_bic2laminas.png",
     },
     {
       id: 34,
@@ -311,7 +311,7 @@ const mock = {
       weight: 0.01,
       price: 6.97,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/barbeador_bic3laminas.png",
+      thumb: "../mock/images/barbeador_bic3laminas.png",
     },
     {
       id: 35,
@@ -321,7 +321,7 @@ const mock = {
       weight: 0.01,
       price: 9.95,
       maxUnitsPerClient: 2,
-      thumb: "mock/images/barbeador_gilette.png",
+      thumb: "../mock/images/barbeador_gilette.png",
     },
     {
       id: 36,
@@ -331,7 +331,7 @@ const mock = {
       weight: 0.065,
       price: 21.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/creme_barba_nivea.png",
+      thumb: "../mock/images/creme_barba_nivea.png",
     },
     {
       id: 37,
@@ -341,7 +341,7 @@ const mock = {
       weight: 0.01,
       price: 21.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/fiodental_johnson.png",
+      thumb: "../mock/images/fiodental_johnson.png",
     },
     {
       id: 38,
@@ -351,7 +351,7 @@ const mock = {
       weight: 0.01,
       price: 9.35,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/fiodental_hilio.png",
+      thumb: "../mock/images/fiodental_hilio.png",
     },
     //Limpeza
     {
@@ -362,7 +362,7 @@ const mock = {
       weight: 0.5,
       price: 3.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/detergente_ype.png",
+      thumb: "../mock/images/detergente_ype.png",
     },
     {
       id: 40,
@@ -372,7 +372,7 @@ const mock = {
       weight: 0.5,
       price: 4.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/desinfetante_ype.png",
+      thumb: "../mock/images/desinfetante_ype.png",
     },
     {
       id: 41,
@@ -382,7 +382,7 @@ const mock = {
       weight: 0.8,
       price: 9.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/sabao_po_ype.png",
+      thumb: "../mock/images/sabao_po_ype.png",
     },
     {
       id: 42,
@@ -392,7 +392,7 @@ const mock = {
       weight: 0.2,
       price: 2.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/sabao_barra.png",
+      thumb: "../mock/images/sabao_barra.png",
     },
     {
       id: 43,
@@ -402,7 +402,7 @@ const mock = {
       weight: 1,
       price: 9.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/amaciante_ype.png",
+      thumb: "../mock/images/amaciante_ype.png",
     },
 
     //Vestuario
@@ -414,7 +414,7 @@ const mock = {
       weight: 0.2,
       price: 19.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/camisa_moletom.png",
+      thumb: "../mock/images/camisa_moletom.png",
     },
     {
       id: 46,
@@ -424,7 +424,7 @@ const mock = {
       weight: 0.5,
       price: 49.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/calca_jeanspng",
+      thumb: "../mock/images/calca_jeanspng",
     },
     {
       id: 47,
@@ -434,7 +434,7 @@ const mock = {
       weight: 0.5,
       price: 24.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/chinelo_ipanema.png",
+      thumb: "../mock/images/chinelo_ipanema.png",
     },
     {
       id: 48,
@@ -444,7 +444,7 @@ const mock = {
       weight: 0.05,
       price: 5.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/meia_branca.png",
+      thumb: "../mock/images/meia_branca.png",
     },
     {
       id: 49,
@@ -454,7 +454,7 @@ const mock = {
       weight: 0.3,
       price: 29.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/bermuda_simples.png",
+      thumb: "../mock/images/bermuda_simples.png",
     },
     {
       id: 50,
@@ -464,7 +464,7 @@ const mock = {
       weight: 0.1,
       price: 15.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/cueca_box.png",
+      thumb: "../mock/images/cueca_box.png",
     },
     //Diversos
     {
@@ -475,7 +475,7 @@ const mock = {
       weight: 0.5,
       price: 39.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/livros_biblia.png",
+      thumb: "../mock/images/livros_biblia.png",
     },
     {
       id: 52,
@@ -485,7 +485,7 @@ const mock = {
       weight: 0.5,
       price: 69.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/livros_livro.png",
+      thumb: "../mock/images/livros_livro.png",
     },
     {
       id: 53,
@@ -495,7 +495,7 @@ const mock = {
       weight: 0.5,
       price: 29.9,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/jogos_domino.png",
+      thumb: "../mock/images/jogos_domino.png",
     },
     //Papelaria
     {
@@ -506,7 +506,7 @@ const mock = {
       weight: 0.5,
       price: 19.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/papelaria_caderno.png",
+      thumb: "../mock/images/papelaria_caderno.png",
     },
     {
       id: 55,
@@ -516,7 +516,7 @@ const mock = {
       weight: 0.01,
       price: 2.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/papelaria_bic.png",
+      thumb: "../mock/images/papelaria_bic.png",
     },
     {
       id: 56,
@@ -526,7 +526,7 @@ const mock = {
       weight: 0.02,
       price: 1.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/papelaria_lapis.png",
+      thumb: "../mock/images/papelaria_lapis.png",
     },
     {
       id: 57,
@@ -536,7 +536,7 @@ const mock = {
       weight: 0.01,
       price: 1.49,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/papelaria_borracha.png",
+      thumb: "../mock/images/papelaria_borracha.png",
     },
     //Cigarros
     {
@@ -547,7 +547,7 @@ const mock = {
       weight: 0.01,
       price: 8.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/cigarro_marlboro_gold.png",
+      thumb: "../mock/images/cigarro_marlboro_gold.png",
     },
     {
       id: 60,
@@ -557,7 +557,7 @@ const mock = {
       weight: 0.01,
       price: 9.49,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/cigarro_luckystrike.png",
+      thumb: "../mock/images/cigarro_luckystrike.png",
     },
     {
       id: 63,
@@ -567,7 +567,7 @@ const mock = {
       weight: 0.01,
       price: 3.99,
       maxUnitsPerClient: 1,
-      thumb: "mock/images/cigarros_isqueiro.png",
+      thumb: "../mock/images/cigarros_isqueiro.png",
     },
   ],
 };
