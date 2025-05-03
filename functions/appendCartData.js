@@ -5,23 +5,27 @@ export const appendCartData = (data, parent, orderTotalParent) => {
   console.log("data ==> ", data);
   parent.innerHTML = null;
 
+  // Envolve a tabela em um wrapper com classe "table-responsive"
+  const wrapperDiv = document.createElement("div");
+  wrapperDiv.setAttribute("class", "table-responsive");
+
   const table = document.createElement("table");
   table.setAttribute(
     "class",
-    "table table-bordered table-hover table-sm text-start table-striped table-responsive "
+    "table table-bordered table-hover table-sm text-start table-striped"
   );
-  table.style = "width: 100%; text-align: center; font-size: 22px;";
+  table.style =
+    "width: 100%; text-align: center; font-size: 22px; min-width: 600px;";
 
   const thead = document.createElement("thead");
   thead.innerHTML = `
-      <tr class="table-dark ">
-        <th class="text-left">Produto</th>
- 
-        <th>Peso (kg)</th>
-               <th>Preço</th>
-        <th></th>
-      </tr>
-    `;
+    <tr class="table-dark">
+      <th class="text-left">Produto</th>
+      <th>Peso (kg)</th>
+      <th>Preço</th>
+      <th></th>
+    </tr>
+  `;
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
@@ -30,7 +34,8 @@ export const appendCartData = (data, parent, orderTotalParent) => {
     const { brand, thumb, category, subcategory, price, weight } = item;
 
     const tr = document.createElement("tr");
-    // Nome + thumbm juntos em uma célula
+
+    // Nome + thumb juntos em uma célula
     const tdTitle = document.createElement("td");
     const productDiv = document.createElement("div");
     const infoDiv = document.createElement("div");
@@ -40,7 +45,7 @@ export const appendCartData = (data, parent, orderTotalParent) => {
     const img = document.createElement("img");
     img.src = thumb;
     img.style =
-      "width: 100px; height: 100px; object-fit: cover; border-radius: 6px;";
+      "width: 80px; height: 80px; object-fit: cover; border-radius: 6px;";
 
     const titleText = document.createElement("span");
     titleText.textContent = shortString(brand, 50).toUpperCase();
@@ -55,7 +60,6 @@ export const appendCartData = (data, parent, orderTotalParent) => {
     tdTitle.appendChild(productDiv);
 
     // Preço
-
     const tdPrice = document.createElement("td");
     const safePrice = typeof price === "number" ? price : 0;
     tdPrice.textContent = `R$ ${numberWithCommas(safePrice.toFixed(2))}`;
@@ -79,20 +83,25 @@ export const appendCartData = (data, parent, orderTotalParent) => {
       getTotalOrderAmount(data, orderTotalParent);
     });
     tdRemove.appendChild(removeBtn);
+
     [tdPrice, tdWeight].forEach((td) => {
       td.style.verticalAlign = "middle";
       td.style.textAlign = "left";
     });
+
     tdRemove.style.verticalAlign = "middle";
     tdRemove.style.textAlign = "center";
     tdRemove.style.width = "10%";
+
     tr.append(tdTitle, tdWeight, tdPrice, tdRemove);
     tbody.appendChild(tr);
   });
 
   table.appendChild(tbody);
-  parent.appendChild(table);
+  wrapperDiv.appendChild(table);
+  parent.appendChild(wrapperDiv);
 };
+
 
 export const getTotalOrderAmount = (
   data,

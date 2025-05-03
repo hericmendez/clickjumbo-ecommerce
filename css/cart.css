@@ -114,6 +114,10 @@ body {
 #detailsDiv p {
   margin: 0px;
 }
+.cartItemList{
+  overflow-x: auto;
+}
+
 
 #cartDetailsDiv {
   padding: 10px 20px;
