@@ -19,15 +19,10 @@ body {
     gap: 20px;
 }
 
-#display {
-    max-width: 1300px;
-    margin: 50px auto;
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-}
 
+.d-none-js {
+    display: none !important;
+  }
 #foodDiv {
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
@@ -126,3 +121,36 @@ body {
   border-top: 1px solid #ccc;
   font-size: 22px;
 }
+.table-transition {
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+  }
+  
+  .table-transition-collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toggle-section {
+    overflow: hidden;
+    max-height: 1000px;
+    opacity: 1;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+  }
+  
+  .toggle-section-collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Animação do chevron */
+.chevron-rotate {
+    transition: transform 0.3s ease;
+  }
+  
+  .chevron-rotate-up {
+    transform: rotate(180deg);
+  }
+  

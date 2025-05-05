@@ -36,6 +36,9 @@ body {
   gap: 50px;
   grid-template-columns: 66% 30%;
 }
+.d-none-js {
+  display: none !important;
+}
 
 #display {
   display: flex;

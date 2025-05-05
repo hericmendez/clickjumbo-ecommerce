@@ -50,7 +50,7 @@ function handleRemoveOne(item) {
 function displayItems(penitenciaria, category="alimentos") {
   const items =
     mock[penitenciaria]?.filter((item) => item.category === category) || [];
-  console.log("items ==> ", items);
+
   if (!Array.isArray(items) || items.length === 0) {
     console.warn(`Nenhum dado encontrado para ${category} na ${penitenciaria}`);
     return;
@@ -68,19 +68,21 @@ function displayItems(penitenciaria, category="alimentos") {
 }
 
 function handleAddToCart(item) {
+  // Calcula o peso total do carrinho considerando as quantidades
   const totalWeight = cartData.reduce(
-    (acc, curr) => acc + (curr.weight || 0),
+    (acc, curr) => acc + (curr.weight || 0) * (curr.qty || 1),
     0
   );
 
-  if (totalWeight + item.weight > MAX_WEIGHT) {
+  // Verifica se o peso total mais o peso do item ultrapassa o limite
+  if (totalWeight + (item.weight || 0) > MAX_WEIGHT) {
     notifyDiv.innerHTML = notify(
       "danger",
       `Limite de peso excedido! Máximo: ${MAX_WEIGHT}kg`
     );
     const toastEl = document.getElementById("liveToast");
     if (toastEl) new bootstrap.Toast(toastEl).show();
-    return;
+    return; // Impede a adição se o limite de peso for atingido
   }
 
   // Verifica se o item já está no carrinho
@@ -88,18 +90,21 @@ function handleAddToCart(item) {
   if (existing) {
     existing.qty = (existing.qty || 0) + 1;
   } else {
-    cartData.push({ ...item, qty: 1 }); // Aqui você garante que qty começa com 1
+    cartData.push({ ...item, qty: 1 }); // Garante que a quantidade começa com 1
   }
 
-  localStorage.setItem("cartData", JSON.stringify(cartData)); // Salva o carrinho no localStorage
+  // Salva o carrinho no localStorage
+  localStorage.setItem("cartData", JSON.stringify(cartData));
   notifyDiv.innerHTML = notify("success", "Item adicionado com sucesso!");
   const toastEl = document.getElementById("liveToast");
   if (toastEl) new bootstrap.Toast(toastEl).show();
 
-  displayItems(currentPenitenciaria, currentCategory); // Re-renderiza
+  // Re-renderiza o carrinho e as informações de total
+  displayItems(currentPenitenciaria, currentCategory);
   showTotal(cartData, totalFood);
   updateCartSummaryBar(cartData);
 
+  // Atualiza o peso total do carrinho
   const pesoInfo = document.getElementById("pesoTotalInfo");
   if (pesoInfo) {
     const pesoTotal = cartData.reduce(

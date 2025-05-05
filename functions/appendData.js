@@ -1,76 +1,201 @@
 import { shortString } from "./extraFunctions.js";
-import { setItem } from "./localStorage.js";
 
-export const appendData = (data, parent, handleAddToCart, handleRemoveOne, cartData = []) => {
+export const appendData = (
+  data,
+  parent,
+  handleAddToCart,
+  handleRemoveOne,
+  cartData = []
+) => {
   parent.innerHTML = null;
 
-  data.map((item) => {
-    const { id, brand, thumb, price, category, subcategory, weight, maxUnitsPerClient } = item;
+  const categoryMap = {};
+  data.forEach((item) => {
+    const { category, subcategory } = item;
+    if (!categoryMap[category]) categoryMap[category] = {};
+    if (!categoryMap[category][subcategory])
+      categoryMap[category][subcategory] = [];
+    categoryMap[category][subcategory].push(item);
+  });
 
-    // Verifica quantas unidades do item já estão no carrinho
-    const carrinhoItem = cartData.find((prod) => prod.id === id);
-    const qtdeAtual = carrinhoItem ? carrinhoItem.qty : 0;
+  Object.entries(categoryMap).forEach(([category, subcats]) => {
+    const categoryHeading = document.createElement("h2");
+    categoryHeading.textContent = category;
+    categoryHeading.className = "text-center";
+    categoryHeading.style = "margin-top: 2rem; font-size: 2rem;";
+    parent.appendChild(categoryHeading);
 
-    const div = document.createElement("div");
-    div.setAttribute("id", "foodDiv");
+    Object.entries(subcats).forEach(([subcatName, items]) => {
+      const subHeader = document.createElement("div");
+      subHeader.style =
+        "display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;";
+      subHeader.className = "sub-header";
 
-    const imgDiv = document.createElement("div");
-    imgDiv.setAttribute("id", "imgDiv");
+      const heading = document.createElement("h3");
+      heading.textContent = subcatName;
+      heading.style = "margin: 0;";
+      const toggleBtn = document.createElement("button");
+      toggleBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+      toggleBtn.setAttribute("aria-expanded", "true"); // controle visibilidade
+      toggleBtn.classList.add("btn", "btn-sm", "btn-link", "p-0");
+      toggleBtn.style = "font-size: 1.2rem;";
 
-    const detailsDiv = document.createElement("div");
-    detailsDiv.setAttribute("id", "detailsDiv");
+      subHeader.appendChild(heading);
+      subHeader.appendChild(toggleBtn);
+      parent.appendChild(subHeader);
 
-    const btnDiv = document.createElement("div");
-    btnDiv.setAttribute("id", "btnDiv");
-    btnDiv.style="display: flex; flex-direction: row;"
-    const img = document.createElement("img");
-    img.src = `${window.location.origin}${window.location.pathname.replace(
-      /\/[^\/]*$/,
-      "/"
-    )}${thumb.replace(/^(\.\.\/)+/, "")}`;
-    console.log("img.src ==> ", img.src);
-    img.style="width:100%;"
-    const name = document.createElement("p");
-    name.textContent = shortString(brand, 20).toUpperCase();
-    name.style = "font-weight:600; font-size:17px";
+      const hr = document.createElement("hr");
+      hr.style = "margin-top: 4px; margin-bottom: 12px;";
+      parent.appendChild(hr);
 
-    const foodCategory = document.createElement("p");
-    foodCategory.textContent = `${category} > ${subcategory}`;
-    foodCategory.style = "color:gray; font-size:14px; font-weight:400";
+      // ========== TABELA DESKTOP ==========
+      const tableWrapper = document.createElement("div");
+      tableWrapper.className =
+        "table-responsive d-none d-md-block table-transition";
 
-    const rate = document.createElement("p");
-    rate.textContent = `R$${price.toFixed(2).replace(".", ",")}`;
-    rate.style = "color:red; font-weight:600; font-size:22px";
+      const table = document.createElement("table");
+      table.classList.add("table", "table-bordered", "align-middle");
 
-    const pesoEl = document.createElement("p");
-    pesoEl.textContent = `Peso: ${weight}kg`;
-    pesoEl.style = "color:gray; font-size:14px";
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>Produto</th>
+          <th>Preço</th>
+          <th>Peso</th>
+          <th>Qtde</th>
+    <th style="width: 1%; white-space: nowrap; text-align: center;">Ações</th>
+        </tr>
+      `;
+      table.appendChild(thead);
 
-    const limiteEl = document.createElement("p");
-    limiteEl.textContent = `Qtd: ${qtdeAtual} / ${maxUnitsPerClient}`;
-    limiteEl.style = "color:gray; font-size:14px";
+      const tbody = document.createElement("tbody");
 
-    const addBtn = document.createElement("button");
-    addBtn.textContent = "+";
-    addBtn.setAttribute("class", "btn btn-sm btn-success mx-1");
-    addBtn.disabled = qtdeAtual >= maxUnitsPerClient;
-    addBtn.addEventListener("click", () => {
-      handleAddToCart(item);
+      // ========== LISTA MOBILE ==========
+      const mobileList = document.createElement("div");
+      mobileList.classList.add("toggle-section", "toggle-section-collapsed");
+
+      mobileList.style = "display: flex; flex-direction: column; gap: 1rem; ";
+
+      items.forEach((item) => {
+        const { id, brand, thumb, price, weight, maxUnitsPerClient } = item;
+        const carrinhoItem = cartData.find((prod) => prod.id === id);
+        const qtdeAtual = carrinhoItem ? carrinhoItem.qty : 0;
+
+        // === Linha da tabela (desktop)
+        const tr = document.createElement("tr");
+
+        const tdProduto = document.createElement("td");
+        tdProduto.innerHTML = `
+          <div class="d-flex align-items-center gap-2">
+            <img src="${
+              window.location.origin
+            }${window.location.pathname.replace(
+          /\/[^\/]*$/,
+          "/"
+        )}${thumb.replace(/^(\.\.\/)+/, "")}" 
+              alt="${brand}" 
+              style="width:80px; height:80px; object-fit:cover;">
+            <span style="font-weight: 600;">${shortString(
+              brand,
+              25
+            ).toUpperCase()}</span>
+          </div>
+        `;
+
+        const tdPreco = document.createElement("td");
+        tdPreco.textContent = `R$ ${price.toFixed(2).replace(".", ",")}`;
+
+        const tdPeso = document.createElement("td");
+        tdPeso.textContent = `${weight}kg`;
+
+        const tdQtd = document.createElement("td");
+        tdQtd.textContent = `${qtdeAtual} / ${maxUnitsPerClient}`;
+
+        const tdAcoes = document.createElement("td");
+        tdAcoes.style.whiteSpace = "nowrap";
+        tdAcoes.style.textAlign = "center";
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+";
+        addBtn.setAttribute("class", "btn btn-success mx-1");
+        addBtn.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
+        addBtn.disabled = maxUnitsPerClient <= qtdeAtual;
+        addBtn.addEventListener("click", () => handleAddToCart(item));
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "-";
+        removeBtn.setAttribute("class", "btn btn-danger mx-1");
+        removeBtn.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
+        removeBtn.disabled = qtdeAtual <= 0;
+        removeBtn.addEventListener("click", () => handleRemoveOne(item));
+
+        tdAcoes.append(removeBtn, addBtn);
+        tr.append(tdProduto, tdPreco, tdPeso, tdQtd, tdAcoes);
+        tbody.appendChild(tr);
+
+        // === Card mobile
+        const card = document.createElement("div");
+        card.className = "border p-2 rounded d-flex";
+        card.style = "gap: 0.75rem; align-items: center;";
+
+        const img = document.createElement("img");
+        img.src = `${window.location.origin}${window.location.pathname.replace(
+          /\/[^\/]*$/,
+          "/"
+        )}${thumb.replace(/^(\.\.\/)+/, "")}`;
+        img.alt = brand;
+        img.style = "width: 80px; height: 80px; object-fit: cover;";
+
+        const info = document.createElement("div");
+        info.style = "flex: 1;";
+
+        info.innerHTML = `
+          <div style="font-weight: 600;">${shortString(
+            brand,
+            25
+          ).toUpperCase()} (${weight}kg)</div>
+          <div>R$ ${price.toFixed(2).replace(".", ",")}</div>
+          <div>Qtd: ${qtdeAtual} / ${maxUnitsPerClient}</div>
+        `;
+
+        const actions = document.createElement("div");
+        actions.className = "d-flex flex-column gap-1";
+
+        const addBtnMobile = addBtn.cloneNode(true);
+        addBtnMobile.addEventListener("click", () => handleAddToCart(item));
+
+        const removeBtnMobile = removeBtn.cloneNode(true);
+        removeBtnMobile.addEventListener("click", () => handleRemoveOne(item));
+        mobileList.classList.toggle("toggle-section-collapsed", false);
+
+        actions.append(addBtnMobile, removeBtnMobile);
+
+        card.append(img, info, actions);
+        mobileList.appendChild(card);
+      });
+
+      table.appendChild(tbody);
+      tableWrapper.appendChild(table);
+      parent.appendChild(tableWrapper);
+      parent.appendChild(mobileList);
+
+      // Botão toggle (só afeta a tabela no desktop)
+      toggleBtn.addEventListener("click", () => {
+        const isExpanded = toggleBtn.getAttribute("aria-expanded") === "true";
+        console.log("isExpanded ==> ", isExpanded);
+
+        tableWrapper.classList.toggle("table-transition-collapsed", isExpanded);
+
+        // Alterna também o conteúdo mobile
+        mobileList.classList.toggle("toggle-section-collapsed", isExpanded);
+
+        const chevronIcon = toggleBtn.querySelector("i");
+        toggleBtn.innerHTML = isExpanded
+          ? '<i class="bi bi-chevron-down"></i>'
+          : '<i class="bi bi-chevron-up"></i>';
+
+        chevronIcon.classList.toggle("chevron-rotate-up", isExpanded);
+        toggleBtn.setAttribute("aria-expanded", isExpanded ? "false" : "true");
+      });
     });
-
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "-";
-    removeBtn.setAttribute("class", "btn btn-sm btn-danger mx-1");
-    removeBtn.disabled = qtdeAtual <= 0;
-    removeBtn.addEventListener("click", () => {
-      handleRemoveOne(item);
-    });
-
-    btnDiv.append(removeBtn, addBtn);
-    detailsDiv.append(name, foodCategory, rate, pesoEl, limiteEl);
-    div.append(imgDiv, img, detailsDiv, btnDiv);
-    parent.append(div);
   });
 };
-
-

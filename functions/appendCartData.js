@@ -1,107 +1,57 @@
 import { shortString, numberWithCommas } from "./extraFunctions.js";
 import { setItem } from "./localStorage.js";
 
-export const appendCartData = (data, parent, orderTotalParent) => {
-  console.log("data ==> ", data);
-  parent.innerHTML = null;
+export function appendCartData(cartData, display, totalAmount) {
+  display.innerHTML = ""; // Limpa o conteúdo atual
 
-  // Envolve a tabela em um wrapper com classe "table-responsive"
-  const wrapperDiv = document.createElement("div");
-  wrapperDiv.setAttribute("class", "table-responsive");
+  // Agrupa os produtos por subcategoria
+  const grouped = cartData.reduce((acc, item) => {
+    const key = item.subcategory || "Outros";
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(item);
+    return acc;
+  }, {});
 
-  const table = document.createElement("table");
-  table.setAttribute(
-    "class",
-    "table table-bordered table-hover table-sm text-start table-striped"
-  );
-  table.style =
-    "width: 100%; text-align: center; font-size: 22px; min-width: 600px;";
+  // Para cada subcategoria, cria uma seção
+  for (const [subcategory, items] of Object.entries(grouped)) {
+    const section = document.createElement("section");
+    section.classList.add("cart-section", "mb-4");
 
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr class="table-dark">
-      <th class="text-left">Produto</th>
-      <th>Peso (kg)</th>
-      <th>Preço</th>
-      <th></th>
-    </tr>
-  `;
-  table.appendChild(thead);
+    const title = document.createElement("h3");
+    title.textContent = subcategory;
+    title.classList.add("fs-5", "mb-2", "fw-semibold");
+    section.appendChild(title);
 
-  const tbody = document.createElement("tbody");
+    const ul = document.createElement("ul");
+    ul.classList.add("list-group");
 
-  data.forEach((item, index) => {
-    const { brand, thumb, category, subcategory, price, weight } = item;
+    items.forEach((item) => {
+      const li = document.createElement("li");
+      li.classList.add(
+        "list-group-item",
+        "d-flex",
+        "justify-content-between",
+        "align-items-center"
+      );
 
-    const tr = document.createElement("tr");
+      li.innerHTML = `
+        <div>
+          <strong>${item.brand}</strong><br />
+          Peso: ${(item.weight * (item.qty || 1)).toFixed(2)}kg<br />
+          Preço: R$${(item.price * (item.qty || 1)).toFixed(2)}
+        </div>
+        <img src="${item.thumb}" alt="${
+        item.brand
+      }" style="width: 60px; height: auto; border-radius: 4px;" />
+      `;
 
-    // Nome + thumb juntos em uma célula
-    const tdTitle = document.createElement("td");
-    const productDiv = document.createElement("div");
-    const infoDiv = document.createElement("div");
-    const centerContent = "display: flex; align-items: center; gap: 10px;";
-    productDiv.style = centerContent;
-
-    const img = document.createElement("img");
-    img.src = thumb;
-    img.style =
-      "width: 80px; height: 80px; object-fit: cover; border-radius: 6px;";
-
-    const titleText = document.createElement("span");
-    titleText.textContent = shortString(brand, 50).toUpperCase();
-    titleText.style = "font-weight: 600;";
-    const descriptionText = document.createElement("span");
-    descriptionText.textContent = `${category}, ${subcategory}`;
-    descriptionText.style = "font-weight: 400; font-size: 14px;";
-    infoDiv.style = "display: flex; flex-direction: column;";
-    infoDiv.append(titleText, descriptionText);
-    productDiv.append(img, infoDiv);
-
-    tdTitle.appendChild(productDiv);
-
-    // Preço
-    const tdPrice = document.createElement("td");
-    const safePrice = typeof price === "number" ? price : 0;
-    tdPrice.textContent = `R$ ${numberWithCommas(safePrice.toFixed(2))}`;
-
-    // Peso
-    const tdWeight = document.createElement("td");
-    const safeWeight = typeof weight === "number" ? weight : 0;
-    tdWeight.textContent = `${safeWeight.toFixed(2)}kg`;
-
-    // Botão de remover
-    const tdRemove = document.createElement("td");
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "Remover";
-    removeBtn.setAttribute("class", "btn btn-sm btn-danger");
-    removeBtn.addEventListener("click", () => {
-      data.splice(index, 1);
-      setItem("cartData", data);
-      const toast = new bootstrap.Toast(document.getElementById("liveToast"));
-      toast.show();
-      appendCartData(data, parent, orderTotalParent);
-      getTotalOrderAmount(data, orderTotalParent);
-    });
-    tdRemove.appendChild(removeBtn);
-
-    [tdPrice, tdWeight].forEach((td) => {
-      td.style.verticalAlign = "middle";
-      td.style.textAlign = "left";
+      ul.appendChild(li);
     });
 
-    tdRemove.style.verticalAlign = "middle";
-    tdRemove.style.textAlign = "center";
-    tdRemove.style.width = "10%";
-
-    tr.append(tdTitle, tdWeight, tdPrice, tdRemove);
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  wrapperDiv.appendChild(table);
-  parent.appendChild(wrapperDiv);
-};
-
+    section.appendChild(ul);
+    display.appendChild(section);
+  }
+}
 
 export const getTotalOrderAmount = (
   data,
@@ -137,7 +87,7 @@ export const appendCartTotal = (
   const cartTotal1 = document.createElement("p");
   cartTotal1.innerText = `Total da Compra:`;
   const cartTotal2 = document.createElement("p");
-  cartTotal2.innerText = `R$${numberWithCommas(total.toFixed(2))}`;
+  cartTotal2.innerText = `R$${total.toFixed(2).replace(".", ",")}`;
   cartDiv1.append(cartTotal1, cartTotal2);
   cartDiv1.setAttribute("class", "cartFontDiv");
 
@@ -169,7 +119,7 @@ export const appendCartTotal = (
   const finalTotal1 = document.createElement("p");
   finalTotal1.innerText = `Total:`;
   const finalTotal2 = document.createElement("p");
-  finalTotal2.innerText = `R$${numberWithCommas(grandTotal)}`;
+  finalTotal2.innerText = `R$${grandTotal.toFixed(2).replace(".", ",")}`;
   cartDiv5.append(finalTotal1, finalTotal2);
   cartDiv5.setAttribute("class", "cartFontDiv");
 
@@ -180,5 +130,7 @@ export const appendCartTotal = (
   weightValue.innerText = `${weight.toFixed(2)} kg`;
   cartDiv6.append(weightLabel, weightValue);
   cartDiv6.setAttribute("class", "cartFontDiv");
+
   parent.append(cartDiv1, cartDiv2, cartDiv3, cartDiv4, cartDiv6, cartDiv5);
 };
+
