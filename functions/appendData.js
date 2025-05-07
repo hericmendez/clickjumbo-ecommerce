@@ -1,5 +1,3 @@
-import { shortString } from "./extraFunctions.js";
-
 export const appendData = (
   data,
   parent,
@@ -8,6 +6,30 @@ export const appendData = (
   cartData = []
 ) => {
   parent.innerHTML = null;
+
+  const fallbackThumb = "https://placehold.co/400x400/orange/white";
+  function createLoadingButton(text, className, onClick, isDisabled) {
+    const button = document.createElement("button");
+    button.innerHTML = text;
+    button.className = className;
+    button.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
+    button.disabled = isDisabled;
+
+    button.addEventListener("click", async () => {
+      const originalHTML = button.innerHTML;
+      button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+      button.disabled = true;
+
+      try {
+        await onClick();
+      } finally {
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+      }
+    });
+
+    return button;
+  }
 
   const categoryMap = {};
   data.forEach((item) => {
@@ -36,7 +58,7 @@ export const appendData = (
       heading.style = "margin: 0;";
       const toggleBtn = document.createElement("button");
       toggleBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
-      toggleBtn.setAttribute("aria-expanded", "true"); // controle visibilidade
+      toggleBtn.setAttribute("aria-expanded", "true");
       toggleBtn.classList.add("btn", "btn-sm", "btn-link", "p-0");
       toggleBtn.style = "font-size: 1.2rem;";
 
@@ -48,7 +70,6 @@ export const appendData = (
       hr.style = "margin-top: 4px; margin-bottom: 12px;";
       parent.appendChild(hr);
 
-      // ========== TABELA DESKTOP ==========
       const tableWrapper = document.createElement("div");
       tableWrapper.className =
         "table-responsive d-none d-md-block table-transition";
@@ -63,42 +84,31 @@ export const appendData = (
           <th>Preço</th>
           <th>Peso</th>
           <th>Qtde</th>
-    <th style="width: 1%; white-space: nowrap; text-align: center;">Ações</th>
+          <th style="width: 1%; white-space: nowrap; text-align: center;">Ações</th>
         </tr>
       `;
       table.appendChild(thead);
 
       const tbody = document.createElement("tbody");
 
-      // ========== LISTA MOBILE ==========
       const mobileList = document.createElement("div");
-      mobileList.classList.add("toggle-section", "toggle-section-collapsed");
-
-      mobileList.style = "display: flex; flex-direction: column; gap: 1rem; ";
+      mobileList.classList.add("toggle-section", "d-md-none");
+      // Removemos "toggle-section-collapsed" para iniciar expandido no mobile
 
       items.forEach((item) => {
-        const { id, brand, thumb, price, weight, maxUnitsPerClient } = item;
+        const { id, name, thumb, price, weight, maxUnitsPerClient } = item;
         const carrinhoItem = cartData.find((prod) => prod.id === id);
         const qtdeAtual = carrinhoItem ? carrinhoItem.qty : 0;
+        const thumbUrl = fallbackThumb;
+        const urlImage = thumbUrl;
 
-        // === Linha da tabela (desktop)
         const tr = document.createElement("tr");
 
         const tdProduto = document.createElement("td");
         tdProduto.innerHTML = `
           <div class="d-flex align-items-center gap-2">
-            <img src="${
-              window.location.origin
-            }${window.location.pathname.replace(
-          /\/[^\/]*$/,
-          "/"
-        )}${thumb.replace(/^(\.\.\/)+/, "")}" 
-              alt="${brand}" 
-              style="width:80px; height:80px; object-fit:cover;">
-            <span style="font-weight: 600;">${shortString(
-              brand,
-              25
-            ).toUpperCase()}</span>
+            <img src="${urlImage}" alt="${name}" style="width:80px; height:80px; object-fit:cover;">
+            <span style="font-weight: 600;">${name.toUpperCase()}</span>
           </div>
         `;
 
@@ -114,45 +124,38 @@ export const appendData = (
         const tdAcoes = document.createElement("td");
         tdAcoes.style.whiteSpace = "nowrap";
         tdAcoes.style.textAlign = "center";
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+";
-        addBtn.setAttribute("class", "btn btn-success mx-1");
-        addBtn.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
-        addBtn.disabled = maxUnitsPerClient <= qtdeAtual;
-        addBtn.addEventListener("click", () => handleAddToCart(item));
 
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "-";
-        removeBtn.setAttribute("class", "btn btn-danger mx-1");
-        removeBtn.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
-        removeBtn.disabled = qtdeAtual <= 0;
-        removeBtn.addEventListener("click", () => handleRemoveOne(item));
+        const addBtn = createLoadingButton(
+          "+",
+          "btn btn-success mx-1",
+          () => handleAddToCart(item),
+          maxUnitsPerClient <= qtdeAtual
+        );
+
+        const removeBtn = createLoadingButton(
+          "-",
+          "btn btn-danger mx-1",
+          () => handleRemoveOne(item),
+          qtdeAtual <= 0
+        );
 
         tdAcoes.append(removeBtn, addBtn);
         tr.append(tdProduto, tdPreco, tdPeso, tdQtd, tdAcoes);
         tbody.appendChild(tr);
 
-        // === Card mobile
         const card = document.createElement("div");
         card.className = "border p-2 rounded d-flex";
         card.style = "gap: 0.75rem; align-items: center;";
 
         const img = document.createElement("img");
-        img.src = `${window.location.origin}${window.location.pathname.replace(
-          /\/[^\/]*$/,
-          "/"
-        )}${thumb.replace(/^(\.\.\/)+/, "")}`;
-        img.alt = brand;
+        img.src = urlImage;
+        img.alt = name;
         img.style = "width: 80px; height: 80px; object-fit: cover;";
 
         const info = document.createElement("div");
         info.style = "flex: 1;";
-
         info.innerHTML = `
-          <div style="font-weight: 600;">${shortString(
-            brand,
-            25
-          ).toUpperCase()} (${weight}kg)</div>
+          <div style="font-weight: 600;">${name.toUpperCase()} (${weight}kg)</div>
           <div>R$ ${price.toFixed(2).replace(".", ",")}</div>
           <div>Qtd: ${qtdeAtual} / ${maxUnitsPerClient}</div>
         `;
@@ -160,12 +163,19 @@ export const appendData = (
         const actions = document.createElement("div");
         actions.className = "d-flex flex-column gap-1";
 
-        const addBtnMobile = addBtn.cloneNode(true);
-        addBtnMobile.addEventListener("click", () => handleAddToCart(item));
+        const addBtnMobile = createLoadingButton(
+          "+",
+          "btn btn-success",
+          () => handleAddToCart(item),
+          maxUnitsPerClient <= qtdeAtual
+        );
 
-        const removeBtnMobile = removeBtn.cloneNode(true);
-        removeBtnMobile.addEventListener("click", () => handleRemoveOne(item));
-        mobileList.classList.toggle("toggle-section-collapsed", false);
+        const removeBtnMobile = createLoadingButton(
+          "-",
+          "btn btn-danger",
+          () => handleRemoveOne(item),
+          qtdeAtual <= 0
+        );
 
         actions.append(addBtnMobile, removeBtnMobile);
 
@@ -178,22 +188,14 @@ export const appendData = (
       parent.appendChild(tableWrapper);
       parent.appendChild(mobileList);
 
-      // Botão toggle (só afeta a tabela no desktop)
       toggleBtn.addEventListener("click", () => {
         const isExpanded = toggleBtn.getAttribute("aria-expanded") === "true";
-        console.log("isExpanded ==> ", isExpanded);
-
         tableWrapper.classList.toggle("table-transition-collapsed", isExpanded);
-
-        // Alterna também o conteúdo mobile
         mobileList.classList.toggle("toggle-section-collapsed", isExpanded);
 
-        const chevronIcon = toggleBtn.querySelector("i");
         toggleBtn.innerHTML = isExpanded
           ? '<i class="bi bi-chevron-down"></i>'
           : '<i class="bi bi-chevron-up"></i>';
-
-        chevronIcon.classList.toggle("chevron-rotate-up", isExpanded);
         toggleBtn.setAttribute("aria-expanded", isExpanded ? "false" : "true");
       });
     });

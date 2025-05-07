@@ -1,0 +1,55 @@
+Name,Categories,Weight,Regular price,Meta:maxUnitsPerClient,Meta:prison
+Adocyl,"Alimentos > Adoçante Líquido",0.1,6.9,1,Penitenciária A
+Adocyl,"Alimentos > Adoçante Líquido",0.1,6.9,1,Penitenciária B
+Zero Cal,"Alimentos > Adoçante Líquido",0.1,8.93,1,Penitenciária A
+Zero Cal,"Alimentos > Adoçante Líquido",0.1,8.93,1,Penitenciária B
+Vitarella,"Alimentos > Bolacha",0.35,7.93,1,Penitenciária A
+Vitarella,"Alimentos > Bolacha",0.35,7.93,1,Penitenciária B
+Mabel (rosquinha),"Alimentos > Bolacha",0.5,8.97,1,Penitenciária A
+Mabel (rosquinha),"Alimentos > Bolacha",0.5,8.97,1,Penitenciária B
+Tradicional,"Alimentos > Pão de Forma",0.4,9.9,1,Penitenciária A
+Tradicional,"Alimentos > Pão de Forma",0.4,9.9,1,Penitenciária B
+Kim - Sabor Laranja,"Alimentos > Bolo Industrializado",0.25,9.9,2,Penitenciária A
+Kim - Sabor Laranja,"Alimentos > Bolo Industrializado",0.25,9.9,2,Penitenciária B
+Kim - Sabor Abacaxi,"Alimentos > Bolo Industrializado",0.25,9.9,2,Penitenciária A
+Kim - Sabor Abacaxi,"Alimentos > Bolo Industrializado",0.25,9.9,2,Penitenciária B
+Hersey's,"Alimentos > Chocolates",0.082,9.47,2,Penitenciária A
+Hersey's,"Alimentos > Chocolates",0.082,9.47,2,Penitenciária B
+Nestlé Classic,"Alimentos > Chocolates",0.08,12.5,2,Penitenciária A
+Nestlé Classic,"Alimentos > Chocolates",0.08,12.5,2,Penitenciária B
+Sweet Kiss,"Alimentos > Balas" (pacote),0.5,16.9,1,Penitenciária A
+Sweet Kiss,"Alimentos > Balas" (pacote),0.5,16.9,1,Penitenciária B
+Aurora,"Alimentos > Leite em Pó",0.4,19.73,1,Penitenciária A
+Aurora,"Alimentos > Leite em Pó",0.4,19.73,1,Penitenciária B
+Sazon sabor Carne (12 unidades),"Alimentos >Temperos",0.06,8.37,1,Penitenciária A
+Sazon sabor Carne (12 unidades),"Alimentos >Temperos",0.06,8.37,1,Penitenciária B
+Sazon sabor Frango (12 unidades),"Alimentos >Temperos",0.06,8.37,1,Penitenciária A
+Sazon sabor Frango (12 unidades),"Alimentos >Temperos",0.06,8.37,1,Penitenciária B
+SunDay,"Higiene > Protetor Solar",0.06,8.37,1,Penitenciária A
+SunDay,"Higiene > Protetor Solar",0.06,8.37,1,Penitenciária B
+Tok Bothanico 325ml,"Higiene > Shampoo",0.325,9.5,1,Penitenciária A
+Tok Bothanico 325ml,"Higiene > Shampoo",0.325,9.5,1,Penitenciária B
+Seda 325ml,"Higiene > Shampoo",0.325,19.87,1,Penitenciária A
+Seda 325ml,"Higiene > Shampoo",0.325,19.87,1,Penitenciária B
+Lux - Buquet Jasmin,"Higiene > Sabonete",0.085,3.95,2,Penitenciária A
+Lux - Buquet Jasmin,"Higiene > Sabonete",0.085,3.95,2,Penitenciária B
+Albany Antibac,"Higiene > Sabonete",0.085,3.25,2,Penitenciária A
+Albany Antibac,"Higiene > Sabonete",0.085,3.25,2,Penitenciária B
+Enlace Dupla Face,"Higiene > Esponja de Banho",0.05,5.3,2,Penitenciária A
+Enlace Dupla Face,"Higiene > Esponja de Banho",0.05,5.3,2,Penitenciária B
+Colgate,"Higiene > Escova de Dente",0.09,9.15,1,Penitenciária A
+Colgate,"Higiene > Escova de Dente",0.09,9.15,1,Penitenciária B
+Oral-B,"Higiene > Escova de Dente",0.07,8.3,1,Penitenciária A
+Oral-B,"Higiene > Escova de Dente",0.07,8.3,1,Penitenciária B
+Colgate,"Higiene > Creme Dental",0.09,6.15,1,Penitenciária A
+Colgate,"Higiene > Creme Dental",0.09,6.15,1,Penitenciária B
+Oral-B,"Higiene > Creme Dental",0.07,4.3,1,Penitenciária A
+Oral-B,"Higiene > Creme Dental",0.07,4.3,1,Penitenciária B
+Skala (roll-on),"Higiene > Desodorante",0.05,9.73,1,Penitenciária A
+Skala (roll-on),"Higiene > Desodorante",0.05,9.73,1,Penitenciária B
+Nivea (roll-on),"Higiene > Desodorante",0.05,26.9,1,Penitenciária A
+Nivea (roll-on),"Higiene > Desodorante",0.05,26.9,1,Penitenciária B
+Bic Comfort (2 lâminas),"Higiene > Barbeador",0.01,4.37,2,Penitenciária A
+Bic Comfort (2 lâminas),"Higiene > Barbeador",0.01,4.37,2,Penitenciária B
+Bic Comfort (3 lâminas),"Higiene > Barbeador",0.01,6.97,2,Penitenciária A
+Bic Comfort (3 lâminas),"Higiene > Barbeador",0.01,6.97,2,Penitenciária B

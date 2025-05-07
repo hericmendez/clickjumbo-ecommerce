@@ -2,179 +2,45 @@ import { notify } from "../components/notify.js";
 import { appendData } from "../functions/appendData.js";
 import { showTotal } from "../functions/showTotal.js";
 import { appendCartData } from "../functions/appendCartData.js";
-import mock from "../mock/produtos_clickjumbo.js";
-import { setItem } from "../functions/localStorage.js";
+import { fetchedData } from "../mock/fetchedData.js";
 import updateCartSummaryBar from "../functions/updateCartSummaryBar.js";
 
+let cachedData = null;
 
 const display = document.getElementById("display");
 const totalFood = document.getElementById("totalFood");
 const notifyDiv = document.getElementById("notifyDiv");
-const trendingBtn = document.getElementsByName("trendingBtn"); // Botões de categoria
-const penitenciariaSelect = document.getElementById("penitenciariaSelect"); // Select de penitenciária
+const trendingBtn = document.getElementsByName("trendingBtn");
+const penitenciariaSelect = document.getElementById("penitenciariaSelect");
 const totalAmount = document.getElementById("totalAmount");
+const clearCartBtn = document.getElementById("clearCartBtn");
+const pesoInfo = document.getElementById("pesoTotalInfo");
+
 const MAX_WEIGHT = 12;
-let cartData = JSON.parse(localStorage.getItem("cartData")) || []; // Recupera o carrinho do localStorage, ou cria um vazio
-console.log("cartData ==> ", cartData);
-let currentCategory = "Alimentos"; // Categoria inicial
-let currentPenitenciaria = "penitenciariaA"; // Penitenciária inicial
+let cartData = JSON.parse(localStorage.getItem("cartData")) || [];
+let currentCategory = "Alimentos";
+let currentPenitenciaria = "Penitenciária A";
 
 notifyDiv.innerHTML = notify("success", "Item is added to the bag");
 
-// Adiciona evento aos botões de categoria
-for (let btn of trendingBtn) {
+trendingBtn.forEach((btn) => {
   btn.addEventListener("click", () => {
-    currentCategory = btn.value; // Altera a categoria com base no botão
+    currentCategory = btn.value;
     displayItems(currentPenitenciaria, currentCategory);
   });
-}
-
-// Adiciona evento ao select de penitenciária
-penitenciariaSelect.addEventListener("change", (e) => {
-  currentPenitenciaria = e.target.value; // Altera a penitenciária selecionada
-  displayItems(currentPenitenciaria, currentCategory);
 });
-function handleRemoveOne(item) {
-  const index = cartData.findIndex((i) => i.id === item.id);
-  if (index !== -1) {
-    cartData[index].qty -= 1;
-    if (cartData[index].qty <= 0) cartData.splice(index, 1);
-    setItem("cartData", cartData);
-    displayItems(currentPenitenciaria, currentCategory); // ou qualquer função que atualize a tela
-    showTotal(cartData, totalFood);
-    updateCartSummaryBar(cartData);
 
-  }
-}
-
-function displayItems(penitenciaria, category="alimentos") {
-  const items =
-    mock[penitenciaria]?.filter((item) => item.category === category) || [];
-
-  if (!Array.isArray(items) || items.length === 0) {
-    console.warn(`Nenhum dado encontrado para ${category} na ${penitenciaria}`);
-    return;
-  }
-
-  // Adiciona peso simulado se ainda não houver
-  items.forEach((item) => {
-    item.weight = item.weight || parseFloat((Math.random() * 2 + 1).toFixed(2)); // entre 1kg e 3kg
-  });
-
-  appendData(items, display, handleAddToCart, handleRemoveOne, cartData);
-  showTotal(cartData, totalFood);
-  updateCartSummaryBar(cartData);
-
-}
-
-function handleAddToCart(item) {
-  // Calcula o peso total do carrinho considerando as quantidades
-  const totalWeight = cartData.reduce(
-    (acc, curr) => acc + (curr.weight || 0) * (curr.qty || 1),
-    0
-  );
-
-  // Verifica se o peso total mais o peso do item ultrapassa o limite
-  if (totalWeight + (item.weight || 0) > MAX_WEIGHT) {
-    notifyDiv.innerHTML = notify(
-      "danger",
-      `Limite de peso excedido! Máximo: ${MAX_WEIGHT}kg`
-    );
-    const toastEl = document.getElementById("liveToast");
-    if (toastEl) new bootstrap.Toast(toastEl).show();
-    return; // Impede a adição se o limite de peso for atingido
-  }
-
-  // Verifica se o item já está no carrinho
-  const existing = cartData.find((i) => i.id === item.id);
-  if (existing) {
-    existing.qty = (existing.qty || 0) + 1;
-  } else {
-    cartData.push({ ...item, qty: 1 }); // Garante que a quantidade começa com 1
-  }
-
-  // Salva o carrinho no localStorage
-  localStorage.setItem("cartData", JSON.stringify(cartData));
-  notifyDiv.innerHTML = notify("success", "Item adicionado com sucesso!");
-  const toastEl = document.getElementById("liveToast");
-  if (toastEl) new bootstrap.Toast(toastEl).show();
-
-  // Re-renderiza o carrinho e as informações de total
-  displayItems(currentPenitenciaria, currentCategory);
-  showTotal(cartData, totalFood);
-  updateCartSummaryBar(cartData);
-
-  // Atualiza o peso total do carrinho
-  const pesoInfo = document.getElementById("pesoTotalInfo");
-  if (pesoInfo) {
-    const pesoTotal = cartData.reduce(
-      (acc, curr) => acc + (curr.weight || 0) * (curr.qty || 1),
-      0
-    );
-    pesoInfo.innerText = `Peso total do carrinho: ${pesoTotal.toFixed(
-      2
-    )}kg (máximo: ${MAX_WEIGHT}kg)`;
-  }
-}
-
-
-// Inicializa com a penitenciária e categoria padrão
-displayItems(currentPenitenciaria, currentCategory);
-
-// Exibe peso total na interface
-const pesoInfo = document.getElementById("pesoTotalInfo");
-if (pesoInfo) {
-  const pesoTotal = cartData.reduce(
-    (acc, curr) => acc + (curr.weight || 0) * (curr.qty || 1),
-    0
-  );
-  
-  pesoInfo.innerText = `Peso total do carrinho: ${pesoTotal.toFixed(
-    2
-  )}kg (máximo: ${MAX_WEIGHT}kg)`;
-} else {
-  const insertAfter = document.querySelector("#totalFood");
-  if (insertAfter) {
-    const pesoDiv = document.createElement("div");
-    pesoDiv.id = "pesoTotalInfo";
-    pesoDiv.className = "alert alert-info mt-2 fw-bold";
-    const pesoTotal = cartData.reduce(
-      (acc, curr) => acc + (curr.weight || 0),
-      0
-    );
-    pesoDiv.innerText = `Peso total do carrinho: ${pesoTotal.toFixed(
-      2
-    )}kg (máximo: ${MAX_WEIGHT}kg)`;
-    insertAfter.parentElement.insertBefore(pesoDiv, insertAfter.nextSibling);
-  }
-}
-const prisonSelect = document.getElementById("penitenciariaSelect");
-
-prisonSelect.addEventListener("change", () => {
+penitenciariaSelect.addEventListener("change", () => {
   if (cartData.length > 0) {
     const confirmClear = confirm(
       "Você está trocando de penitenciária. Isso irá limpar seu carrinho. Deseja continuar?"
     );
-
     if (!confirmClear) {
-      // Força voltar ao valor anterior no select
       penitenciariaSelect.value = currentPenitenciaria;
       return;
     }
 
-    cartData = []; // Limpa o carrinho global
-    localStorage.setItem("cartData", JSON.stringify(cartData)); // Atualiza o storage
-
-    // Atualiza a exibição
-    appendCartData([], display, totalAmount);
-    displayItems(currentPenitenciaria, currentCategory);
-    showTotal(cartData, totalFood);
-    updateCartSummaryBar(cartData);
-
-    const pesoInfo = document.getElementById("pesoTotalInfo");
-    if (pesoInfo) {
-      pesoInfo.innerText = `Peso total do carrinho: 0.00kg (máximo: ${MAX_WEIGHT}kg)`;
-    }
+    clearCartData();
   }
 
   currentPenitenciaria = penitenciariaSelect.value;
@@ -182,30 +48,170 @@ prisonSelect.addEventListener("change", () => {
 });
 
 clearCartBtn.addEventListener("click", () => {
-  console.log("click")
   if (cartData.length === 0) {
     notifyDiv.innerHTML = notify("info", "O carrinho já está vazio.");
-    const toastEl = document.getElementById("liveToast");
-    if (toastEl) new bootstrap.Toast(toastEl).show();
+    showToast();
     return;
   }
 
   const confirmClear = confirm("Tem certeza que deseja limpar o carrinho?");
-  if (!confirmClear) return;
+  if (confirmClear) {
+    clearCartData();
+    notifyDiv.innerHTML = notify("success", "Carrinho limpo com sucesso!");
+    showToast();
+  }
+});
 
-  cartData = [];
-  localStorage.setItem("cartData", JSON.stringify(cartData));
+async function displayItems(penitenciaria, category = "Alimentos") {
+  try {
+    let data;
 
-  appendCartData([], display, totalAmount); // se você quiser limpar visualmente a lista do carrinho (caso esteja exibindo uma)
-  displayItems(currentPenitenciaria, currentCategory); // Re-renderiza a listagem
-  showTotal(cartData, totalFood);
-  updateCartSummaryBar(cartData); // Atualiza o rodapé
-  const pesoInfo = document.getElementById("pesoTotalInfo");
-  if (pesoInfo) {
-    pesoInfo.innerText = `Peso total do carrinho: 0.00kg (máximo: ${MAX_WEIGHT}kg)`;
+    // Se já carregamos uma vez, reutiliza
+    if (cachedData) {
+      data = cachedData;
+    } else {
+      // Modo real:
+      const response = await fetch(
+        "http://clickjumbo.local/wp-json/clickjumbo/v1/produtos"
+      );
+      data = await response.json();
+
+      // Modo mock:
+      // data = fetchedData;
+      cachedData = data; // Armazena para uso futuro
+    }
+
+    if (!data || !Array.isArray(data.content)) {
+      console.warn("Erro ao carregar produtos da API.");
+      return;
+    }
+
+    const items = data.content.filter(
+      (item) =>
+        item.prison?.trim().toLowerCase() ===
+          penitenciaria.trim().toLowerCase() &&
+        item.category?.trim().toLowerCase() === category.trim().toLowerCase()
+    );
+
+    if (items.length === 0) {
+      console.warn(
+        `Nenhum produto encontrado para ${category} na ${penitenciaria}`
+      );
+      return;
+    }
+
+    // Atribui peso falso se não tiver (apenas se necessário)
+    items.forEach((item) => {
+      item.weight =
+        item.weight || parseFloat((Math.random() * 2 + 1).toFixed(2));
+    });
+
+    appendData(items, display, handleAddToCart, handleRemoveOne, cartData);
+    showTotal(cartData, totalFood);
+    updateCartSummaryBar(cartData);
+    updatePesoInfo();
+  } catch (error) {
+    console.error("Erro ao buscar produtos:", error);
+  }
+  console.log("cachedData ==> ", cachedData);
+}
+
+function handleAddToCart(item) {
+  const existing = cartData.find((i) => i.id === item.id);
+  const currentQty = existing?.qty || 0;
+
+  if (currentQty >= item.maxUnitsPerClient) {
+    notifyDiv.innerHTML = notify(
+      "warning",
+      `Limite de ${item.maxUnitsPerClient} unidades por cliente para este item.`
+    );
+    showToast();
+    return;
   }
 
-  notifyDiv.innerHTML = notify("success", "Carrinho limpo com sucesso!");
+  const totalWeight = calculateCartWeight();
+  const addedWeight = item.weight || 0;
+  if (totalWeight + addedWeight > MAX_WEIGHT) {
+    notifyDiv.innerHTML = notify(
+      "danger",
+      `Limite de peso excedido! Máximo: ${MAX_WEIGHT}kg`
+    );
+    showToast();
+    return;
+  }
+
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cartData.push({ ...item, qty: 1 });
+  }
+
+  saveCart();
+  notifyDiv.innerHTML = notify("success", "Item adicionado com sucesso!");
+  showToast();
+
+  displayItems(currentPenitenciaria, currentCategory);
+}
+
+function handleRemoveOne(item) {
+  const index = cartData.findIndex((i) => i.id === item.id);
+  if (index !== -1) {
+    cartData[index].qty -= 1;
+    if (cartData[index].qty <= 0) {
+      cartData.splice(index, 1);
+    }
+
+    saveCart();
+    displayItems(currentPenitenciaria, currentCategory);
+  }
+}
+
+function saveCart() {
+  localStorage.setItem("cartData", JSON.stringify(cartData));
+  showTotal(cartData, totalFood);
+  updateCartSummaryBar(cartData);
+  updatePesoInfo();
+}
+
+function clearCartData() {
+  cartData = [];
+  saveCart();
+  appendCartData([], display, totalAmount);
+  displayItems(currentPenitenciaria, currentCategory);
+}
+
+function calculateCartWeight() {
+  return cartData.reduce(
+    (acc, curr) => acc + (curr.weight || 0) * (curr.qty || 1),
+    0
+  );
+}
+
+function updatePesoInfo() {
+  const pesoTotal = calculateCartWeight();
+  if (pesoInfo) {
+    pesoInfo.innerText = `Peso total do carrinho: ${pesoTotal.toFixed(
+      2
+    )}kg (máximo: ${MAX_WEIGHT}kg)`;
+  } else {
+    const insertAfter = document.querySelector("#totalFood");
+    if (insertAfter) {
+      const pesoDiv = document.createElement("div");
+      pesoDiv.id = "pesoTotalInfo";
+      pesoDiv.className = "alert alert-info mt-2 fw-bold";
+      pesoDiv.innerText = `Peso total do carrinho: ${pesoTotal.toFixed(
+        2
+      )}kg (máximo: ${MAX_WEIGHT}kg)`;
+      insertAfter.parentElement.insertBefore(pesoDiv, insertAfter.nextSibling);
+    }
+  }
+}
+
+function showToast() {
   const toastEl = document.getElementById("liveToast");
   if (toastEl) new bootstrap.Toast(toastEl).show();
-});
+}
+
+// Inicialização
+displayItems(currentPenitenciaria, currentCategory);
+updatePesoInfo();

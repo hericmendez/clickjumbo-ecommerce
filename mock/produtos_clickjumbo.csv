@@ -1,0 +1,51 @@
+ID,Type,SKU,Name,Published,Is featured?,Visibility in catalog,Short description,Description,Tax status,Tax class,In stock?,Stock,Low stock amount,Backorders allowed?,Sold individually?,Weight,Length,Width,Height,Allow customer reviews?,Purchase note,Sale price,Regular price,Categories,Images,Limit purchase to 1 item per order
+1,simple,penitenciariaA-1,Adocyl,1,0,visible,"","","taxable","",1,100,,0,1,0.1,,,,1,"",,6.9,"Alimentos > Adoçante Líquido","/wp-content/uploads/mock/images/adocante_adocyl.png",1
+2,simple,penitenciariaA-2,Zero Cal,1,0,visible,"","","taxable","",1,100,,0,1,0.1,,,,1,"",,8.93,"Alimentos > Adoçante Líquido","/wp-content/uploads/mock/images/adocante_zero_cal.png",1
+3,simple,penitenciariaA-3,Vitarella,1,0,visible,"","","taxable","",1,100,,0,1,0.35,,,,1,"",,7.93,"Alimentos > Bolacha","/wp-content/uploads/mock/images/bolacha_vitarella.png",1
+4,simple,penitenciariaA-4,Mabel (rosquinha),1,0,visible,"","","taxable","",1,100,,0,1,0.5,,,,1,"",,8.97,"Alimentos > Bolacha","/wp-content/uploads/mock/images/bolacha_mabel.png",1
+5,simple,penitenciariaA-5,Marilan (maizena),1,0,visible,"","","taxable","",1,100,,0,1,0.35,,,,1,"",,9.25,"Alimentos > Bolacha","/wp-content/uploads/mock/images/bolacha_marilan.png",1
+6,simple,penitenciariaA-6,Pão de Forma Tradicional,1,0,visible,"","","taxable","",1,100,,0,1,0.4,,,,1,"",,9.9,"Alimentos > Pão de Forma","/wp-content/uploads/mock/images/paodeforma_tradicional.png",1
+7,simple,penitenciariaA-7,Kim - Bolo Laranja,1,0,visible,"","","taxable","",1,100,,0,0,0.25,,,,1,"",,9.9,"Alimentos > Bolo Industrializado","/wp-content/uploads/mock/images/bolo_kim_laranja.png",1
+8,simple,penitenciariaA-8,Kim - Bolo Abacaxi,1,0,visible,"","","taxable","",1,100,,0,0,0.25,,,,1,"",,9.9,"Alimentos > Bolo Industrializado","/wp-content/uploads/mock/images/bolo_kim_abacaxi.png",1
+9,simple,penitenciariaA-9,Shampoo Seda,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,7.5,"Higiene > Cabelo","mock/images/shampoo_seda.png",1
+10,simple,penitenciariaA-10,Shampoo Dove,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,7.7,"Higiene > Cabelo","mock/images/shampoo_dove.png",1
+11,simple,penitenciariaA-11,Shampoo Johnson's,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,6.9,"Higiene > Cabelo","mock/images/shampoo_johnson.png",1
+12,simple,penitenciariaA-12,Shampoo Head & Shoulders,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,8.0,"Higiene > Cabelo","mock/images/shampoo_head_shoulders.png",1
+13,simple,penitenciariaA-13,Condicionador Seda,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,7.0,"Higiene > Cabelo","mock/images/condicionador_seda.png",1
+14,simple,penitenciariaA-14,Condicionador Dove,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,7.2,"Higiene > Cabelo","mock/images/condicionador_dove.png",1
+15,simple,penitenciariaA-15,Condicionador Johnson's,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,6.8,"Higiene > Cabelo","mock/images/condicionador_johnson.png",1
+16,simple,penitenciariaA-16,Condicionador Head & Shoulders,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,7.5,"Higiene > Cabelo","mock/images/condicionador_head_shoulders.png",1
+17,simple,penitenciariaA-17,Óleo Johnson's,1,0,visible,"","","taxable","",1,100,,0,1,0.200,,,,1,"",,8.5,"Higiene > Corpo","mock/images/oleo_johnson.png",1
+18,simple,penitenciariaA-18,Lavabo Relaxante,1,0,visible,"","","taxable","",1,100,,0,1,0.300,,,,1,"",,12.0,"Higiene > Sabonete","mock/images/lavabo_relaxante.png",1
+19,simple,penitenciariaA-19,Lavabo Hidratante,1,0,visible,"","","taxable","",1,100,,0,1,0.300,,,,1,"",,11.5,"Higiene > Sabonete","mock/images/lavabo_hidratante.png",1
+20,simple,penitenciariaA-20,Toalha de Banho,1,0,visible,"","","taxable","",1,100,,0,1,0.500,,,,1,"",,28.0,"Higiene > Toalhas","mock/images/toalha_banho.png",1
+21,simple,penitenciariaA-21,Toalha de Rosto,1,0,visible,"","","taxable","",1,100,,0,1,0.200,,,,1,"",,6.0,"Higiene > Toalhas","mock/images/toalha_rosto.png",1
+22,simple,penitenciariaA-22,Papel Higiênico Neve,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,8.0,"Higiene > Papel Higiênico","mock/images/papel_higienico_neve.png",1
+23,simple,penitenciariaA-23,Papel Higiênico Qualitá,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,9.5,"Higiene > Papel Higiênico","mock/images/papel_higienico_qualita.png",1
+24,simple,penitenciariaA-24,Papel Higiênico Carinho,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,7.5,"Higiene > Papel Higiênico","mock/images/papel_higienico_carinho.png",1
+25,simple,penitenciariaA-25,Tira Gosto Frango,1,0,visible,"","","taxable","",1,100,,0,1,0.045,,,,1,"",,2.5,"Alimentos > Salgadinhos","mock/images/salgadinho_tiragosto_frango.png",1
+26,simple,penitenciariaA-26,Tira Gosto Linguiça,1,0,visible,"","","taxable","",1,100,,0,1,0.045,,,,1,"",,2.5,"Alimentos > Salgadinhos","mock/images/salgadinho_tiragosto_linguica.png",1
+27,simple,penitenciariaA-27,Tira Gosto Salsicha,1,0,visible,"","","taxable","",1,100,,0,1,0.045,,,,1,"",,2.5,"Alimentos > Salgadinhos","mock/images/salgadinho_tiragosto_salsicha.png",1
+28,simple,penitenciariaA-28,Chocolate Branco Nestlé,1,0,visible,"","","taxable","",1,100,,0,1,0.05,,,,1,"",,8.5,"Alimentos > Chocolates","mock/images/chocolate_nestle_branco.png",1
+29,simple,penitenciariaA-29,Chocolate ao Leite Nestlé,1,0,visible,"","","taxable","",1,100,,0,1,0.05,,,,1,"",,8.5,"Alimentos > Chocolates","mock/images/chocolate_nestle_ao_leite.png",1
+30,simple,penitenciariaA-30,Chocolate Meio Amargo Garoto,1,0,visible,"","","taxable","",1,100,,0,1,0.05,,,,1,"",,10.0,"Alimentos > Chocolates","mock/images/chocolate_garoto_meioamargo.png",1
+31,simple,penitenciariaA-31,Chocolate ao Leite Garoto,1,0,visible,"","","taxable","",1,100,,0,1,0.05,,,,1,"",,10.0,"Alimentos > Chocolates","mock/images/chocolate_garoto_ao_leite.png",1
+32,simple,penitenciariaA-32,Chocolate Branco Garoto,1,0,visible,"","","taxable","",1,100,,0,1,0.05,,,,1,"",,9.0,"Alimentos > Chocolates","mock/images/chocolate_garoto_branco.png",1
+33,simple,penitenciariaA-33,Biscoito de Maizena,1,0,visible,"","","taxable","",1,100,,0,1,0.200,,,,1,"",,4.0,"Alimentos > Biscoitos","mock/images/biscoito_maizena.png",1
+34,simple,penitenciariaA-34,Biscoito Recheado,1,0,visible,"","","taxable","",1,100,,0,1,0.150,,,,1,"",,5.5,"Alimentos > Biscoitos","mock/images/biscoito_recheado.png",1
+35,simple,penitenciariaA-35,Biscoito de Chocolate,1,0,visible,"","","taxable","",1,100,,0,1,0.200,,,,1,"",,6.0,"Alimentos > Biscoitos","mock/images/biscoito_chocolate.png",1
+36,simple,penitenciariaA-36,Arroz Tio João,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,12.0,"Alimentos > Grãos e Cereais","mock/images/arroz_tio_joao.png",1
+37,simple,penitenciariaA-37,Feijão Preto Camil,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,15.0,"Alimentos > Grãos e Cereais","mock/images/feijao_preto_camil.png",1
+38,simple,penitenciariaA-38,Feijão Carioca Camil,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,14.0,"Alimentos > Grãos e Cereais","mock/images/feijao_carioca_camil.png",1
+39,simple,penitenciariaA-39,Macarrão Spaghetti,1,0,visible,"","","taxable","",1,100,,0,1,0.500,,,,1,"",,7.0,"Alimentos > Massas","mock/images/macarrao_spaghetti.png",1
+40,simple,penitenciariaA-40,Macarrão Instantâneo Nissin,1,0,visible,"","","taxable","",1,100,,0,1,0.100,,,,1,"",,3.0,"Alimentos > Massas","mock/images/macarrao_instantaneo_nissin.png",1
+41,simple,penitenciariaA-41,Macarrão Instantâneo Miojo,1,0,visible,"","","taxable","",1,100,,0,1,0.100,,,,1,"",,2.5,"Alimentos > Massas","mock/images/macarrao_instantaneo_miojo.png",1
+42,simple,penitenciariaA-42,Óleo de Soja Liza,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,7.0,"Alimentos > Óleos","mock/images/oleo_soja_liza.png",1
+43,simple,penitenciariaA-43,Óleo de Soja Soya,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,6.5,"Alimentos > Óleos","mock/images/oleo_soja_soya.png",1
+44,simple,penitenciariaA-44,Óleo de Soja Litoral,1,0,visible,"","","taxable","",1,100,,0,1,1,,,,1,"",,6.8,"Alimentos > Óleos","mock/images/oleo_soja_litoral.png",1
+45,simple,penitenciariaA-45,Azeite Extra Virgem,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,22.0,"Alimentos > Azeites","mock/images/azeite_extra_virgem.png",1
+46,simple,penitenciariaA-46,Azeite de Oliva,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,19.0,"Alimentos > Azeites","mock/images/azeite_oliva.png",1
+47,simple,penitenciariaA-47,Salmão,1,0,visible,"","","taxable","",1,100,,0,1,0.200,,,,1,"",,25.0,"Alimentos > Peixes","mock/images/salmao.png",1
+48,simple,penitenciariaA-48,Filé de Peixe,1,0,visible,"","","taxable","",1,100,,0,1,0.250,,,,1,"",,30.0,"Alimentos > Peixes","mock/images/file_peixe.png",1
+49,simple,penitenciariaA-49,Carne Bovina,1,0,visible,"","","taxable","",1,100,,0,1,0.300,,,,1,"",,35.0,"Alimentos > Carnes","mock/images/carne_bovina.png",1
+50,simple,penitenciariaA-50,Carne de Frango,1,0,visible,"","","taxable","",1,100,,0,1,0.350,,,,1,"",,30.0,"Alimentos > Carnes","mock/images/carne_frango.png",1
