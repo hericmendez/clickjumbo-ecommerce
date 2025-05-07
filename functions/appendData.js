@@ -8,28 +8,6 @@ export const appendData = (
   parent.innerHTML = null;
 
   const fallbackThumb = "https://placehold.co/400x400/orange/white";
-  function createLoadingButton(text, className, onClick, isDisabled) {
-    const button = document.createElement("button");
-    button.innerHTML = text;
-    button.className = className;
-    button.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
-    button.disabled = isDisabled;
-
-    button.addEventListener("click", async () => {
-      const originalHTML = button.innerHTML;
-      button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
-      button.disabled = true;
-
-      try {
-        await onClick();
-      } finally {
-        button.innerHTML = originalHTML;
-        button.disabled = false;
-      }
-    });
-
-    return button;
-  }
 
   const categoryMap = {};
   data.forEach((item) => {
@@ -70,6 +48,7 @@ export const appendData = (
       hr.style = "margin-top: 4px; margin-bottom: 12px;";
       parent.appendChild(hr);
 
+      // Tabela desktop
       const tableWrapper = document.createElement("div");
       tableWrapper.className =
         "table-responsive d-none d-md-block table-transition";
@@ -91,17 +70,24 @@ export const appendData = (
 
       const tbody = document.createElement("tbody");
 
+      // Lista mobile
       const mobileList = document.createElement("div");
-      mobileList.classList.add("toggle-section", "d-md-none");
-      // Removemos "toggle-section-collapsed" para iniciar expandido no mobile
+      mobileList.classList.add(
+        "toggle-section",
+        "toggle-section-collapsed",
+        "d-md-none"
+      );
+
+      // mobileList.style = "display: flex; flex-direction: column; gap: 1rem; ";
 
       items.forEach((item) => {
         const { id, name, thumb, price, weight, maxUnitsPerClient } = item;
         const carrinhoItem = cartData.find((prod) => prod.id === id);
         const qtdeAtual = carrinhoItem ? carrinhoItem.qty : 0;
-        const thumbUrl = fallbackThumb;
-        const urlImage = thumbUrl;
+        const thumbUrl = thumb && thumb.trim() ? thumb.trim() : fallbackThumb;
+        const urlImage = "https://placehold.co/400x400";
 
+        // === Tabela (desktop)
         const tr = document.createElement("tr");
 
         const tdProduto = document.createElement("td");
@@ -125,24 +111,25 @@ export const appendData = (
         tdAcoes.style.whiteSpace = "nowrap";
         tdAcoes.style.textAlign = "center";
 
-        const addBtn = createLoadingButton(
-          "+",
-          "btn btn-success mx-1",
-          () => handleAddToCart(item),
-          maxUnitsPerClient <= qtdeAtual
-        );
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+";
+        addBtn.setAttribute("class", "btn btn-success mx-1");
+        addBtn.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
+        addBtn.disabled = maxUnitsPerClient <= qtdeAtual;
+        addBtn.addEventListener("click", () => handleAddToCart(item));
 
-        const removeBtn = createLoadingButton(
-          "-",
-          "btn btn-danger mx-1",
-          () => handleRemoveOne(item),
-          qtdeAtual <= 0
-        );
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "-";
+        removeBtn.setAttribute("class", "btn btn-danger mx-1");
+        removeBtn.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
+        removeBtn.disabled = qtdeAtual <= 0;
+        removeBtn.addEventListener("click", () => handleRemoveOne(item));
 
         tdAcoes.append(removeBtn, addBtn);
         tr.append(tdProduto, tdPreco, tdPeso, tdQtd, tdAcoes);
         tbody.appendChild(tr);
 
+        // === Card mobile
         const card = document.createElement("div");
         card.className = "border p-2 rounded d-flex";
         card.style = "gap: 0.75rem; align-items: center;";
@@ -163,19 +150,16 @@ export const appendData = (
         const actions = document.createElement("div");
         actions.className = "d-flex flex-column gap-1";
 
-        const addBtnMobile = createLoadingButton(
-          "+",
-          "btn btn-success",
-          () => handleAddToCart(item),
-          maxUnitsPerClient <= qtdeAtual
-        );
+        const addBtnMobile = document.createElement("button");
+        addBtnMobile.textContent = "+";
+        addBtnMobile.setAttribute("class", "btn btn-success");
+        addBtnMobile.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
+        addBtnMobile.disabled = maxUnitsPerClient <= qtdeAtual;
+        addBtnMobile.addEventListener("click", () => handleAddToCart(item));
 
-        const removeBtnMobile = createLoadingButton(
-          "-",
-          "btn btn-danger",
-          () => handleRemoveOne(item),
-          qtdeAtual <= 0
-        );
+        const removeBtnMobile = removeBtn.cloneNode(true);
+        removeBtnMobile.addEventListener("click", () => handleRemoveOne(item));
+        mobileList.classList.toggle("toggle-section-collapsed", false);
 
         actions.append(addBtnMobile, removeBtnMobile);
 
