@@ -6,46 +6,56 @@ import { fetchedData } from "../mock/fetchedData.js";
 import updateCartSummaryBar from "../functions/updateCartSummaryBar.js";
 
 let cachedData = null;
+let currentOrder = "asc"; // padrão
 
 const display = document.getElementById("display");
 const totalFood = document.getElementById("totalFood");
 const notifyDiv = document.getElementById("notifyDiv");
 const trendingBtn = document.getElementsByName("trendingBtn");
-const penitenciariaSelect = document.getElementById("penitenciariaSelect");
+
 const totalAmount = document.getElementById("totalAmount");
 const clearCartBtn = document.getElementById("clearCartBtn");
 const pesoInfo = document.getElementById("pesoTotalInfo");
+const orderSelectContainer = document.getElementById("orderSelectContainer");
 
 const MAX_WEIGHT = 12;
 let cartData = JSON.parse(localStorage.getItem("cartData")) || [];
 let currentCategory = "Alimentos";
-let currentPenitenciaria = "Penitenciária A";
 
-notifyDiv.innerHTML = notify("success", "Item is added to the bag");
+const urlParams = new URLSearchParams(window.location.search);
 
+let currentPenitenciaria =
+  urlParams.size === 0
+    ? null
+    : decodeURIComponent(urlParams.get("penitenciaria"));
+
+if (!currentPenitenciaria) {
+  window.alert(`Penitenciária não informada. Redirecionando...`);
+  window.location.href = "/";
+}
+
+const orderBySelect = document.getElementById("orderBySelect");
+if (orderBySelect) {
+  orderBySelect.addEventListener("change", (e) => {
+    currentOrder = e.target.value;
+    displayItems(currentPenitenciaria, currentCategory);
+  });
+}
 trendingBtn.forEach((btn) => {
   btn.addEventListener("click", () => {
     currentCategory = btn.value;
     displayItems(currentPenitenciaria, currentCategory);
   });
 });
+function showNotification(type, message) {
+  const { wrapper, id } = notify(type, message);
+  notifyDiv.appendChild(wrapper);
 
-penitenciariaSelect.addEventListener("change", () => {
-  if (cartData.length > 0) {
-    const confirmClear = confirm(
-      "Você está trocando de penitenciária. Isso irá limpar seu carrinho. Deseja continuar?"
-    );
-    if (!confirmClear) {
-      penitenciariaSelect.value = currentPenitenciaria;
-      return;
-    }
-
-    clearCartData();
-  }
-
-  currentPenitenciaria = penitenciariaSelect.value;
-  displayItems(currentPenitenciaria, currentCategory);
-});
+  const toastEl = document.getElementById(id);
+  const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
+  console.log("toast ==> ", toast);
+  toast.show();
+}
 
 clearCartBtn.addEventListener("click", () => {
   if (cartData.length === 0) {
@@ -57,63 +67,78 @@ clearCartBtn.addEventListener("click", () => {
   const confirmClear = confirm("Tem certeza que deseja limpar o carrinho?");
   if (confirmClear) {
     clearCartData();
-    notifyDiv.innerHTML = notify("success", "Carrinho limpo com sucesso!");
-    showToast();
+    showNotification("success", "Item adicionado com sucesso!");
   }
 });
 
 async function displayItems(penitenciaria, category = "Alimentos") {
-  try {
-    let data;
+  const spinner = document.getElementById("loadingSpinner");
 
-    // Se já carregamos uma vez, reutiliza
-    if (cachedData) {
-      data = cachedData;
-    } else {
-      // Modo real:
-      const response = await fetch(
-        "http://clickjumbo.local/wp-json/clickjumbo/v1/produtos"
-      );
-      data = await response.json();
+  let data;
 
-      // Modo mock:
-      // data = fetchedData;
-      cachedData = data; // Armazena para uso futuro
+  if (!cachedData) {
+    if (spinner) spinner.style.display = "block";
+
+    try {
+      // Simula tempo de carregamento apenas quando buscando dados
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // Aqui faria o fetch real:
+      // const response = await fetch("...");
+      // data = await response.json();
+
+      data = fetchedData;
+      cachedData = data;
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+    } finally {
+      if (spinner) spinner.style.display = "none";
     }
-
-    if (!data || !Array.isArray(data.content)) {
-      console.warn("Erro ao carregar produtos da API.");
-      return;
-    }
-
-    const items = data.content.filter(
-      (item) =>
-        item.prison?.trim().toLowerCase() ===
-          penitenciaria.trim().toLowerCase() &&
-        item.category?.trim().toLowerCase() === category.trim().toLowerCase()
-    );
-
-    if (items.length === 0) {
-      console.warn(
-        `Nenhum produto encontrado para ${category} na ${penitenciaria}`
-      );
-      return;
-    }
-
-    // Atribui peso falso se não tiver (apenas se necessário)
-    items.forEach((item) => {
-      item.weight =
-        item.weight || parseFloat((Math.random() * 2 + 1).toFixed(2));
-    });
-
-    appendData(items, display, handleAddToCart, handleRemoveOne, cartData);
-    showTotal(cartData, totalFood);
-    updateCartSummaryBar(cartData);
-    updatePesoInfo();
-  } catch (error) {
-    console.error("Erro ao buscar produtos:", error);
+  } else {
+    data = cachedData;
   }
-  console.log("cachedData ==> ", cachedData);
+
+  if (!data || !Array.isArray(data.content)) {
+    console.warn("Erro ao carregar produtos da API.");
+    return;
+  }
+
+  const items = data.content.filter(
+    (item) =>
+      item.prison?.trim().toLowerCase() ===
+        penitenciaria.trim().toLowerCase() &&
+      item.category?.trim().toLowerCase() === category.trim().toLowerCase()
+  );
+  items.sort((a, b) => {
+    const nameA = a.subcategory?.toLowerCase() || "";
+    const nameB = b.subcategory?.toLowerCase() || "";
+
+    if (currentOrder === "asc") {
+      return nameA.localeCompare(nameB);
+    } else {
+      return nameB.localeCompare(nameA);
+    }
+  });
+
+  if (items.length === 0) {
+    display.innerHTML = `
+      <div class="alert alert-warning text-center fw-bold my-4" role="alert">
+        Nenhum produto encontrado para <strong>${category}</strong> na <strong>${penitenciaria}</strong>.
+      </div>
+    `;
+
+    if (orderSelectContainer) orderSelectContainer.innerHTML = "";
+    return;
+  }
+
+  items.forEach((item) => {
+    item.weight = item.weight || parseFloat((Math.random() * 2 + 1).toFixed(2));
+  });
+
+  appendData(items, display, handleAddToCart, handleRemoveOne, cartData);
+  showTotal(cartData, totalFood);
+  updateCartSummaryBar(cartData);
+  updatePesoInfo();
 }
 
 function handleAddToCart(item) {
@@ -125,7 +150,8 @@ function handleAddToCart(item) {
       "warning",
       `Limite de ${item.maxUnitsPerClient} unidades por cliente para este item.`
     );
-    showToast();
+    showNotification("success", "Item adicionado com sucesso!");
+
     return;
   }
 

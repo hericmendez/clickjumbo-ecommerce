@@ -14,73 +14,45 @@
   rel="stylesheet"
 />
 
-  <link rel="stylesheet" href="css/food.css" />
+  <link rel="stylesheet" href="css/home.css" />
   <link rel="stylesheet" href="css/footer.css" />
   <title>Produtos</title>
 </head>
 
 <body>
-
+  <div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner text-primary" role="status" style="width: 4rem; height: 4rem;">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+  </div>
+  
   <div id="navbar"></div>
-
-  <!-- Seletor de penitenciária -->
-  <div class="mt-4 text-center">
-    <h3 for="penitenciariaSelect" class="form-label fw-bold">Selecione a penitenciária</h3>
-    <div class="d-flex justify-content-center">
-      <select id="penitenciariaSelect" class="form-select mx-2 w-md-50" style="max-width: 500px;">
-        <option value="Penitenciária A">Penitenciária A</option>
-        <option value="Penitenciária B">Penitenciária B</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Botões de categoria -->
-  <div id="trendingBtnDiv" class="d-flex flex-wrap justify-content-center gap-2 my-4 px-2">
-    <button name="trendingBtn" value="Alimentos" type="button" class="btn btn-outline-success">Alimentos</button>
-    <button name="trendingBtn" value="Vestuario" type="button" class="btn btn-outline-success">Vestuário</button>
-    <button name="trendingBtn" value="Higiene" type="button" class="btn btn-outline-success">Higiene</button>
-    <button name="trendingBtn" value="Limpeza" type="button" class="btn btn-outline-success">Limpeza</button>
-    <button name="trendingBtn" value="Diversos" type="button" class="btn btn-outline-success">Diversos</button>
-    <button name="trendingBtn" value="Papelaria" type="button" class="btn btn-outline-success">Papelaria</button>
-    <button name="trendingBtn" value="Cigarros" type="button" class="btn btn-outline-success">Cigarros</button>
-  </div>
-
-  <!-- Total de alimentos -->
-  <div class="container visually-hidden">
-    <div id="totalFood" class="alert alert-info text-center fw-bold py-2"></div>
-  </div>
-
-  <!-- Lista de produtos -->
-  <div id="display" class="container mt-5"></div>
-
-  <!-- Toast de notificação -->
-  <div id="notifyDiv"></div>
-
-  <!-- Footer -->
-  <div id="footerDiv" class="mt-5"></div>
-
-  <!-- Barra de resumo do carrinho -->
-  <div id="cartSummaryBar" class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 px-4 py-3 bg-light border-top shadow fixed-bottom">
-    <div class="text-center text-md-start fs-5">
-      <div id="produtosCount" class="fw-bold visually-hidden">Produtos: 0</div>
-      <div id="pesoResumo" class="fw-bold">Peso total: 0.00kg/12kg</div>
-      <div id="valorResumo" class="fw-bold">Total: R$ 0,00</div>
+  <main class="d-flex flex-column align-items-center" style="height: 70vh; background-color: #fff;">
+    <div class="search-container">
+      <div class="mb-4">
+        <img src="assets/logo.png" alt="Logo ClickJumbo" class="img-fluid" style="max-width: 300px;"/>
+  
+      </div>
+  
+      <div class="input-group">
+        <input list="penitenciariaOptions" id="penitenciariaInput" class="form-control" placeholder="Escolha a penitenciária" />
+        <button id="buscarBtn" class="btn btn-primary" type="button">Buscar produtos</button>
+      </div>
+      <datalist id="penitenciariaOptions"></datalist>
     </div>
 
-    <div style="min-width: 300px;" class="d-flex flex-row  justify-content-between gap-2 ">
-      <button id="clearCartBtn" class="btn btn-danger fw-bold w-50 p-2">Limpar Carrinho</button>
-      <a href="cart.html" class="w-50">
-        <button class="btn btn-success fw-bold w-100 p-2">Ver Carrinho</button>
-      </a>
-
-    </div>
-  </div>
-
+    
+  </main>
+<!-- Footer -->
+  
+<div id="footerDiv" class="mt-5"></div>
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="scripts/navbar.script.js"></script>
   <script type="module" src="scripts/footer.script.js"></script>
-  <script type="module" src="scripts/shop.js"></script>
+  <script type="module" src="scripts/home.js"></script>
+  
 </body>
+
 
 </html>
