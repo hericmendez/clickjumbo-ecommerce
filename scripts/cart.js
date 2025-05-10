@@ -38,12 +38,12 @@ applyCoupon.addEventListener("click", () => {
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-
+  /* 
   if (!getItem("token")) {
     alert("Please login first");
     window.location.href = "login.html";
     return;
-  }
+  } */
 
   // NOVA LÓGICA: verifica o peso total do carrinho
   const totalWeight = cartData.reduce(
@@ -62,13 +62,22 @@ form.addEventListener("submit", (e) => {
 
   const user = shippingForm(form);
   notifyDiv2.innerHTML = notify("info", user.isFilled().message, "liveToast2");
-  const toastLiveExample = document.getElementById("liveToast2");
+  /*   const toastLiveExample = document.getElementById("liveToast2");
   const toast = new bootstrap.Toast(toastLiveExample);
-  toast.show();
+  toast.show(); */
 
   if (user.isFilled().status) {
+    const cartItemsToSend = cartData.map((item) => ({
+      id: item.id,
+      qty: item.qty,
+    }));
+
+    console.log("Dados enviados ao backend:", cartItemsToSend);
+    console.log("user shipping data ==> ", user);
     setTimeout(() => {
-      window.location.href = "orderPlaced.html";
+      // window.location.href = "orderPlaced.html";
+      window.alert("Order placed successfully!");
+      // Aqui você pode adicionar a lógica para redirecionar o usuário ou mostrar uma mensagem de sucesso
     }, 2000);
   }
 });

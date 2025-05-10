@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  rel="stylesheet"
+/>
+
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/footer.css" />
+  <title>Produtos</title>
+</head>
+
+<body>
+  <div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner text-primary" role="status" style="width: 4rem; height: 4rem;">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+  </div>
+ <!-- Modal de Pagamento -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentModalLabel">Pagamento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" id="paymentModalBody">
+        <!-- Conteúdo injetado via JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmPaymentBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div id="navbar"></div>
+  <main class="d-flex flex-column align-items-center mt-2 mb-2" style="min-height: 70vh; background-color: #fff;">
+    <div class="container">
+      <div class="py-5 text-center">
+        <img class="d-block mx-auto mb-4" src="https://images.unsplash.com/photo-1523350165414-082d792c4bcc?auto=format&fit=crop&w=634&q=80" alt="" width="72" height="72">
+        <h1>Finalizar Compra</h1>
+      </div>
+  
+      <div class="row">
+        <!-- Carrinho -->
+        <div class="col-md-4 order-2 mb-4">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Seu carrinho</span>
+            <span class="badge bg-secondary rounded-pill" id="cart-count">0</span>
+          </h4>
+  
+          <ul class="list-group mb-3" id="cart-items">
+            <!-- Itens inseridos via JS -->
+          </ul>
+  
+  
+        </div>
+  
+        <!-- Endereço + Pagamento -->
+        <div class="col-md-8 order-1">
+          <h4 class="mb-3">Endereço para entrega</h4>
+          <form id="checkout-form" method="post" class="needs-validation" novalidate>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <label class="form-label">Nome</label>
+                <input type="text" class="form-control" name="firstName" required>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label">Sobrenome</label>
+                <input type="text" class="form-control" name="lastName" required>
+              </div>
+  
+              <div class="col-12">
+                <label class="form-label">Endereço</label>
+                <input type="text" class="form-control" name="address" placeholder="Rua Exemplo, 123" required>
+              </div>
+  
+              <div class="col-12">
+                <label class="form-label">Complemento <span class="text-muted">(opcional)</span></label>
+                <input type="text" class="form-control" name="address2" placeholder="Apto, bloco, etc.">
+              </div>
+  
+              <div class="col-md-5">
+                <label class="form-label">País</label>
+                <select class="form-select" name="country" required>
+                  <option value="">Escolha...</option>
+                  <option>Brasil</option>
+                </select>
+              </div>
+  
+              <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                <select class="form-select" name="state" required>
+                  <option value="">Escolha...</option>
+                  <option>SP</option>
+                  <option>RJ</option>
+                  <option>MG</option>
+                </select>
+              </div>
+  
+              <div class="col-md-3">
+                <label class="form-label">CEP</label>
+                <input type="text" class="form-control" name="zip" required>
+              </div>
+            </div>
+  
+            <hr class="my-4">
+  
+            <h4 class="mb-3">Forma de pagamento</h4>
+  
+            <div class="form-check">
+              <input id="pix" name="paymentMethod" type="radio" class="form-check-input" value="pix" checked required>
+              <label class="form-check-label" for="pix">Pix</label>
+            </div>
+            <div class="form-check">
+              <input id="boleto" name="paymentMethod" type="radio" class="form-check-input" value="boleto" required>
+              <label class="form-check-label" for="boleto">Boleto bancário</label>
+            </div>
+            <div class="form-check">
+              <input id="card" name="paymentMethod" type="radio" class="form-check-input" value="card" required>
+              <label class="form-check-label" for="card">Cartão de crédito/débito</label>
+            </div>
+            <hr class="my-4">
+  
+            <h4 class="mb-3">Incluir:</h4>
+            <ul>
+              <li>Forma de envio</li>
+              <li>Cálculo de frete</li>
+              <li>Valor do frete no carrinho</li>
+            </ul>
+            <div id="card-details" class="mt-3">
+              <div class="row">
+                <div class="col-md-6">
+                  <label class="form-label">Nome no cartão</label>
+                  <input type="text" class="form-control" name="cardName">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Número do cartão</label>
+                  <input type="text" class="form-control" name="cardNumber" placeholder="1234 5678 9012 3456">
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-md-6">
+                  <label class="form-label">Validade</label>
+                  <input type="text" class="form-control" name="cardExpiration" placeholder="MM/AA">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">CVV</label>
+                  <input type="text" class="form-control" name="cardCVV" placeholder="123">
+                </div>
+              </div>
+            </div>
+            <div id="pix-instructions" class="mt-3" style="display: none;">
+              <div class="alert alert-success">
+                Você selecionou pagamento via <strong>Pix</strong>.<br />
+                Após finalizar a compra, um QR Code será gerado.
+              </div>
+            </div>
+            
+            <div id="boleto-instructions" class="mt-3" style="display: none;">
+              <div class="alert alert-secondary">
+                Você selecionou pagamento via <strong>Boleto bancário</strong>.<br />
+                Após finalizar a compra, o boleto será gerado com vencimento em 3 dias úteis.
+              </div>
+            </div>
+            
+            <hr class="my-4">
+       
+            <button id="submitBtn" class="w-100 btn btn-success btn-lg" type="button">Finalizar compra</button>
+          </form>
+  
+        </div>
+      </div>
+    </div>
+  </main>
+<!-- Footer -->
+  
+<div id="footerDiv" class="mt-5"></div>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script type="module" src="scripts/navbar.script.js"></script>
+  <script type="module" src="scripts/footer.script.js"></script>
+    
+  <script type="module" src="scripts/checkout.js"></script>
+  <script type="module" src="functions/paymentModal.js"></script>
+  
+</body>
+
+
+</html>

@@ -1,0 +1,1 @@
+export const API_URL = 'http://clickjumbo.local/wp-json/clickjumbo/v1';

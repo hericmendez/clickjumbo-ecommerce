@@ -2,9 +2,9 @@ import { notify } from "../components/notify.js";
 import { appendData } from "../functions/appendData.js";
 import { showTotal } from "../functions/showTotal.js";
 import { appendCartData } from "../functions/appendCartData.js";
-import { fetchedData } from "../mock/fetchedData.js";
 import updateCartSummaryBar from "../functions/updateCartSummaryBar.js";
-
+import { API_URL } from "./baseUrl.js";
+console.log("API_URL ==> ", API_URL);
 let cachedData = null;
 let currentOrder = "asc"; // padrão
 
@@ -24,12 +24,10 @@ let currentCategory = "Alimentos";
 
 const urlParams = new URLSearchParams(window.location.search);
 
-let currentPenitenciaria =
-  urlParams.size === 0
-    ? null
-    : decodeURIComponent(urlParams.get("penitenciaria"));
-
-if (!currentPenitenciaria) {
+let currentPrison =
+  urlParams.size === 0 ? null : decodeURIComponent(urlParams.get("p"));
+console.log("currentPrison ==> ", currentPrison);
+if (!currentPrison) {
   window.alert(`Penitenciária não informada. Redirecionando...`);
   window.location.href = "/";
 }
@@ -38,13 +36,13 @@ const orderBySelect = document.getElementById("orderBySelect");
 if (orderBySelect) {
   orderBySelect.addEventListener("change", (e) => {
     currentOrder = e.target.value;
-    displayItems(currentPenitenciaria, currentCategory);
+    displayItems(currentPrison, currentCategory);
   });
 }
 trendingBtn.forEach((btn) => {
   btn.addEventListener("click", () => {
     currentCategory = btn.value;
-    displayItems(currentPenitenciaria, currentCategory);
+    displayItems(currentPrison, currentCategory);
   });
 });
 function showNotification(type, message) {
@@ -71,7 +69,7 @@ clearCartBtn.addEventListener("click", () => {
   }
 });
 
-async function displayItems(penitenciaria, category = "Alimentos") {
+async function displayItems(slug, category = "Alimentos") {
   const spinner = document.getElementById("loadingSpinner");
 
   let data;
@@ -81,13 +79,24 @@ async function displayItems(penitenciaria, category = "Alimentos") {
 
     try {
       // Simula tempo de carregamento apenas quando buscando dados
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // await new Promise((resolve) => setTimeout(resolve, 800));
+      const response = await fetch(
+        `${API_URL}/produtos/por-penitenciaria?slug=${currentPrison}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${res.status}`);
+      }
+      const text = await response.text();
 
-      // Aqui faria o fetch real:
-      // const response = await fetch("...");
-      // data = await response.json();
+      data = JSON.parse(text);
+      console.log("data ==> ", data);
 
-      data = fetchedData;
       cachedData = data;
     } catch (error) {
       console.error("Erro ao buscar produtos:", error);
@@ -97,7 +106,7 @@ async function displayItems(penitenciaria, category = "Alimentos") {
   } else {
     data = cachedData;
   }
-
+  const prisonName = data.content[0].prison;
   if (!data || !Array.isArray(data.content)) {
     console.warn("Erro ao carregar produtos da API.");
     return;
@@ -105,8 +114,6 @@ async function displayItems(penitenciaria, category = "Alimentos") {
 
   const items = data.content.filter(
     (item) =>
-      item.prison?.trim().toLowerCase() ===
-        penitenciaria.trim().toLowerCase() &&
       item.category?.trim().toLowerCase() === category.trim().toLowerCase()
   );
   items.sort((a, b) => {
@@ -123,7 +130,7 @@ async function displayItems(penitenciaria, category = "Alimentos") {
   if (items.length === 0) {
     display.innerHTML = `
       <div class="alert alert-warning text-center fw-bold my-4" role="alert">
-        Nenhum produto encontrado para <strong>${category}</strong> na <strong>${penitenciaria}</strong>.
+        Nenhum produto encontrado para <strong>${category}</strong> na <strong>${prisonName}</strong>.
       </div>
     `;
 
@@ -176,7 +183,7 @@ function handleAddToCart(item) {
   notifyDiv.innerHTML = notify("success", "Item adicionado com sucesso!");
   showToast();
 
-  displayItems(currentPenitenciaria, currentCategory);
+  displayItems(currentPrison, currentCategory);
 }
 
 function handleRemoveOne(item) {
@@ -188,7 +195,7 @@ function handleRemoveOne(item) {
     }
 
     saveCart();
-    displayItems(currentPenitenciaria, currentCategory);
+    displayItems(currentPrison, currentCategory);
   }
 }
 
@@ -203,7 +210,7 @@ function clearCartData() {
   cartData = [];
   saveCart();
   appendCartData([], display, totalAmount);
-  displayItems(currentPenitenciaria, currentCategory);
+  displayItems(currentPrison, currentCategory);
 }
 
 function calculateCartWeight() {
@@ -239,5 +246,5 @@ function showToast() {
 }
 
 // Inicialização
-displayItems(currentPenitenciaria, currentCategory);
+displayItems(currentPrison, currentCategory);
 updatePesoInfo();

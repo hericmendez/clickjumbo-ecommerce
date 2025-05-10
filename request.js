@@ -8,6 +8,8 @@ fetch("http://clickjumbo.local/wp-json/clickjumbo/v1/produtos")
 
     const text = await res.text();
 
+    const json = JSON.parse(text);
+    console.log("json ==> ", json);
     try {
       const json = JSON.parse(text);
       if (json.status !== 200) {
