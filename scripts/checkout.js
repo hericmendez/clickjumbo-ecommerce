@@ -1,167 +1,207 @@
-const cartData = JSON.parse(localStorage.getItem("cartData") || "[]");
+// checkout.js atualizado para preencher dados do envio, controlar exibição condicional de campos e finalizar pedido
+
+import { API_URL } from "./baseUrl.js";
+import { getItem, removeItem } from "../functions/localStorage.js";
+
+const cartData = getItem("cartData") || [];
+const cartValidation = getItem("cartValidated");
+const freteInfo = getItem("freteData");
+const token = getItem("token");
+
 const cartItemsContainer = document.getElementById("cart-items");
 const cartCount = document.getElementById("cart-count");
+const cartSummary = document.getElementById("cart-summary");
+const shippingSummary = document.getElementById("shipping-summary");
+const submitBtn = document.getElementById("submitBtn");
+const form = document.getElementById("checkout-form");
 
-let total = 0;
+const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
+const modalBody = document.getElementById("paymentModalBody");
+const confirmBtn = document.getElementById("confirmPaymentBtn");
 
-cartCount.textContent = cartData.length;
-
-
-
-// Oculta/exibe campos de cartão e CPF
-const radios = document.querySelectorAll('input[name="paymentMethod"]');
-const cardSection = document.getElementById("card-details");
-
-// Cria dinamicamente o campo CPF e container para código gerado
-const cpfContainer = document.createElement("div");
-cpfContainer.classList.add("mt-3");
-cpfContainer.innerHTML = `
-  <label class="form-label">CPF</label>
-  <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" required>
-  <div id="payment-code" class="mt-3" style="display: none;">
-    <label class="form-label">Código gerado</label>
-    <div class="input-group">
-      <input type="text" id="generated-code" class="form-control" readonly>
-      <button type="button" id="copy-code" class="btn btn-outline-secondary">Copiar</button>
-    </div>
-  </div>
-`;
-
-function isCPFRequired(method) {
-  return method === "boleto" || method === "pix";
-}
-
-function showCPFField(show) {
-  const form = document.getElementById("checkout-form");
-  if (show && !form.contains(cpfContainer)) {
-    form.insertBefore(cpfContainer, cardSection);
-  } else if (!show && form.contains(cpfContainer)) {
-    cpfContainer.remove();
-  }
-}
-
-radios.forEach(radio => {
-  radio.addEventListener("change", () => {
-    const method = radio.value;
-    cardSection.style.display = method === "card" ? "block" : "none";
-    document.getElementById("pix-instructions").style.display = method === "pix" ? "block" : "none";
-    document.getElementById("boleto-instructions").style.display = method === "boleto" ? "block" : "none";
-    showCPFField(isCPFRequired(method));
-  });
-});
-
-if (!document.getElementById("card").checked) {
-  cardSection.style.display = "none";
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const cartData = JSON.parse(localStorage.getItem("cartData") || "[]");
-  const cartItemsContainer = document.getElementById("cart-items");
-  const cartCount = document.getElementById("cart-count");
-  const form = document.getElementById("checkout-form");
-  const cardSection = document.getElementById("card-details");
-  const radios = document.querySelectorAll('input[name="paymentMethod"]');
-
+function renderCart() {
   let total = 0;
+  let weight = 0;
+  cartItemsContainer.innerHTML = "";
+  cartSummary.innerHTML = "";
 
-  cartData.forEach(item => {
+  cartData.forEach((item) => {
     const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between lh-condensed";
+    li.className = "list-group-item d-flex justify-content-between lh-sm";
     li.innerHTML = `
       <div>
-        <h6 class="my-0">${item.name}</h6>
-        <small class="text-muted">${item.description || ""}</small>
+        <strong>${item.name}</strong><br />
+        <small>${item.weight || 0}kg x ${item.qty}</small>
       </div>
-      <span class="text-muted">R$ ${item.price.toFixed(2)}</span>
+      <span>R$ ${(item.price * item.qty).toFixed(2)}</span>
     `;
     cartItemsContainer.appendChild(li);
-    total += item.price;
+    total += item.price * item.qty;
+    weight += item.weight * item.qty;
   });
 
   cartCount.textContent = cartData.length;
 
-  const totalEl = document.createElement("li");
-  totalEl.className = "list-group-item d-flex justify-content-between";
-  totalEl.innerHTML = `<strong>Total (R$)</strong><strong>R$ ${total.toFixed(2)}</strong>`;
-  cartItemsContainer.appendChild(totalEl);
-
-  // Mostrar ou ocultar campos de cartão
-  const toggleCardSection = () => {
-    const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-    cardSection.style.display = selectedMethod === "card" ? "block" : "none";
-  };
-
-  // Inicializa visibilidade do cartão
-  toggleCardSection();
-
-  radios.forEach(radio => {
-    radio.addEventListener("change", toggleCardSection);
+  const items = [
+    [`Peso total`, `${weight.toFixed(2)} kg`],
+    [`Frete (${freteInfo?.metodo})`, `R$ ${freteInfo?.valor.toFixed(2)}`],
+    [`Total`, `R$ ${(total + freteInfo?.valor).toFixed(2)}`],
+  ];
+  items.forEach(([label, value]) => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between lh-sm";
+    li.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+    cartSummary.appendChild(li);
   });
+}
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+function renderShipping() {
+  shippingSummary.innerHTML = "";
+  const dados = [
+    [`Método`, freteInfo?.metodo || "PAC"],
+    [`CEP destino`, freteInfo?.cep_destino || "-"],
+    [`CEP origem`, freteInfo?.cep_origem || "-"],
+    [`Valor`, `R$ ${freteInfo?.valor?.toFixed(2)}`],
+    [`Prazo`, freteInfo?.prazo || "-"],
+  ];
+  dados.forEach(([label, value]) => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between lh-sm";
+    li.innerHTML = `<span>${label}</span><span>${value}</span>`;
+    shippingSummary.appendChild(li);
+  });
+}
 
-    const data = new FormData(form);
+function togglePaymentInstructions() {
+  const method = document.querySelector(
+    "input[name='paymentMethod']:checked"
+  )?.value;
+  document.getElementById("card-details").style.display =
+    method === "card" ? "block" : "none";
+  document
+    .getElementById("pix-instructions")
+    .classList.toggle("d-none", method !== "pix");
+  document
+    .getElementById("boleto-instructions")
+    .classList.toggle("d-none", method !== "boleto");
+}
 
-    const user = {
-      firstName: data.get("firstName"),
-      lastName: data.get("lastName"),
-      address: data.get("address"),
-      complement: data.get("address2"),
-      country: data.get("country"),
-      state: data.get("state"),
-      zip: data.get("zip"),
-    };
+async function gerarPagamento(metodo, valor, cpf) {
+  const endpoint = metodo === "pix" ? "generate-pix" : "generate-boleto";
+  const payload =
+    metodo === "pix"
+      ? { valor, txid: `pedido-${Date.now()}` }
+      : { valor, nome: "Cliente", cpf };
+  const res = await fetch(`${API_URL}/${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return await res.json();
+}
 
-    const selectedMethod = data.get("paymentMethod");
+async function processarPedido(metodo, valorTotal) {
+  const payload = {
+    cart: cartValidation.itens.map((i) => ({
+      id: i.id,
+      quantidade: i.quantidade,
+    })),
+    shipping: {
+      method: freteInfo.metodo || "PAC",
+      value: freteInfo.valor,
+    },
+    payment: {
+      method: metodo,
+      value: valorTotal,
+    },
+  };
+  const res = await fetch(`${API_URL}/process-order`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  return await res.json();
+}
 
-    const payment = {
-      method: selectedMethod,
-      data: {},
-    };
+submitBtn.addEventListener("click", async () => {
+  const paymentMethod = document.querySelector(
+    "input[name='paymentMethod']:checked"
+  )?.value;
+  const cpf = document.getElementById("cpf")?.value || "";
 
-    if (selectedMethod === "card") {
-      payment.data = {
-        cardName: data.get("cardName") || "",
-        cardNumber: data.get("cardNumber") || "",
-        cardExpiration: data.get("cardExpiration") || "",
-        cardCVV: data.get("cardCVV") || "",
-      };
+  if (!paymentMethod) {
+    alert("Selecione uma forma de pagamento.");
+    return;
+  }
 
-      // Validação básica dos campos de cartão
-      const allFilled = Object.values(payment.data).every(val => val.trim() !== "");
-      if (!allFilled) {
-        alert("Por favor, preencha todos os campos do cartão.");
-        return;
-      }
+  try {
+    const valorTotal = cartValidation.total + freteInfo.valor;
+    const pagamento = await gerarPagamento(paymentMethod, valorTotal, cpf);
+    if (!pagamento.success) {
+      alert("Erro ao gerar pagamento.");
+      return;
     }
 
-    const cartItemsToSend = cartData.map((item) => ({
-      id: item.id,
-      qty: item.qty,
-    }));
+    modalBody.innerHTML = "";
+    if (paymentMethod === "pix") {
+      modalBody.innerHTML = `
+        <p>Escaneie o QR Code ou copie o código Pix:</p>
+        <img src="${pagamento.qr_code_url}" class="img-fluid" />
+        <div class="input-group mt-3">
+          <input type="text" class="form-control" value="${pagamento.codigo_pix}" readonly />
+          <button class="btn btn-outline-secondary" id="copyPix">Copiar</button>
+        </div>
+      `;
+    } else if (paymentMethod === "boleto") {
+      modalBody.innerHTML = `
+        <p>Boleto gerado com sucesso:</p>
+        <a href="${pagamento.url_boleto}" class="btn btn-primary" target="_blank">Ver Boleto</a>
+      `;
+    }
 
-    const checkoutData = { cartItemsToSend, user, payment };
-    console.log("checkoutData =>", checkoutData);
+    modal.show();
 
-    // Aqui você pode enviar os dados com fetch()
-    // fetch('/api/checkout', {
-    //   method: 'POST',
-    //   body: JSON.stringify(checkoutData),
-    //   headers: { 'Content-Type': 'application/json' }
-    // });
-  });
+    confirmBtn.onclick = async () => {
+      const pedido = await processarPedido(paymentMethod, valorTotal);
+      if (pedido.success) {
+        alert("✅ Pedido finalizado com sucesso!");
+        removeItem("cartData");
+        removeItem("cartValidated");
+        removeItem("freteData");
+        window.location.href = "index.html";
+      } else {
+        alert("❌ Erro ao processar pedido.");
+      }
+    };
+  } catch (err) {
+    console.error(err);
+    alert("Erro durante o checkout. Tente novamente.");
+  }
 });
 
+document.addEventListener("change", (e) => {
+  if (e.target.name === "paymentMethod") togglePaymentInstructions();
+});
 
-// Botão "Copiar"
 document.addEventListener("click", (e) => {
-  if (e.target.id === "copy-code") {
-    const codeInput = document.getElementById("generated-code");
-    navigator.clipboard.writeText(codeInput.value).then(() => {
+  if (e.target.id === "copyPix") {
+    const code = e.target.previousElementSibling.value;
+    navigator.clipboard.writeText(code).then(() => {
       e.target.textContent = "Copiado!";
       setTimeout(() => (e.target.textContent = "Copiar"), 2000);
     });
   }
 });
+
+renderCart();
+renderShipping();
+togglePaymentInstructions();
+
+if (cartData.length === 0) {
+  cartItemsContainer.innerHTML =
+    "<li class='list-group-item'>Carrinho vazio</li>";
+  submitBtn.disabled = true;
+}

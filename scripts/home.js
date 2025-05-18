@@ -25,7 +25,7 @@ import { fetchedData } from "../mock/fetchedData.js";
   }
 
   async function carregarPenitenciarias() {
-    const data = await getToken("/penitenciarias");
+    const data = await getToken("/prison-list");
     if (!data) return;
 
     console.log("Penitenciárias:", data.content);

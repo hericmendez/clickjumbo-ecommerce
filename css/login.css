@@ -12,6 +12,8 @@ body {
     max-width: 400px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     gap: 15px;
     border-radius: 8px;
 }

@@ -1,0 +1,120 @@
+/clickjumbo-core/
+├── clickjumbo-core.php  ← Plugin principal (orquestrador)
+├── includes/
+|   ├── validations/
+|   │   ├── validate-login.php
+|   │   ├── validate-cart.php
+|   │   ├── validate-shipping.php
+|   │   ├── validate-payment.php
+|   |   └── validate-order.php
+|   ├── auth/
+|   |   ├── login.php
+|   |   ├── register.php
+|   ├── functions/
+|   |   ├── product-list.php
+|   |   ├── calculate-shipping.php
+|   |   ├── generate-pix.php
+|   |   └── generate-boleto.php
+|   |   └── generate-receipt.php
+|   └── utils.php (se necessário)
+
+Validations
+Validam se uma compra é válida. Se todas as validações retornarem true, a compra é realizada. Se qualquer uma delas retornar false, retorna uma mensagem de erro.
+
+> validate-login.php: 
+Verifica se o usuário está logado com uma token válida.
+
+> validate-cart.php:
+Verifica se o carrinho enviado pelo front end é válido, cruzando dados com a lista de produtos do back end.
+Funciona assim:
+Todo produto possui id, nome, categoria, subcategoria, peso (total do carrinho não pode ultrapassar 12kg), quantidade e preço. 
+O back end recebe apenas o id e quantidade do produto, confirmando o valor total da compra. 
+Qualquer discrepância de valores de dados retorna uma mensagem de erro.
+Esse approach impede que o usuário manipule os valores dos produtos no front end.
+
+> validate-shipping.php:
+Verifica se os dados de envio são válidos e valida o pagamento do frete.
+Funciona em conjunto com o plugin calculate-shipping.php.
+Possui duas funções: a primeira valida os dados de endereço, e a segunda verifica se o valor do frete recebido pelo front end é o mesmo calculado pelo plugin. 
+
+
+> validate-payment.php:
+Confirma o pagamento recebido do gateway de pagamento. 
+Identifica discrepâncias entre o valor recebido e o valor calculado.
+
+> validate-order.php:
+Verifica se todos os outros plugins retornaram true.
+Em caso positivo, valida a compra.
+
+Functions:
+Funcionam de forma independente ou em conjunto com os plugins de validação.
+
+> product-list.php:
+Já existe. Possui dois endpoints: um que lista as penitenciárias, e outro que recebe o nome de uma penitenciária (da lista do primeiro endpoint) e retorna uma lista de produtos daquela penitenciária.
+
+> calculate-shipping.php:
+Responsável por calcular o valor do frete e retornar para o cliente.
+Primeiro, recebe o endereço, cep e meio de envio (exemplo: Correios - PAC), valida os dados de endereço, e se os dados forem válidos, calcula o valor do frete e o tempo estimado de chegada (ETA), e os envia de volta para o cliente.
+Ao receber o pagamento, verifica se o valor do frete (recebido do cliente) bate com o valor calculado.
+
+> generate-pix.php:
+Gera um código pix/QR Code e envia para o cliente, caso o método de pagamento escolhido for esse.
+
+> generate-boleto.php:
+Gera um boleto em pdf e envia para o cliente.
+
+generate-receipt,php:
+> Gera e envia o comprovante de compra para o cliente, após a compra ser aprovada.
+
+Utils
+Funções de apoio aos plugins principais
+
+>utils.php:
+Função sendEmail(): Envia um email para o endereço do usuário cadastrado.
+Por exemplo, envia um boleto ou o comprovante de compra, com uma mensagem automática.
+
+
+
+Objeto enviado ao back end:
+{
+    "cart":{
+        "products": [
+            {
+                "id": 100,
+                "qty": 2,
+            },
+                    {
+                "id": 101,
+                "qty": 1,
+            },
+            //
+        ]
+    },
+    "shipping":{
+        "prison_name": "Penitenciária ABC",
+        "cart_weight": 10.0,
+        "method": "Correios - PAC"
+        "sender_address": {
+            "cep": "15991-534",
+            "rua": "Rua Exemplo",
+            "cidade": "São Paulo",
+            "estado": "SP",
+        }
+    },
+    "user":{
+        "name": "José Placeholder",
+        "email": "user@gmail.com",
+        "acess_token": "osefjioçusenfoçejfjnkjsfgikjws",
+    },
+    "payment":{
+        "method": "credit-card | debt-card | pix | boleto" ,
+        "payment_data": {
+            //dados do cartão, id do pix, etc
+        }
+    }
+}
+
+
+
+
+

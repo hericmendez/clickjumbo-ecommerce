@@ -1,23 +1,49 @@
-import { createToken } from "../functions/extraFunctions.js";
-import { getItem, setItem } from "../functions/localStorage.js";
-import { signupForm } from "../functions/signupForm.js";
+import { setItem } from "../functions/localStorage.js";
 
-const form = document.getElementById('form');
-const userData = getItem("userData") || [];
+const form = document.getElementById("form");
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const user = signupForm(form);
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    if(user.isFilled().status){
-        userData.push(user);
-        setItem('user', user);
-        setItem('token', createToken());
-        setItem('userData', userData);
-        setItem('token', createToken());
-        alert("Account created successfully");
-        window.location.href = ".././index.html";
-    } else {
-        alert(user.isFilled().message);
+  const username = form.querySelector("#username")?.value.trim();
+  const email = form.querySelector("#email")?.value.trim();
+  const password = form.querySelector("#password")?.value.trim();
+  const confirm = form.querySelector("#confirm")?.value?.trim();
+
+  if (!username || !password) {
+    alert("Por favor, preencha todos os campos.");
+    return;
+  }
+
+  if (password !== confirm) {
+    alert("As senhas não coincidem.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "http://clickjumbo.local/wp-json/clickjumbo/v1/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success || !data.token) {
+      alert(data.message || "Erro ao criar conta.");
+      return;
     }
+
+    setItem("token", data.token);
+    setItem("user", data.user); // se o backend retornar
+
+    alert("Conta criada com sucesso!");
+    window.location.href = "../index.html";
+  } catch (err) {
+    console.error("Erro na requisição:", err);
+    alert("Erro ao criar conta. Tente novamente mais tarde.");
+  }
 });

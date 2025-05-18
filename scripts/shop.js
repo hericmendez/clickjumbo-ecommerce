@@ -81,7 +81,7 @@ async function displayItems(slug, category = "Alimentos") {
       // Simula tempo de carregamento apenas quando buscando dados
       // await new Promise((resolve) => setTimeout(resolve, 800));
       const response = await fetch(
-        `${API_URL}/produtos/por-penitenciaria?slug=${currentPrison}`,
+        `${API_URL}/product-list/prison?slug=${currentPrison}`,
         {
           method: "GET",
           headers: {
@@ -90,7 +90,7 @@ async function displayItems(slug, category = "Alimentos") {
         }
       );
       if (!response.ok) {
-        throw new Error(`Erro HTTP: ${res.status}`);
+        throw new Error(`Erro HTTP: ${response.status}`);
       }
       const text = await response.text();
 

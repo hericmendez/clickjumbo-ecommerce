@@ -4,53 +4,62 @@ import { setItem } from "./localStorage.js";
 export function appendCartData(cartData, display, totalAmount) {
   display.innerHTML = ""; // Limpa o conteúdo atual
 
-  // Agrupa os produtos por subcategoria
-  const grouped = cartData.reduce((acc, item) => {
-    const key = item.subcategory || "Outros";
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(item);
-    return acc;
-  }, {});
-
-  // Para cada subcategoria, cria uma seção
-  for (const [subcategory, items] of Object.entries(grouped)) {
-    const section = document.createElement("section");
-    section.classList.add("cart-section", "mb-4");
-
-    const title = document.createElement("h3");
-    title.textContent = subcategory;
-    title.classList.add("fs-5", "mb-2", "fw-semibold");
-    section.appendChild(title);
-
-    const ul = document.createElement("ul");
-    ul.classList.add("list-group");
-
-    items.forEach((item) => {
-      const li = document.createElement("li");
-      li.classList.add(
-        "list-group-item",
-        "d-flex",
-        "justify-content-between",
-        "align-items-center"
-      );
-
-      li.innerHTML = `
-        <div>
-          <strong>${item.brand}</strong><br />
-          Peso: ${(item.weight * (item.qty || 1)).toFixed(2)}kg<br />
-          Preço: R$${(item.price * (item.qty || 1)).toFixed(2)}
-        </div>
-        <img src="${item.thumb}" alt="${
-        item.brand
-      }" style="width: 60px; height: auto; border-radius: 4px;" />
-      `;
-
-      ul.appendChild(li);
-    });
-
-    section.appendChild(ul);
-    display.appendChild(section);
+  if (!cartData.length) {
+    display.innerHTML = `
+      <div class="alert alert-warning text-center fw-bold fs-5" role="alert">
+        Carrinho vazio!
+      </div>
+    `;
+    return;
   }
+
+  const ul = document.createElement("ul");
+  ul.classList.add("list-group");
+
+  cartData.forEach((item) => {
+    const li = document.createElement("li");
+    li.classList.add(
+      "list-group-item",
+      "d-flex",
+      "justify-content-between",
+      "align-items-center"
+    );
+    li.innerHTML = `
+      <div class="d-flex align-items-center flex-grow-1 flex-row">
+        <div class="border border-2 border-dark me-2 rounded-3 bg-gray" style="width: 100px; height: 100px; display: flex; justify-content: center; align-items: center;">
+          <img src="${item.thumb || ""}" alt="${
+      item.brand || "Produto"
+    }" style="width: 60px; height: auto; border-radius: 4px;" />
+        </div>
+        <div class="ms-2">
+          <strong>${shortString(item.name, 30)}</strong><br />
+          Peso: ${(item.weight * (item.qty || 1)).toFixed(2)}kg<br />
+          Qtde: ${item.qty || 1}<br />
+        </div>
+      </div>
+      <div class="d-flex flex-column align-items-end fs-4 fw-bold">
+        R$${(item.price * (item.qty || 1)).toFixed(2)}
+        <button class="btn btn-sm btn-danger mt-2 remove-item" data-id="${
+          item.id
+        }">Remover</button>
+      </div>
+    `;
+    ul.appendChild(li);
+  });
+
+  display.appendChild(ul);
+
+  // Atualiza os eventos dos botões de remoção
+  setTimeout(() => {
+    document.querySelectorAll(".remove-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        const updatedCart = cartData.filter((item) => item.id != id);
+        setItem("cartData", updatedCart);
+        appendCartData(updatedCart, display, totalAmount);
+      });
+    });
+  }, 0);
 }
 
 export const getTotalOrderAmount = (
@@ -77,6 +86,7 @@ export const getTotalOrderAmount = (
   setItem("cartTotal", cartTotal);
   appendCartTotal(cartTotal, parent);
 };
+
 export const appendCartTotal = (
   { total, quantity, shipping, discount, grandTotal, weight },
   parent
@@ -133,4 +143,3 @@ export const appendCartTotal = (
 
   parent.append(cartDiv1, cartDiv2, cartDiv3, cartDiv4, cartDiv6, cartDiv5);
 };
-

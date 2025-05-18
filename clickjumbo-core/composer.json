@@ -1,0 +1,16 @@
+{
+    "name": "clickjumbo/core",
+    "description": "Plugin principal do ClickJumbo",
+    "type": "wordpress-plugin",
+    "require": {
+      "firebase/php-jwt": "^6.10"
+    },
+    "autoload": {
+      "psr-4": {
+        "ClickJumbo\\": "includes/"
+      }
+    },
+    "minimum-stability": "stable",
+    "license": "MIT"
+  }
+  
