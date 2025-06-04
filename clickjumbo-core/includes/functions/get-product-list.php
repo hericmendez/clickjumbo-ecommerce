@@ -7,21 +7,15 @@ add_action('rest_api_init', function () {
     register_rest_route('clickjumbo/v1', '/product-list', [
         'methods' => 'GET',
         'callback' => 'clickjumbo_listar_produtos_json',
-        'permission_callback' => '__return_true', 
+        'permission_callback' => '__return_true',
 
     ]);
 
-    register_rest_route('clickjumbo/v1', '/prison-list', [
-        'methods' => 'GET',
-        'callback' => 'clickjumbo_listar_penitenciarias',
-        'permission_callback' => '__return_true', 
-
-    ]);
 
     register_rest_route('clickjumbo/v1', '/product-list/prison', [
         'methods' => 'GET',
         'callback' => 'clickjumbo_filtrar_por_penitenciaria',
-        'permission_callback' => '__return_true', 
+        'permission_callback' => '__return_true',
 
     ]);
 });
@@ -103,27 +97,49 @@ function clickjumbo_listar_produtos_json($request)
  */
 function clickjumbo_listar_penitenciarias($request)
 {
+    // 1. Penitenciárias vindas do campo `meta['prison']` (mock)
     $produtos_response = clickjumbo_listar_produtos_json($request);
     if (is_wp_error($produtos_response))
         return $produtos_response;
 
     $produtos = $produtos_response->get_data()['content'];
-    $penis = [];
+    $penis_mock = [];
 
     foreach ($produtos as $produto) {
         $nome = $produto['prison'];
         $slug = sanitize_title($nome);
-        $penis[$slug] = $nome;
+        $penis_mock[$slug] = $nome;
     }
 
-    $lista = array_map(fn($slug) => ['slug' => $slug, 'label' => $penis[$slug]], array_keys($penis));
+    // 2. Penitenciárias reais da taxonomia
+    $penis_tax = [];
+    $terms = get_terms([
+        'taxonomy' => 'penitenciaria',
+        'hide_empty' => false,
+    ]);
+
+    foreach ($terms as $term) {
+        $penis_tax[$term->slug] = $term->name;
+    }
+
+    // 3. Combinar e evitar duplicatas
+    $penitenciarias = array_merge($penis_mock, $penis_tax);
+    $penitenciarias_unicas = [];
+
+    foreach ($penitenciarias as $slug => $nome) {
+        $penitenciarias_unicas[$slug] = [
+            'slug' => $slug,
+            'label' => $nome,
+        ];
+    }
 
     return rest_ensure_response([
         'status' => 200,
         'message' => 'ok',
-        'content' => array_values($lista),
+        'content' => array_values($penitenciarias_unicas),
     ]);
 }
+
 
 /**
  * Retorna produtos filtrados por penitenciária via ?slug=penitenciaria-a

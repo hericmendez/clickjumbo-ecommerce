@@ -26,7 +26,7 @@ add_action('init', function () {
 
 // Carrega arquivos automaticamente
 function clickjumbo_core_load_modules() {
-    $folders = ['validations', 'auth', 'functions'];
+    $folders = ['validations', 'auth', 'functions', 'admin'];
     $base_dir = plugin_dir_path(__FILE__) . 'includes/';
     // Carrega utils antes de tudo
     $utils = $base_dir . 'utils.php';

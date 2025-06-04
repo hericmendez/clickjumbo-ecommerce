@@ -1,0 +1,78 @@
+Front-end/
+    ├── .vscode/
+    │   └── settings.json
+    ├── assets/
+    │   ├── logo.png
+    │   ├── logo_full.png
+    │   ├── logo_transparent.png
+    │   ├── noResult.gif
+    │   └── order-placed.gif
+    ├── cart.html
+    ├── checkout.html
+    ├── components/
+    │   ├── footer.js
+    │   ├── navbar.js
+    │   ├── notify.js
+    │   └── searchImage.js
+    ├── css/
+    │   ├── cart.css
+    │   ├── food.css
+    │   ├── footer.css
+    │   ├── home.css
+    │   ├── loading.css
+    │   ├── login.css
+    │   ├── main.css
+    │   ├── orderPlaced.css
+    │   ├── search.css
+    │   └── signup.css
+    ├── favicon.ico
+    ├── functions/
+    │   ├── appendCartData copy.js
+    │   ├── appendCartData.js
+    │   ├── appendData.js
+    │   ├── clearCart.js
+    │   ├── createOrderSelect.js
+    │   ├── extraFunctions.js
+    │   ├── freteOptions.js
+    │   ├── generateURLImage.js
+    │   ├── getCoupon.js
+    │   ├── handleGetRequest.js
+    │   ├── isLogin.js
+    │   ├── localStorage.js
+    │   ├── paymentModal.js
+    │   ├── shippingForm.js
+    │   ├── showTotal.js
+    │   ├── signupForm.js
+    │   └── updateCartSummaryBar.js
+    ├── generate-tree.js
+    ├── html/
+    |   └── ...
+    ├── index.html
+    ├── login.html
+    ├── mock/
+    │   ├── fetchedData.js
+    │   ├── images/
+    │   │   └── ...
+    │   ├── produtos.csv
+    │   ├── produtos_clickjumbo.csv
+    │   ├── produtos_clickjumbo.js
+    │   └── produtos_mock_clickjumbo.csv
+    ├── notes.txt
+    ├── orderPlaced.html
+    ├── request.html
+    ├── request.js
+    ├── scripts/
+    │   ├── baseUrl.js
+    │   ├── cart.js
+    │   ├── checkout.js
+    │   ├── footer.script.js
+    │   ├── home.js
+    │   ├── loading.script.js
+    │   ├── login.js
+    │   ├── mock.js
+    │   ├── navbar.script.js
+    │   ├── orderPlaced.js
+    │   ├── shop.js
+    │   └── signup.js
+    ├── shop.html
+    └── signup.html

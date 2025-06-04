@@ -4,10 +4,10 @@ import { API_URL } from "./baseUrl.js";
 import { getItem, removeItem } from "../functions/localStorage.js";
 
 const cartData = getItem("cartData") || [];
-const cartValidation = getItem("cartValidated");
 const freteInfo = getItem("freteData");
 const token = getItem("token");
-
+const userData = getItem("userData");
+console.log("userData ==> ", userData);
 const cartItemsContainer = document.getElementById("cart-items");
 const cartCount = document.getElementById("cart-count");
 const cartSummary = document.getElementById("cart-summary");
@@ -86,35 +86,72 @@ function togglePaymentInstructions() {
     .classList.toggle("d-none", method !== "boleto");
 }
 
-async function gerarPagamento(metodo, valor, cpf) {
-  const endpoint = metodo === "pix" ? "generate-pix" : "generate-boleto";
-  const payload =
-    metodo === "pix"
-      ? { valor, txid: `pedido-${Date.now()}` }
-      : { valor, nome: "Cliente", cpf };
-  const res = await fetch(`${API_URL}/${endpoint}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return await res.json();
-}
+async function gerarPagamento(metodo, valor, userData) {
+  if (metodo === "pix") {
+    return {
+      success: true,
+      pix: {
+        codigo: "000201...mocked-pix",
+        qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?data=mocked&size=200x200`,
+      },
+    };
+  }
 
-async function processarPedido(metodo, valorTotal) {
+  if (metodo === "boleto") {
+    const res = await fetch(`${API_URL}/generate-boleto`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user: {
+          nome: userData.nome,
+          email: userData.email,
+        },
+        valor_total: valor,
+      }),
+    });
+    console.log("res.json() ==> ", res);
+    return await res.json();
+  }
+}
+async function processarPedido(metodo, valorTotal, userData) {
   const payload = {
-    cart: cartValidation.itens.map((i) => ({
-      id: i.id,
-      quantidade: i.quantidade,
-    })),
+    user: {
+      name: userData.name,
+      email: userData.email,
+    },
+    cart: {
+      products: cartData.map((item) => ({
+        id: item.id,
+        qty: item.qty,
+      })),
+    },
     shipping: {
-      method: freteInfo.metodo || "PAC",
-      value: freteInfo.valor,
+      prison_name: prisonData.label,
+      cart_weight: cartData.reduce(
+        (acc, curr) => acc + curr.qty * curr.weight,
+        0
+      ),
+      method: freteInfo.metodo,
+      sender_address: {
+        cep: freteInfo.cep_origem,
+        rua: userData.street,
+        cidade: userData.city,
+        estado: userData.state,
+      },
+      frete_valor: freteInfo.valor,
     },
     payment: {
       method: metodo,
-      value: valorTotal,
+      payment_data: {
+        valor_recebido: valorTotal,
+        id_transacao: `TRANS_${Date.now()}`,
+      },
     },
   };
+
   const res = await fetch(`${API_URL}/process-order`, {
     method: "POST",
     headers: {
@@ -123,6 +160,7 @@ async function processarPedido(metodo, valorTotal) {
     },
     body: JSON.stringify(payload),
   });
+
   return await res.json();
 }
 
@@ -130,7 +168,6 @@ submitBtn.addEventListener("click", async () => {
   const paymentMethod = document.querySelector(
     "input[name='paymentMethod']:checked"
   )?.value;
-  const cpf = document.getElementById("cpf")?.value || "";
 
   if (!paymentMethod) {
     alert("Selecione uma forma de pagamento.");
@@ -138,30 +175,45 @@ submitBtn.addEventListener("click", async () => {
   }
 
   try {
-    const valorTotal = cartValidation.total + freteInfo.valor;
-    const pagamento = await gerarPagamento(paymentMethod, valorTotal, cpf);
+    const valorProdutos = cartData.reduce(
+      (acc, item) => acc + item.price * item.qty,
+      0
+    );
+    const valorFrete = freteInfo?.valor || 0;
+    const valorTotal = valorProdutos + valorFrete;
+
+    const pagamento = await gerarPagamento(paymentMethod, valorTotal, userData);
     if (!pagamento.success) {
       alert("Erro ao gerar pagamento.");
       return;
     }
 
     modalBody.innerHTML = "";
+
     if (paymentMethod === "pix") {
       modalBody.innerHTML = `
         <p>Escaneie o QR Code ou copie o código Pix:</p>
-        <img src="${pagamento.qr_code_url}" class="img-fluid" />
+        <img src="${pagamento.pix?.qr_code_url}" class="img-fluid" />
         <div class="input-group mt-3">
-          <input type="text" class="form-control" value="${pagamento.codigo_pix}" readonly />
+          <input type="text" class="form-control" value="${pagamento.pix?.codigo}" readonly />
           <button class="btn btn-outline-secondary" id="copyPix">Copiar</button>
         </div>
       `;
-    } else if (paymentMethod === "boleto") {
+    }
+    if (paymentMethod === "boleto") {
       modalBody.innerHTML = `
-        <p>Boleto gerado com sucesso:</p>
-        <a href="${pagamento.url_boleto}" class="btn btn-primary" target="_blank">Ver Boleto</a>
+        <p>Baixe o PDF ou copie o número do código de barras::</p>
+        <a href="${
+          pagamento.boleto?.pdf_url
+        }" download="clickjumbo_${Date.now()}" rel="noopener noreferrer" target="_blank">Download link</a>
+        <div class="input-group mt-3">
+          <input type="text" class="form-control" value="${
+            pagamento.boleto.linha_digitavel
+          }" readonly />
+          <button class="btn btn-outline-secondary" id="copyPix">Copiar</button>
+        </div>
       `;
     }
-
     modal.show();
 
     confirmBtn.onclick = async () => {
@@ -181,6 +233,7 @@ submitBtn.addEventListener("click", async () => {
     alert("Erro durante o checkout. Tente novamente.");
   }
 });
+
 
 document.addEventListener("change", (e) => {
   if (e.target.name === "paymentMethod") togglePaymentInstructions();

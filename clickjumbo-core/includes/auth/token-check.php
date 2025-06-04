@@ -1,10 +1,12 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if (!defined('ABSPATH'))
+    exit;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 // Rotas públicas
-function clickjumbo_public_routes() {
+function clickjumbo_public_routes()
+{
     return [
         '/clickjumbo/v1/login',
         '/clickjumbo/v1/register',
@@ -12,13 +14,16 @@ function clickjumbo_public_routes() {
         '/clickjumbo/v1/product-list/prison',
         '/clickjumbo/v1/prison-list',
         '/clickjumbo/v1/check-health',
+        '/clickjumbo/v1/products-by-prison-admin',
         '/jwt-auth/v1/token',
+        '/clickjumbo/v1/prison-list-full'
     ];
 }
 
 add_filter('rest_pre_dispatch', 'clickjumbo_check_token', 10, 3);
 
-function clickjumbo_check_token($result, WP_REST_Server $server, WP_REST_Request $request) {
+function clickjumbo_check_token($result, WP_REST_Server $server, WP_REST_Request $request)
+{
     $route = $request->get_route();
 
     // Ignora rotas públicas

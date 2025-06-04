@@ -1,8 +1,6 @@
 body {
-    font-family: 'Source Sans Pro', sans-serif;
-
+  font-family: "Montserrat", sans-serif;
 }
-
 main {
 
     margin-top: 20dvh;
@@ -24,4 +22,11 @@ main {
   input[type="text"] {
     padding: 12px 16px;
     font-size: 1.1rem;
+  }
+
+  .nav-link{
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    
   }

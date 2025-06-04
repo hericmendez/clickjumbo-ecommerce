@@ -30,7 +30,8 @@ add_action('rest_api_init', function () {
 
 function clickjumbo_validate_cart(WP_REST_Request $request) {
     $body = json_decode($request->get_body(), true);
-    $products = $body['products'] ?? [];
+    $products = $body['products'] ?? ($body['cart']['products'] ?? []);
+
     
 
     if (!$products || !is_array($products)) {

@@ -13,10 +13,25 @@ const btnCalcFrete = document.getElementById("btnCalcFrete");
 const btnContinuar = document.getElementById("btnContinuar");
 const freteContainer = document.getElementById("freteContainer");
 const freteCardsContainer = document.getElementById("freteCardsContainer");
+const prisonField = document.getElementById("prisonField");
 
 let cartData = getItem("cartData") || [];
-let freteData = {}; // Armazena o frete atual selecionado
+const prisonData = getItem("prisonData");
 
+// Garante que a penitenciária foi selecionada
+if (!prisonData) {
+  alert("Selecione uma penitenciária.");
+  window.location.href = "index.html";
+}
+
+// Exibe penitenciária no formulário
+if (prisonField) {
+  prisonField.value = prisonData.label;
+}
+
+let freteData = {}; // Armazena o frete selecionado
+
+// Renderiza carrinho
 appendCartData(cartData, display, totalAmount);
 getTotalOrderAmount(cartData, totalAmount);
 appendCartTotal(getItem("cartTotal"), totalAmount);
@@ -44,16 +59,18 @@ btnCalcFrete.addEventListener("click", async () => {
     return;
   }
 
-  // Coleta dados do endereço
   const formData = new FormData(form);
   const address = {
+
     nome: formData.get("name"),
     email: formData.get("email"),
     mobile: formData.get("mobile"),
     street: formData.get("street"),
     city: formData.get("city"),
     state: formData.get("state"),
-    cep: formData.get("cep"),
+    cep_origem: formData.get("cep"),
+    prison_name: prisonData.label,
+    prison_slug: prisonData.slug,
   };
   console.log("address ==> ", address);
   const payload = {
@@ -64,7 +81,7 @@ btnCalcFrete.addEventListener("click", async () => {
   };
 
   try {
-    // Valida carrinho
+    // 🔐 Valida carrinho
     const validateRes = await fetch(
       "http://clickjumbo.local/wp-json/clickjumbo/v1/validate-cart",
       {
@@ -83,7 +100,7 @@ btnCalcFrete.addEventListener("click", async () => {
     }
     setItem("cartValidated", validateJson);
 
-    // Calcula frete
+    // 🚚 Calcula frete
     const freteRes = await fetch(
       "http://clickjumbo.local/wp-json/clickjumbo/v1/calculate-shipping",
       {
@@ -93,8 +110,9 @@ btnCalcFrete.addEventListener("click", async () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          cep_origem: "01001-000",
-          cep_destino: address.cep,
+          cep_origem: address.cep_origem,
+
+          cep_destino: address.prison_slug, // slug
           peso: totalWeight.toFixed(2),
           comprimento: 25,
           largura: 15,
@@ -109,10 +127,11 @@ btnCalcFrete.addEventListener("click", async () => {
       return;
     }
 
-    // Renderiza cards de frete
+    // 💳 Exibe cards de envio
     freteCardsContainer.innerHTML = "";
     Object.entries(freteJson.frete).forEach(([metodo, dados], index) => {
       const id = `frete_${metodo}`;
+
       const wrapper = document.createElement("div");
       wrapper.className = "card p-3 frete-card";
       wrapper.style.cursor = "pointer";
@@ -137,12 +156,12 @@ btnCalcFrete.addEventListener("click", async () => {
         wrapper.classList.add("border-success");
         wrapper.querySelector("input").checked = true;
 
-        // Armazena frete selecionado
+        // Atualiza freteData
         freteData = {
           ...dados,
           metodo,
-          cep_destino: address.cep,
-          cep_origem: "01001-000",
+          cep_destino: prisonData.slug,
+          cep_origem: address,cep_origem,
         };
       });
 
@@ -151,13 +170,14 @@ btnCalcFrete.addEventListener("click", async () => {
         freteData = {
           ...dados,
           metodo,
-          cep_destino: address.cep,
-          cep_origem: "01001-000",
+          cep_destino: prisonData.slug,
+          cep_origem: address.cep_origem,
         };
       }
 
       freteCardsContainer.appendChild(wrapper);
     });
+    setItem("userData", address);
 
     freteContainer.style.display = "block";
     btnContinuar.disabled = false;
@@ -167,7 +187,7 @@ btnCalcFrete.addEventListener("click", async () => {
   }
 });
 
-// Submete o form: envia frete selecionado e endereço
+// Botão de continuar
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 

@@ -1,4 +1,6 @@
-
+body {
+  font-family: "Montserrat", sans-serif;
+}
 
 .spinner-overlay {
     position: fixed;
