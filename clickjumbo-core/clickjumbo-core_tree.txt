@@ -1,14 +1,13 @@
 clickjumbo-core/
     ├── api-test.js
     ├── clickjumbo-core.php
-    ├── clickjumbo-core_tree.txt
     ├── composer.json
     ├── composer.lock
     ├── generate-tree.js
     ├── includes/
     │   ├── admin/
     │   │   ├── prison-panel.php
-    │   │   └── product-panel.php
+    │   │   └── product-create-form.php
     │   ├── auth/
     │   │   ├── login.php
     │   │   ├── register.php
@@ -16,6 +15,7 @@ clickjumbo-core/
     │   ├── functions/
     │   │   ├── calculate-shipping.php
     │   │   ├── check-health.php
+    │   │   ├── delete-prison.php
     │   │   ├── generate-boleto.php
     │   │   ├── generate-pix.php
     │   │   ├── generate-receipt.php
@@ -23,7 +23,8 @@ clickjumbo-core/
     │   │   ├── get-product-list.php
     │   │   ├── process-order.php
     │   │   ├── register-prisons.php
-    │   │   └── register-taxonomies.php
+    │   │   ├── register-taxonomies.php
+    │   │   └── update-prison.php
     │   ├── utils.php
     │   └── validations/
     │       ├── validate-cart.php

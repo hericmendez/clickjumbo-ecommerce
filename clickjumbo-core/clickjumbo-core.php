@@ -23,6 +23,12 @@ add_action('init', function () {
         exit;
     }
 });
+add_action('admin_enqueue_scripts', function () {
+    wp_localize_script('jquery', 'clickjumbo_data', [
+        'nonce' => wp_create_nonce('wp_rest')
+    ]);
+});
+
 
 // Carrega arquivos automaticamente
 function clickjumbo_core_load_modules() {

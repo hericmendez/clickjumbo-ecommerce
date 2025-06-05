@@ -1,7 +1,8 @@
 <?php
 // includes/admin/product-create-form.php
 
-function clickjumbo_render_novo_produto_form() {
+function clickjumbo_render_novo_produto_form()
+{
     if (isset($_POST['cadastrar_produto'])) {
         $nome = sanitize_text_field($_POST['nome']);
         $preco = floatval($_POST['preco']);
@@ -17,8 +18,11 @@ function clickjumbo_render_novo_produto_form() {
             'post_status' => 'publish'
         ]);
 
+
         if (!is_wp_error($post_id)) {
+            wp_set_object_terms($post_id, $prison_slug, 'penitenciaria');
             wp_set_object_terms($post_id, [$cat_id], 'product_cat');
+
             if ($subcat) {
                 $subcat_term = term_exists($subcat, 'product_cat');
                 if (!$subcat_term) {
@@ -34,6 +38,17 @@ function clickjumbo_render_novo_produto_form() {
             update_post_meta($post_id, '_weight', $peso);
             update_post_meta($post_id, 'prison', $prison_slug);
             update_post_meta($post_id, 'maxUnitsPerClient', $max);
+            update_post_meta($post_id, '_visibility', 'visible');
+            update_post_meta($post_id, '_stock_status', 'instock');
+            update_post_meta($post_id, '_manage_stock', 'no');
+
+            wc_update_product_stock_status($post_id, 'instock');
+
+            // Garante que o status seja realmente "publish"
+            wp_update_post([
+                'ID' => $post_id,
+                'post_status' => 'publish'
+            ]);
 
             wp_redirect(admin_url('admin.php?page=clickjumbo-prisons&produto=ok'));
             exit;
@@ -41,6 +56,7 @@ function clickjumbo_render_novo_produto_form() {
             wp_die('Erro ao cadastrar produto.');
         }
     }
+    $penitenciaria_predefinida = isset($_GET['penitenciaria']) ? sanitize_title($_GET['penitenciaria']) : '';
 
     $penitenciarias = get_terms(['taxonomy' => 'penitenciaria', 'hide_empty' => false]);
     $categorias = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false, 'parent' => 0]);
@@ -48,21 +64,35 @@ function clickjumbo_render_novo_produto_form() {
     <div class="wrap">
         <h1 style="margin-bottom: 20px;">Cadastrar novo produto</h1>
         <form method="POST" enctype="multipart/form-data">
-            <table class="form-table" style="max-width: 700px; background: #fff; padding: 20px; border: 1px solid #ccd0d4; border-radius: 6px;">
-                <tr><th><label for="nome">Nome</label></th><td><input name="nome" id="nome" type="text" class="regular-text" required></td></tr>
-                <tr><th><label for="preco">Preço</label></th><td><input name="preco" id="preco" type="number" step="0.01" class="regular-text" required></td></tr>
-                <tr><th><label for="peso">Peso (kg)</label></th><td><input name="peso" id="peso" type="number" step="0.01" class="regular-text" required></td></tr>
-                <tr><th><label for="penitenciaria">Penitenciária</label></th>
+            <table class="form-table"
+                style="max-width: 700px; background: #fff; padding: 20px; border: 1px solid #ccd0d4; border-radius: 6px;">
+                <tr>
+                    <th><label for="nome">Nome</label></th>
+                    <td><input name="nome" id="nome" type="text" class="regular-text" required></td>
+                </tr>
+                <tr>
+                    <th><label for="preco">Preço</label></th>
+                    <td><input name="preco" id="preco" type="number" step="0.01" class="regular-text" required></td>
+                </tr>
+                <tr>
+                    <th><label for="peso">Peso (kg)</label></th>
+                    <td><input name="peso" id="peso" type="number" step="0.01" class="regular-text" required></td>
+                </tr>
+                <tr>
+                    <th><label for="penitenciaria">Penitenciária</label></th>
                     <td>
                         <select name="penitenciaria" id="penitenciaria" class="regular-text" required>
                             <option value="">Selecione...</option>
                             <?php foreach ($penitenciarias as $p): ?>
-                                <option value="<?= esc_attr($p->slug) ?>"><?= esc_html($p->name) ?></option>
+                                <option value="<?= esc_attr($p->slug) ?>" <?= selected($penitenciaria_predefinida, $p->slug, false) ?>>
+                                    <?= esc_html($p->name) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </td>
                 </tr>
-                <tr><th><label for="categoria">Categoria</label></th>
+                <tr>
+                    <th><label for="categoria">Categoria</label></th>
                     <td>
                         <select name="categoria" id="categoria" class="regular-text" required>
                             <option value="">Selecione...</option>
@@ -72,9 +102,19 @@ function clickjumbo_render_novo_produto_form() {
                         </select>
                     </td>
                 </tr>
-                <tr><th><label for="subcategoria">Subcategoria</label></th><td><input name="subcategoria" id="subcategoria" type="text" class="regular-text"></td></tr>
-                <tr><th><label for="maxUnitsPerClient">Limite por cliente</label></th><td><input name="maxUnitsPerClient" id="maxUnitsPerClient" type="number" value="1" class="regular-text"></td></tr>
-                <tr><th><label for="imagem">Imagem (mock)</label></th><td><input name="imagem" id="imagem" type="file" disabled></td></tr>
+                <tr>
+                    <th><label for="subcategoria">Subcategoria</label></th>
+                    <td><input name="subcategoria" id="subcategoria" type="text" class="regular-text"></td>
+                </tr>
+                <tr>
+                    <th><label for="maxUnitsPerClient">Limite por cliente</label></th>
+                    <td><input name="maxUnitsPerClient" id="maxUnitsPerClient" type="number" value="1" class="regular-text">
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="imagem">Imagem (mock)</label></th>
+                    <td><input name="imagem" id="imagem" type="file" disabled></td>
+                </tr>
             </table>
             <p style="margin-top: 15px;">
                 <button class="button button-primary" type="submit" name="cadastrar_produto">Cadastrar Produto</button>

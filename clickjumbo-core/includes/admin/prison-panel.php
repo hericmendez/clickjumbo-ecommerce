@@ -130,6 +130,12 @@ function clickjumbo_render_prison_panel()
             display: block;
         }
     </style>
+    <?php wp_nonce_field('wp_rest'); ?>
+    <script>
+        window.clickjumbo_data = window.clickjumbo_data || {};
+        window.clickjumbo_data.nonce = "<?php echo wp_create_nonce('wp_rest'); ?>";
+    </script>
+
 
     <script>
         const $ = document.querySelector.bind(document);
@@ -182,8 +188,8 @@ function clickjumbo_render_prison_panel()
                         <div class="dropdown-content">
                             <a href="#" onclick="verProdutos('${p.slug}')">Ver Produtos</a>
                             <a href="/wp-admin/admin.php?page=clickjumbo-novo-produto&penitenciaria=${p.slug}">Novo Produto</a>
-                            <a href="#" onclick="editarPrison('${p.slug}')">Editar</a>
-                            <a href="#" onclick="excluirPrison('${p.slug}')">Excluir</a>
+                            <a href="#" onclick="editPrison('${p.slug}')">Editar</a>
+                            <a href="#" onclick="deletePrison('${p.slug}')">Excluir</a>
                         </div>
                     </div>
                 </td>
@@ -237,11 +243,22 @@ function clickjumbo_render_prison_panel()
             location.href = `/wp-admin/post-new.php?post_type=product&penitenciaria=${slug}`;
         }
 
-        async function editarPrison(slug) {
+        async function editPrison(slug) {
             const res = await fetch(`/wp-json/clickjumbo/v1/prison-details/${slug}`, {
-                credentials: 'include'
+                credentials: 'include',
+                headers: {
+                    'X-WP-Nonce': clickjumbo_data.nonce
+                }
             });
+
+            if (!res.ok) {
+                const error = await res.json();
+                alert("Erro: " + (error.message || "Não foi possível carregar os dados"));
+                return;
+            }
+
             const { content } = await res.json();
+
             $("#nome").value = content.nome;
             $("#cidade").value = content.cidade;
             $("#estado").value = content.estado;
@@ -253,9 +270,13 @@ function clickjumbo_render_prison_panel()
             painelForm.style.display = 'block';
         }
 
-        async function excluirPrison(slug) {
+        async function deletePrison(slug) {
             if (!confirm("Tem certeza que deseja excluir esta penitenciária?")) return;
-            await fetch(`/wp-json/clickjumbo/v1/delete-prison/${slug}`, { method: 'DELETE', credentials: 'include' });
+            await fetch(`/wp-json/clickjumbo/v1/delete-prison/${slug}`, {
+                method: 'DELETE', credentials: 'include', headers: {
+                    'X-WP-Nonce': clickjumbo_data.nonce
+                }
+            });
             msg.innerHTML = `<p style="color:green;">Penitenciária excluída com sucesso!</p>`;
             modoEdicao = null;
             painelForm.style.display = 'none';
@@ -278,10 +299,17 @@ function clickjumbo_render_prison_panel()
             const method = modoEdicao ? 'PUT' : 'POST';
             try {
                 const res = await fetch(url, {
+       
                     method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dados), credentials: 'include'
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': clickjumbo_data.nonce
+                    },
+                    body: JSON.stringify(dados),
+                    credentials: 'include'
                 });
+         console.log("res ==> ", res);
+
                 const data = await res.json();
                 if (data.success) {
                     msg.innerHTML = `<p style="color:green;">${data.message || 'Sucesso!'}</p>`;
@@ -297,6 +325,7 @@ function clickjumbo_render_prison_panel()
 
 
     </script>
+
 
     <?php
 
