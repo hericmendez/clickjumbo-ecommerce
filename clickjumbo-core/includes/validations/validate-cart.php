@@ -1,7 +1,7 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-require_once __DIR__ . '/../functions/get-product-list.php'; // para consultar os produtos reais
+require_once __DIR__ . '/../functions/products/get-product-list.php'; // para consultar os produtos reais
 
 function get_all_products_flat() {
     $response = clickjumbo_listar_produtos_json(null);
@@ -29,18 +29,22 @@ add_action('rest_api_init', function () {
 });
 
 function clickjumbo_validate_cart(WP_REST_Request $request) {
-    $body = json_decode($request->get_body(), true);
-    $products = $body['products'] ?? ($body['cart']['products'] ?? []);
+$body = $request->get_body_params(); // ← usa os dados realmente enviados via set_body_params()
 
-    
+$raw_cart = $body['cart'] ?? null;
 
-    if (!$products || !is_array($products)) {
-        return new WP_REST_Response([
-            'success' => false,
-            'message' => 'Carrinho inválido.',
-            'errors' => ['Estrutura do carrinho ausente ou malformada.']
-        ], 400);
-    }
+if (is_array($raw_cart) && isset($raw_cart[0]['id'])) {
+    $products = $raw_cart;
+} else {
+    return new WP_REST_Response([
+        'success' => false,
+        'message' => 'Carrinho inválido.',
+        'errors' => ['Estrutura do carrinho ausente ou malformada.', $request],
+        'received_cart' => $raw_cart
+    ], 400);
+}
+
+
 
     $valid_products = get_all_products_flat();
     $total_weight = 0;

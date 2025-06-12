@@ -1,1 +1,54 @@
 senha melhor envio: BZ6dFZmZd6n97Qj
+
+
+{
+    "id": 165,
+    "status": "pending",
+    "penitenciaria": "cadeia-001", //aqui deveria ter os dados completos da penitenciária
+    /*
+    Exemplo:
+    "penitenciaria":{
+        "nome": 'cadeia-001',
+        "slug": 'Cadeia 001',
+        "cidade": "Matão",
+        "cep": "15991-534"
+        //...outros dados
+    }
+    */
+    "cliente": {
+        "nome": "Héric Mendes",
+        "email": "heric.mendez00@gmail.com",
+        "endereco": ", " //aqui deveria ser um objeto, não uma string
+    },
+    "produtos": [ //lista de produtos está vindo vazia
+         {
+            "id": 101,
+            "name": "Enlace Dupla Face",
+            "category": "Higiene",
+            "subcategory": "Esponja de Banho",
+            "prison": "Penitenciária A",
+            "weight": 0.050,
+            "price": 5.30,
+            "maxUnitsPerClient": 1,
+            "thumb": "mock/images/enlace_dupla_face.png"
+        },
+        {
+            "id": 103,
+            "name": "Colgate",
+            "category": "Higiene",
+            "subcategory": "Escova de Dente",
+            "prison": "Penitenciária A",
+            "weight": 0.08,
+            "maxUnitsPerClient": 1,
+            "thumb": "mock/images/colgate.png"
+        },
+    ],
+    "pesoTotal": 0.00 //incluir
+    "valorTotal": "0.00", //está vindo zerado
+    "pagamento": {
+        "metodo": "pix",
+        "status": "pending",
+        "invoice_url": ""
+    },
+    "data": "2025-06-10 12:31:32" //converter para DD/MM/YYYY no painel
+}

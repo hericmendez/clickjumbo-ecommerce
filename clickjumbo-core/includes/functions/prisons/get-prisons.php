@@ -172,3 +172,39 @@ function clickjumbo_prison_detail_by_slug($request) {
         'message' => 'Penitenciária não encontrada.',
     ], 404);
 }
+
+function clickjumbo_get_prison_name_by_slug($slug) {
+    $slug = sanitize_title($slug);
+
+    // Busca na taxonomia
+    $term = get_term_by('slug', $slug, 'penitenciaria');
+
+    if ($term && !is_wp_error($term)) {
+        return $term->name;
+        
+    }
+
+    // Busca no mock
+    $produtos_response = clickjumbo_listar_produtos_json(new WP_REST_Request('GET', '', ['slug' => $slug]));
+    if (!is_wp_error($produtos_response)) {
+        $produtos = $produtos_response->get_data()['content'];
+        foreach ($produtos as $produto) {
+            if (sanitize_title($produto['prison'] ?? '') === $slug) {
+                return $produto['prison'];
+            }
+        }
+    }
+
+    return 'desconhecida';
+}
+
+function clickjumbo_get_prison_data_by_slug($slug) {
+    $res = wp_remote_get(home_url('/wp-json/clickjumbo/v1/prison-list-full'));
+    if (is_wp_error($res)) return null;
+
+    $items = json_decode(wp_remote_retrieve_body($res), true)['content'] ?? [];
+    foreach ($items as $p) {
+        if ($p['slug'] === $slug) return $p;
+    }
+    return null;
+}

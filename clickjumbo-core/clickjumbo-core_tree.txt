@@ -1,408 +1,57 @@
 clickjumbo-core/
-    ├── api-test.js
+    ├── clickjumbo-core copy.txt
     ├── clickjumbo-core.php
+    ├── clickjumbo-core_tree.txt
+    ├── clickjumbo_extra_features.zip
     ├── composer.json
     ├── composer.lock
     ├── generate-tree.js
     ├── includes/
     │   ├── admin/
+    │   │   ├── menu-admin.php
+    │   │   ├── orders-panel.php
     │   │   ├── prison-panel.php
-    │   │   └── product-create-form.php
+    │   │   ├── product-create-form.php
+    │   │   ├── product-import-form.php
+    │   │   └── products-panel.php
     │   ├── auth/
     │   │   ├── login.php
     │   │   ├── register.php
     │   │   └── token-check.php
     │   ├── functions/
-    │   │   ├── calculate-shipping.php
+    │   │   ├── orders/
+    │   │   │   ├── calculate-shipping.php
+    │   │   │   ├── change-order-status.php
+    │   │   │   ├── delete-order.php
+    │   │   │   ├── export-orders.php
+    │   │   │   ├── generate-boleto.php
+    │   │   │   ├── generate-pix.php
+    │   │   │   ├── generate-receipt.php
+    │   │   │   ├── get-orders.php
+    │   │   │   └── process-order.php
+    │   │   ├── prisons/
+    │   │   │   ├── delete-prison.php
+    │   │   │   ├── get-prisons.php
+    │   │   │   ├── register-prisons.php
+    │   │   │   └── update-prison.php
+    │   │   └── products/
+    │   │       ├── delete-product.php
+    │   │       ├── get-product-list.php
+    │   │       ├── import-export-products.php
+    │   │       ├── register-product.php
+    │   │       ├── register-taxonomies.php
+    │   │       └── update-product.php
+    │   ├── utils/
     │   │   ├── check-health.php
-    │   │   ├── delete-prison.php
-    │   │   ├── generate-boleto.php
-    │   │   ├── generate-pix.php
-    │   │   ├── generate-receipt.php
-    │   │   ├── get-prisons.php
-    │   │   ├── get-product-list.php
-    │   │   ├── process-order.php
-    │   │   ├── register-prisons.php
-    │   │   ├── register-taxonomies.php
-    │   │   └── update-prison.php
+    │   │   ├── formatting.js
+    │   │   └── orders-health.php
     │   ├── utils.php
     │   └── validations/
     │       ├── validate-cart.php
     │       ├── validate-payment.php
     │       ├── validate-prison.php
+    │       ├── validate-product.php
     │       └── validate-shipping.php
-    ├── libs/
-    │   └── dompdf/
-    │       ├── AUTHORS.md
-    │       ├── LICENSE.LGPL
-    │       ├── README.md
-    │       ├── VERSION
-    │       ├── autoload.inc.php
-    │       └── vendor/
-    │           ├── autoload.php
-    │           ├── composer/
-    │           │   ├── ClassLoader.php
-    │           │   ├── InstalledVersions.php
-    │           │   ├── LICENSE
-    │           │   ├── autoload_classmap.php
-    │           │   ├── autoload_namespaces.php
-    │           │   ├── autoload_psr4.php
-    │           │   ├── autoload_real.php
-    │           │   ├── autoload_static.php
-    │           │   ├── installed.json
-    │           │   ├── installed.php
-    │           │   └── platform_check.php
-    │           ├── dompdf/
-    │           │   ├── dompdf/
-    │           │   │   ├── AUTHORS.md
-    │           │   │   ├── LICENSE.LGPL
-    │           │   │   ├── README.md
-    │           │   │   ├── VERSION
-    │           │   │   ├── composer.json
-    │           │   │   ├── lib/
-    │           │   │   │   ├── Cpdf.php
-    │           │   │   │   ├── fonts/
-    │           │   │   │   │   ├── Courier-Bold.afm
-    │           │   │   │   │   ├── Courier-BoldOblique.afm
-    │           │   │   │   │   ├── Courier-Oblique.afm
-    │           │   │   │   │   ├── Courier.afm
-    │           │   │   │   │   ├── DejaVuSans-Bold.ttf
-    │           │   │   │   │   ├── DejaVuSans-Bold.ufm
-    │           │   │   │   │   ├── DejaVuSans-BoldOblique.ttf
-    │           │   │   │   │   ├── DejaVuSans-BoldOblique.ufm
-    │           │   │   │   │   ├── DejaVuSans-Oblique.ttf
-    │           │   │   │   │   ├── DejaVuSans-Oblique.ufm
-    │           │   │   │   │   ├── DejaVuSans.ttf
-    │           │   │   │   │   ├── DejaVuSans.ufm
-    │           │   │   │   │   ├── DejaVuSansMono-Bold.ttf
-    │           │   │   │   │   ├── DejaVuSansMono-Bold.ufm
-    │           │   │   │   │   ├── DejaVuSansMono-BoldOblique.ttf
-    │           │   │   │   │   ├── DejaVuSansMono-BoldOblique.ufm
-    │           │   │   │   │   ├── DejaVuSansMono-Oblique.ttf
-    │           │   │   │   │   ├── DejaVuSansMono-Oblique.ufm
-    │           │   │   │   │   ├── DejaVuSansMono.ttf
-    │           │   │   │   │   ├── DejaVuSansMono.ufm
-    │           │   │   │   │   ├── DejaVuSerif-Bold.ttf
-    │           │   │   │   │   ├── DejaVuSerif-Bold.ufm
-    │           │   │   │   │   ├── DejaVuSerif-BoldItalic.ttf
-    │           │   │   │   │   ├── DejaVuSerif-BoldItalic.ufm
-    │           │   │   │   │   ├── DejaVuSerif-Italic.ttf
-    │           │   │   │   │   ├── DejaVuSerif-Italic.ufm
-    │           │   │   │   │   ├── DejaVuSerif.ttf
-    │           │   │   │   │   ├── DejaVuSerif.ufm
-    │           │   │   │   │   ├── Helvetica-Bold.afm
-    │           │   │   │   │   ├── Helvetica-BoldOblique.afm
-    │           │   │   │   │   ├── Helvetica-Oblique.afm
-    │           │   │   │   │   ├── Helvetica.afm
-    │           │   │   │   │   ├── Symbol.afm
-    │           │   │   │   │   ├── Times-Bold.afm
-    │           │   │   │   │   ├── Times-Bold.afm.json
-    │           │   │   │   │   ├── Times-BoldItalic.afm
-    │           │   │   │   │   ├── Times-Italic.afm
-    │           │   │   │   │   ├── Times-Roman.afm
-    │           │   │   │   │   ├── Times-Roman.afm.json
-    │           │   │   │   │   ├── ZapfDingbats.afm
-    │           │   │   │   │   ├── installed-fonts.dist.json
-    │           │   │   │   │   └── mustRead.html
-    │           │   │   │   └── res/
-    │           │   │   │       ├── broken_image.png
-    │           │   │   │       ├── broken_image.svg
-    │           │   │   │       ├── html.css
-    │           │   │   │       ├── sRGB2014.icc
-    │           │   │   │       └── sRGB2014.icc.LICENSE
-    │           │   │   ├── phpunit.xml
-    │           │   │   └── src/
-    │           │   │       ├── Adapter/
-    │           │   │       │   ├── CPDF.php
-    │           │   │       │   ├── GD.php
-    │           │   │       │   └── PDFLib.php
-    │           │   │       ├── Canvas.php
-    │           │   │       ├── CanvasFactory.php
-    │           │   │       ├── Cellmap.php
-    │           │   │       ├── Css/
-    │           │   │       │   ├── AttributeTranslator.php
-    │           │   │       │   ├── Color.php
-    │           │   │       │   ├── Content/
-    │           │   │       │   │   ├── Attr.php
-    │           │   │       │   │   ├── CloseQuote.php
-    │           │   │       │   │   ├── ContentPart.php
-    │           │   │       │   │   ├── Counter.php
-    │           │   │       │   │   ├── Counters.php
-    │           │   │       │   │   ├── NoCloseQuote.php
-    │           │   │       │   │   ├── NoOpenQuote.php
-    │           │   │       │   │   ├── OpenQuote.php
-    │           │   │       │   │   ├── StringPart.php
-    │           │   │       │   │   └── Url.php
-    │           │   │       │   ├── Style.php
-    │           │   │       │   └── Stylesheet.php
-    │           │   │       ├── Dompdf.php
-    │           │   │       ├── Exception/
-    │           │   │       │   └── ImageException.php
-    │           │   │       ├── Exception.php
-    │           │   │       ├── FontMetrics.php
-    │           │   │       ├── Frame/
-    │           │   │       │   ├── Factory.php
-    │           │   │       │   ├── FrameListIterator.php
-    │           │   │       │   ├── FrameTree.php
-    │           │   │       │   └── FrameTreeIterator.php
-    │           │   │       ├── Frame.php
-    │           │   │       ├── FrameDecorator/
-    │           │   │       │   ├── AbstractFrameDecorator.php
-    │           │   │       │   ├── Block.php
-    │           │   │       │   ├── Image.php
-    │           │   │       │   ├── Inline.php
-    │           │   │       │   ├── ListBullet.php
-    │           │   │       │   ├── ListBulletImage.php
-    │           │   │       │   ├── NullFrameDecorator.php
-    │           │   │       │   ├── Page.php
-    │           │   │       │   ├── Table.php
-    │           │   │       │   ├── TableCell.php
-    │           │   │       │   ├── TableRow.php
-    │           │   │       │   ├── TableRowGroup.php
-    │           │   │       │   └── Text.php
-    │           │   │       ├── FrameReflower/
-    │           │   │       │   ├── AbstractFrameReflower.php
-    │           │   │       │   ├── Block.php
-    │           │   │       │   ├── Image.php
-    │           │   │       │   ├── Inline.php
-    │           │   │       │   ├── ListBullet.php
-    │           │   │       │   ├── NullFrameReflower.php
-    │           │   │       │   ├── Page.php
-    │           │   │       │   ├── Table.php
-    │           │   │       │   ├── TableCell.php
-    │           │   │       │   ├── TableRow.php
-    │           │   │       │   ├── TableRowGroup.php
-    │           │   │       │   └── Text.php
-    │           │   │       ├── Helpers.php
-    │           │   │       ├── Image/
-    │           │   │       │   └── Cache.php
-    │           │   │       ├── JavascriptEmbedder.php
-    │           │   │       ├── LineBox.php
-    │           │   │       ├── Options.php
-    │           │   │       ├── PhpEvaluator.php
-    │           │   │       ├── Positioner/
-    │           │   │       │   ├── Absolute.php
-    │           │   │       │   ├── AbstractPositioner.php
-    │           │   │       │   ├── Block.php
-    │           │   │       │   ├── Fixed.php
-    │           │   │       │   ├── Inline.php
-    │           │   │       │   ├── ListBullet.php
-    │           │   │       │   ├── NullPositioner.php
-    │           │   │       │   ├── TableCell.php
-    │           │   │       │   └── TableRow.php
-    │           │   │       ├── Renderer/
-    │           │   │       │   ├── AbstractRenderer.php
-    │           │   │       │   ├── Block.php
-    │           │   │       │   ├── Image.php
-    │           │   │       │   ├── Inline.php
-    │           │   │       │   ├── ListBullet.php
-    │           │   │       │   ├── TableCell.php
-    │           │   │       │   ├── TableRow.php
-    │           │   │       │   ├── TableRowGroup.php
-    │           │   │       │   └── Text.php
-    │           │   │       └── Renderer.php
-    │           │   ├── php-font-lib/
-    │           │   │   ├── AUTHORS.md
-    │           │   │   ├── LICENSE
-    │           │   │   ├── README.md
-    │           │   │   ├── composer.json
-    │           │   │   ├── maps/
-    │           │   │   │   ├── adobe-standard-encoding.map
-    │           │   │   │   ├── cp1250.map
-    │           │   │   │   ├── cp1251.map
-    │           │   │   │   ├── cp1252.map
-    │           │   │   │   ├── cp1253.map
-    │           │   │   │   ├── cp1254.map
-    │           │   │   │   ├── cp1255.map
-    │           │   │   │   ├── cp1257.map
-    │           │   │   │   ├── cp1258.map
-    │           │   │   │   ├── cp874.map
-    │           │   │   │   ├── iso-8859-1.map
-    │           │   │   │   ├── iso-8859-11.map
-    │           │   │   │   ├── iso-8859-15.map
-    │           │   │   │   ├── iso-8859-16.map
-    │           │   │   │   ├── iso-8859-2.map
-    │           │   │   │   ├── iso-8859-4.map
-    │           │   │   │   ├── iso-8859-5.map
-    │           │   │   │   ├── iso-8859-7.map
-    │           │   │   │   ├── iso-8859-9.map
-    │           │   │   │   ├── koi8-r.map
-    │           │   │   │   └── koi8-u.map
-    │           │   │   └── src/
-    │           │   │       └── FontLib/
-    │           │   │           ├── AdobeFontMetrics.php
-    │           │   │           ├── BinaryStream.php
-    │           │   │           ├── EOT/
-    │           │   │           │   ├── File.php
-    │           │   │           │   └── Header.php
-    │           │   │           ├── EncodingMap.php
-    │           │   │           ├── Exception/
-    │           │   │           │   └── FontNotFoundException.php
-    │           │   │           ├── Font.php
-    │           │   │           ├── Glyph/
-    │           │   │           │   ├── Outline.php
-    │           │   │           │   ├── OutlineComponent.php
-    │           │   │           │   ├── OutlineComposite.php
-    │           │   │           │   └── OutlineSimple.php
-    │           │   │           ├── Header.php
-    │           │   │           ├── OpenType/
-    │           │   │           │   ├── File.php
-    │           │   │           │   └── TableDirectoryEntry.php
-    │           │   │           ├── Table/
-    │           │   │           │   ├── DirectoryEntry.php
-    │           │   │           │   ├── Table.php
-    │           │   │           │   └── Type/
-    │           │   │           │       ├── cmap.php
-    │           │   │           │       ├── cvt.php
-    │           │   │           │       ├── fpgm.php
-    │           │   │           │       ├── glyf.php
-    │           │   │           │       ├── head.php
-    │           │   │           │       ├── hhea.php
-    │           │   │           │       ├── hmtx.php
-    │           │   │           │       ├── kern.php
-    │           │   │           │       ├── loca.php
-    │           │   │           │       ├── maxp.php
-    │           │   │           │       ├── name.php
-    │           │   │           │       ├── nameRecord.php
-    │           │   │           │       ├── os2.php
-    │           │   │           │       ├── post.php
-    │           │   │           │       └── prep.php
-    │           │   │           ├── TrueType/
-    │           │   │           │   ├── Collection.php
-    │           │   │           │   ├── File.php
-    │           │   │           │   ├── Header.php
-    │           │   │           │   └── TableDirectoryEntry.php
-    │           │   │           └── WOFF/
-    │           │   │               ├── File.php
-    │           │   │               ├── Header.php
-    │           │   │               └── TableDirectoryEntry.php
-    │           │   └── php-svg-lib/
-    │           │       ├── AUTHORS.md
-    │           │       ├── LICENSE
-    │           │       ├── README.md
-    │           │       ├── composer.json
-    │           │       └── src/
-    │           │           └── Svg/
-    │           │               ├── CssLength.php
-    │           │               ├── DefaultStyle.php
-    │           │               ├── Document.php
-    │           │               ├── Gradient/
-    │           │               │   └── Stop.php
-    │           │               ├── Style.php
-    │           │               ├── Surface/
-    │           │               │   ├── CPdf.php
-    │           │               │   ├── SurfaceCpdf.php
-    │           │               │   ├── SurfaceInterface.php
-    │           │               │   └── SurfacePDFLib.php
-    │           │               └── Tag/
-    │           │                   ├── AbstractTag.php
-    │           │                   ├── Anchor.php
-    │           │                   ├── Circle.php
-    │           │                   ├── ClipPath.php
-    │           │                   ├── Ellipse.php
-    │           │                   ├── Group.php
-    │           │                   ├── Image.php
-    │           │                   ├── Line.php
-    │           │                   ├── LinearGradient.php
-    │           │                   ├── Path.php
-    │           │                   ├── Polygon.php
-    │           │                   ├── Polyline.php
-    │           │                   ├── RadialGradient.php
-    │           │                   ├── Rect.php
-    │           │                   ├── Shape.php
-    │           │                   ├── Stop.php
-    │           │                   ├── StyleTag.php
-    │           │                   ├── Symbol.php
-    │           │                   ├── Text.php
-    │           │                   └── UseTag.php
-    │           ├── masterminds/
-    │           │   └── html5/
-    │           │       ├── CREDITS
-    │           │       ├── LICENSE.txt
-    │           │       ├── README.md
-    │           │       ├── RELEASE.md
-    │           │       ├── UPGRADING.md
-    │           │       ├── bin/
-    │           │       │   └── entities.php
-    │           │       ├── composer.json
-    │           │       └── src/
-    │           │           ├── HTML5/
-    │           │           │   ├── Elements.php
-    │           │           │   ├── Entities.php
-    │           │           │   ├── Exception.php
-    │           │           │   ├── InstructionProcessor.php
-    │           │           │   ├── Parser/
-    │           │           │   │   ├── CharacterReference.php
-    │           │           │   │   ├── DOMTreeBuilder.php
-    │           │           │   │   ├── EventHandler.php
-    │           │           │   │   ├── FileInputStream.php
-    │           │           │   │   ├── InputStream.php
-    │           │           │   │   ├── ParseError.php
-    │           │           │   │   ├── README.md
-    │           │           │   │   ├── Scanner.php
-    │           │           │   │   ├── StringInputStream.php
-    │           │           │   │   ├── Tokenizer.php
-    │           │           │   │   ├── TreeBuildingRules.php
-    │           │           │   │   └── UTF8Utils.php
-    │           │           │   └── Serializer/
-    │           │           │       ├── HTML5Entities.php
-    │           │           │       ├── OutputRules.php
-    │           │           │       ├── README.md
-    │           │           │       ├── RulesInterface.php
-    │           │           │       └── Traverser.php
-    │           │           └── HTML5.php
-    │           └── sabberworm/
-    │               └── php-css-parser/
-    │                   ├── CHANGELOG.md
-    │                   ├── LICENSE
-    │                   ├── README.md
-    │                   ├── composer.json
-    │                   └── src/
-    │                       ├── CSSList/
-    │                       │   ├── AtRuleBlockList.php
-    │                       │   ├── CSSBlockList.php
-    │                       │   ├── CSSList.php
-    │                       │   ├── Document.php
-    │                       │   └── KeyFrame.php
-    │                       ├── Comment/
-    │                       │   ├── Comment.php
-    │                       │   └── Commentable.php
-    │                       ├── OutputFormat.php
-    │                       ├── OutputFormatter.php
-    │                       ├── Parser.php
-    │                       ├── Parsing/
-    │                       │   ├── Anchor.php
-    │                       │   ├── OutputException.php
-    │                       │   ├── ParserState.php
-    │                       │   ├── SourceException.php
-    │                       │   ├── UnexpectedEOFException.php
-    │                       │   └── UnexpectedTokenException.php
-    │                       ├── Property/
-    │                       │   ├── AtRule.php
-    │                       │   ├── CSSNamespace.php
-    │                       │   ├── Charset.php
-    │                       │   ├── Import.php
-    │                       │   ├── KeyframeSelector.php
-    │                       │   └── Selector.php
-    │                       ├── Renderable.php
-    │                       ├── Rule/
-    │                       │   └── Rule.php
-    │                       ├── RuleSet/
-    │                       │   ├── AtRuleSet.php
-    │                       │   ├── DeclarationBlock.php
-    │                       │   └── RuleSet.php
-    │                       ├── Settings.php
-    │                       └── Value/
-    │                           ├── CSSFunction.php
-    │                           ├── CSSString.php
-    │                           ├── CalcFunction.php
-    │                           ├── CalcRuleValueList.php
-    │                           ├── Color.php
-    │                           ├── LineName.php
-    │                           ├── PrimitiveValue.php
-    │                           ├── RuleValueList.php
-    │                           ├── Size.php
-    │                           ├── URL.php
-    │                           ├── Value.php
-    │                           └── ValueList.php
-    └── notes.txt
+    ├── notes.txt
+    ├── tempCodeRunnerFile.js
+    └── teste.csv

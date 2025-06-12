@@ -26,7 +26,7 @@ function clickjumbo_validate_shipping(WP_REST_Request $request) {
     }
 
     $required_fields = [
-        'prison_name',
+        'prison_slug',
         'cart_weight',
         'method',
         'sender_address',

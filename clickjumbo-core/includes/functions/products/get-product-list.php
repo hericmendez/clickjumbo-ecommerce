@@ -18,6 +18,13 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true',
 
     ]);
+
+    register_rest_route('clickjumbo/v1', '/product-details/(?P<id>\d+)', [
+        'methods' => 'GET',
+        'callback' => 'clickjumbo_get_product_details',
+        'permission_callback' => '__return_true'
+    ]);
+
 });
 
 /**
@@ -167,4 +174,69 @@ function clickjumbo_filtrar_por_penitenciaria($request)
         'message' => 'ok',
         'content' => array_values($filtrados),
     ]);
+}
+
+
+
+function clickjumbo_get_product_details($data)
+{
+    $id = (int) $data['id'];
+    $post = get_post($id);
+
+    if (!$post || $post->post_type !== 'product') {
+        return new WP_REST_Response(['message' => 'Produto não encontrado'], 404);
+    }
+
+    $price = get_post_meta($id, '_price', true);
+    $weight = get_post_meta($id, '_weight', true);
+    $max = get_post_meta($id, 'maxUnitsPerClient', true);
+    $sku = get_post_meta($id, '_sku', true);
+
+    $cats = wp_get_post_terms($id, 'product_cat');
+    $categoria = $cats[0]->name ?? null;
+    $subcategoria = $cats[1]->name ?? null;
+
+    return [
+        'success' => true,
+        'content' => [
+            'name' => $post->post_title,
+            'price' => $price,
+            'weight' => $weight,
+            'sku' => $sku,
+            'maxUnitsPerClient' => $max,
+            'categoria' => $categoria,
+            'subcategoria' => $subcategoria
+        ]
+    ];
+}
+
+function clickjumbo_get_product_by_id($id)
+{
+    $post = get_post((int) $id);
+
+    if (!$post || $post->post_type !== 'product') {
+        return null;
+    }
+
+    $price = get_post_meta($id, '_price', true);
+    $weight = get_post_meta($id, '_weight', true);
+    $max = get_post_meta($id, 'maxUnitsPerClient', true);
+    $sku = get_post_meta($id, '_sku', true);
+
+    $cats = wp_get_post_terms($id, 'product_cat');
+    $categoria = $cats[0]->name ?? null;
+    $subcategoria = $cats[1]->name ?? null;
+
+    return [
+        'id' => $id,
+        'name' => $post->post_title,
+        'price' => floatval($price),
+        'weight' => floatval($weight),
+        'sku' => $sku,
+        'maxUnitsPerClient' => intval($max),
+        'category' => $categoria,
+        'subcategory' => $subcategoria,
+        'thumb' => get_post_meta($id, 'thumb', true), // se existir
+        'prison' => get_post_meta($id, 'prison', true),
+    ];
 }

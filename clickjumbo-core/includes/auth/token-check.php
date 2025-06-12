@@ -7,22 +7,37 @@ use Firebase\JWT\Key;
 // Rotas públicas
 function clickjumbo_public_routes()
 {
+    $routes = [
+        'login',
+        'register',
+        'check-health',
+        'product-list',
+        'product-list/prison',
+        'prison-list',
+        'prison-list-full',
+        'products-by-prison-admin',
+        'product-details/(?P<id>\d+)',
+        'prison-details/.+',
+        'delete-product/\d+',
+        'register-prison',
+        'update-prison/.+',
+        'delete-prison/.+',
+        'export-products',
+        'orders',
+        'orders/.+',
+              'orders/\d+',
+        'orders/\d+/cancel',
+        'orders/\d+/status',
+        'delete-order',
+    ];
+
     return [
-        '#^/clickjumbo/v1/login$#',
-        '#^/clickjumbo/v1/register$#',
-        '#^/clickjumbo/v1/product-list$#',
-        '#^/clickjumbo/v1/product-list/prison$#',
-        '#^/clickjumbo/v1/prison-list$#',
-        '#^/clickjumbo/v1/check-health$#',
-        '#^/clickjumbo/v1/products-by-prison-admin$#',
+        '#^/clickjumbo/v1/(' . implode('|', $routes) . ')$#',
         '#^/jwt-auth/v1/token$#',
-        '#^/clickjumbo/v1/prison-list-full$#',
-        '#^/clickjumbo/v1/prison-details/(?P<slug>[a-zA-Z0-9-_]+)$#',
-        '#^/clickjumbo/v1/delete-prison/(?P<slug>[a-zA-Z0-9-]+)$#',
-        '#^/clickjumbo/v1/update-prison/(?P<slug>[a-zA-Z0-9-]+)$#',
-        '#^/clickjumbo/v1/register-prison$#',
     ];
 }
+
+
 
 add_filter('rest_pre_dispatch', 'clickjumbo_check_token', 10, 3);
 

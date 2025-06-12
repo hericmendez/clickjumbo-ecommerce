@@ -1,8 +1,8 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-require_once __DIR__ . '/../utils.php'; // para usar sendEmail()
-require_once __DIR__ . '/../../libs/dompdf/autoload.inc.php'; // para gerar PDF
+require_once __DIR__ . '/../../utils.php'; // para usar sendEmail()
+require_once __DIR__ . '/../../../libs/dompdf/autoload.inc.php'; // para gerar PDF
 
 
 add_action('rest_api_init', function () {
