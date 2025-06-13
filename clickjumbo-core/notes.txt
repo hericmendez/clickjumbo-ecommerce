@@ -2,7 +2,7 @@ senha melhor envio: BZ6dFZmZd6n97Qj
 
 
 {
-    "id": 165,
+    "id": 166,
     "status": "pending",
     "penitenciaria": "cadeia-001", //aqui deveria ter os dados completos da penitenciária
     /*
@@ -18,7 +18,7 @@ senha melhor envio: BZ6dFZmZd6n97Qj
     "cliente": {
         "nome": "Héric Mendes",
         "email": "heric.mendez00@gmail.com",
-        "endereco": ", " //aqui deveria ser um objeto, não uma string
+        "endereco": ", " //Manter como string para consulta rápida, endereço já está em 'shipping'
     },
     "produtos": [ //lista de produtos está vindo vazia
          {
@@ -43,6 +43,18 @@ senha melhor envio: BZ6dFZmZd6n97Qj
             "thumb": "mock/images/colgate.png"
         },
     ],
+      "shipping": { //incluir objeto
+    "prison_slug": "cadeia-001",
+    "cart_weight": 3.0,
+    "method": "PAC",
+    "sender_address": {
+      "cep": "15991-534",
+      "rua": "Rua Exemplo",
+      "cidade": "São Paulo",
+      "estado": "SP"
+    },
+    "frete_valor": 25.00
+  },
     "pesoTotal": 0.00 //incluir
     "valorTotal": "0.00", //está vindo zerado
     "pagamento": {

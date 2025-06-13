@@ -74,4 +74,14 @@ add_submenu_page(
         'clickjumbo-orders',
         'clickjumbo_render_orders_panel'
     );
+
+    add_submenu_page(
+    'clickjumbo-dashboard',
+    'Usuários',
+    'Usuários',
+    'manage_options',
+    'clickjumbo-users',
+    'clickjumbo_render_users_panel'
+);
+
 });

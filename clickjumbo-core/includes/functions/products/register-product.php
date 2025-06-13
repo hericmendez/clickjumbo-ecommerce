@@ -3,7 +3,9 @@ add_action('rest_api_init', function () {
     register_rest_route('clickjumbo/v1', '/register-product', [
         'methods' => 'POST',
         'callback' => 'clickjumbo_register_product',
-        'permission_callback' => "__return_true",
+        'permission_callback' => function () {
+            return current_user_can('edit_products');
+        }
     ]);
 });
 

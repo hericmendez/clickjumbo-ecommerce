@@ -77,7 +77,7 @@ function clickjumbo_handle_process_order($request)
     // 🔄 Recalcular produtos com detalhes
     $produtos_completos = [];
     $pesoTotal = 0;
-    $valorProdutos = 0;
+    $valorCarrinho = 0;
 
     foreach ($cart as $item) {
         $product_id = $item['id'] ?? null;
@@ -93,7 +93,7 @@ function clickjumbo_handle_process_order($request)
             $produto['subtotal'] = round($produto['price'] * $qty, 2);
 
             $pesoTotal += $produto['weight'] * $qty;
-            $valorProdutos += $produto['subtotal'];
+            $valorCarrinho += $produto['subtotal'];
 
             $produtos_completos[] = $produto;
 
@@ -101,7 +101,7 @@ function clickjumbo_handle_process_order($request)
     }
 
     $valorFrete = floatval($shipping['frete_valor'] ?? 0);
-    $valorTotal = $valorProdutos + $valorFrete;
+    $valorTotal = $valorCarrinho + $valorFrete;
 
     // 🔍 Buscar penitenciária
     $slug = sanitize_title($shipping['prison_slug'] ?? '');
@@ -133,6 +133,17 @@ function clickjumbo_handle_process_order($request)
     $order->set_billing_email($user['email']);
     $order->set_payment_method($method);
     $order->set_status($payment_response['status'] === 'confirmed' ? 'processing' : 'pending');
+    if (isset($user['id'])) {
+        $order->update_meta_data('user_id', intval($user['id']));
+    }
+
+
+    if (!empty($user['id'])) {
+        $order->update_meta_data('user_id', intval($user['id']));
+    }
+    if (!empty($user['email'])) {
+        $order->update_meta_data('user_email', sanitize_email($user['email']));
+    }
 
     // Metadados
     $order->update_meta_data('penitenciaria', $penitenciaria_obj);
@@ -147,6 +158,20 @@ function clickjumbo_handle_process_order($request)
     error_log('Produtos completos: ' . print_r($produtos_completos, true));
     error_log('Valor Total: ' . $valorTotal);
     error_log(print_r($penitenciaria_obj, true));
+    // Formatando produtos
+    foreach ($produtos_completos as &$produto) {
+        $produto['price'] = number_format($produto['price'], 2, '.', '');
+        $produto['weight'] = number_format($produto['weight'], 3, '.', '');
+        $produto['subtotal'] = number_format($produto['subtotal'], 2, '.', '');
+    }
+
+    // Totais formatados
+    $valorCarrinho = number_format($valorCarrinho, 2, ',', '');
+    $valorFrete = number_format($valorFrete, 2, ',', '');
+    $valorTotal = number_format($valorTotal, 2, ',', '');
+    $pesoTotal = number_format($pesoTotal, 3, ',', '');
+
+
     return new WP_REST_Response([
         'success' => true,
         'message' => 'Pedido processado com sucesso',
@@ -154,29 +179,27 @@ function clickjumbo_handle_process_order($request)
         'data' => [
             'id' => $order->get_id(),
             'status' => $order->get_status(),
-            'penitenciaria' => $penitenciaria_obj ?? ['slug' => $slug],
-
+            'penitenciaria' => $penitenciaria_obj,
             'cliente' => [
                 'nome' => $user['name'],
                 'email' => $user['email'],
-                'endereco' => implode(', ', array_filter([
-                    $shipping['sender_address']['rua'] ?? '',
-                    $shipping['sender_address']['cidade'] ?? '',
-                    $shipping['sender_address']['estado'] ?? '',
-                    'CEP: ' . ($shipping['sender_address']['cep'] ?? '')
-                ])),
-
+                'endereco' => $shipping['sender_address'] ?? '',
             ],
             'produtos' => $produtos_completos,
+
             'shipping' => $shipping,
-            'pesoTotal' => round($pesoTotal, 3),
-            'valorTotal' => round($valorTotal, 2),
+            'pesoTotal' => $pesoTotal,
+            'valorCarrinho' => $valorCarrinho,
+
+            'valorFrete' => $valorFrete,
+            'valorTotal' => $valorTotal,
             'pagamento' => [
                 'metodo' => $method,
                 'status' => $payment_response['status'] ?? null,
                 'invoice_url' => $payment_response['qrcode_url'] ?? '',
             ],
-            'data' => current_time('Y-m-d H:i:s'),
+            'data' => current_time('d-m-Y H:i:s'),
         ],
     ]);
+
 }

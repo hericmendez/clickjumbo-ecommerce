@@ -58,7 +58,7 @@ function clickjumbo_core_load_modules()
     }
 
     // Carrega funções agrupadas por categoria (exceto admin)
-    $function_categories = ['prisons', 'orders', 'products', 'utils'];
+    $function_categories = ['prisons', 'orders', 'products', 'utils', 'users']; //faltou inccluir users
     foreach ($function_categories as $category) {
         $category_path = $base_dir . "functions/$category/";
         if (is_dir($category_path)) {

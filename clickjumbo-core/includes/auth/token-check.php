@@ -25,10 +25,11 @@ function clickjumbo_public_routes()
         'export-products',
         'orders',
         'orders/.+',
-              'orders/\d+',
+        'orders/\d+',
         'orders/\d+/cancel',
         'orders/\d+/status',
         'delete-order',
+        '/users'
     ];
 
     return [

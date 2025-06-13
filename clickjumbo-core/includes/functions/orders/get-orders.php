@@ -3,8 +3,11 @@ if (!defined('ABSPATH'))
     exit;
 
 // GET /orders → Lista de pedidos
+
 function clickjumbo_get_orders($request)
 {
+    $user_id = $request->get_param('user_id');
+
     $args = [
         'status' => ['pending', 'processing', 'completed'],
         'limit' => -1,
@@ -12,18 +15,31 @@ function clickjumbo_get_orders($request)
         'order' => 'DESC',
         'type' => 'shop_order',
         'return' => 'objects',
-'post_status' => ['wc-pending', 'wc-processing', 'wc-completed']
+        'post_status' => ['wc-pending', 'wc-processing', 'wc-completed'],
+        'meta_query' => $user_id ? [[
+            'key' => 'user_id',
+            'value' => intval($user_id),
+            'compare' => '=',
+            'type' => 'NUMERIC',
+        ]] : [],
     ];
 
-
     $orders = wc_get_orders($args);
+
+    if (empty($orders)) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Nenhum pedido encontrado para este usuário.'
+        ], 404);
+    }
 
     $result = [];
 
     foreach ($orders as $order) {
         if (get_post_status($order->get_id()) === false) {
-            continue; // ignora pedido já deletado
+            continue;
         }
+
         $result[] = [
             'id' => $order->get_id(),
             'cliente' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
@@ -62,6 +78,8 @@ function clickjumbo_get_order_details($request)
         ];
     }
 
+    $shipping = $order->get_meta('shipping');
+
     return rest_ensure_response([
         'id' => $order->get_id(),
         'status' => $order->get_status(),
@@ -72,15 +90,17 @@ function clickjumbo_get_order_details($request)
             'endereco' => $order->get_billing_address_1() . ', ' . $order->get_billing_city(),
         ],
         'produtos' => $produtos,
+        'shipping' => $shipping,
         'total' => wc_format_decimal($order->get_total(), 2),
         'pagamento' => [
             'metodo' => $order->get_payment_method(),
             'status' => $order->get_status(),
             'comprovante_url' => $order->get_meta('comprovante_url'),
         ],
-        'data' => $order->get_date_created()->date('Y-m-d H:i:s'),
+        'data' => $order->get_date_created()->date('d-m-Y H:i:s'),
     ]);
 }
+
 
 
 // REGISTRO DAS ROTAS
