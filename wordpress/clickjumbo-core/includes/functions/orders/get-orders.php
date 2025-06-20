@@ -6,8 +6,6 @@ if (!defined('ABSPATH'))
 
 function clickjumbo_get_orders($request)
 {
-    $user_id = $request->get_param('user_id');
-
     $args = [
         'status' => ['pending', 'processing', 'completed'],
         'limit' => -1,
@@ -18,38 +16,22 @@ function clickjumbo_get_orders($request)
         'post_status' => ['wc-pending', 'wc-processing', 'wc-completed'],
     ];
 
-    if ($user_id) {
-        $args['customer_id'] = intval($user_id); // ← usa o relacionamento nativo do WooCommerce
-    }
-
-
     $orders = wc_get_orders($args);
-
     if (empty($orders)) {
-        return new WP_REST_Response([
-            'success' => false,
-            'message' => 'Nenhum pedido encontrado para este usuário.'
-        ], 404);
+        return new WP_REST_Response(['success' => false, 'message' => 'Nenhum pedido encontrado.'], 404);
     }
 
-    $result = [];
-
-    foreach ($orders as $order) {
-        if (get_post_status($order->get_id()) === false) {
-            continue;
-        }
-
-        $result[] = [
+    $result = array_map(function ($order) {
+        return [
             'id' => $order->get_id(),
             'cliente' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
-            'user_id' => $order->get_meta('user_id'), // 👈 adiciona aqui
+            'user_id' => $order->get_meta('user_id'),
             'penitenciaria' => $order->get_meta('penitenciaria'),
             'status' => $order->get_status(),
             'total' => $order->get_total(),
             'data' => $order->get_date_created()->date('Y-m-d H:i:s'),
         ];
-
-    }
+    }, $orders);
 
     return rest_ensure_response($result);
 }
@@ -106,6 +88,43 @@ function clickjumbo_get_order_details($request)
     ]);
 }
 
+function clickjumbo_get_orders_by_user($request)
+{
+    $user_id = intval($request->get_param('user_id'));
+    if (!$user_id) {
+        return new WP_REST_Response(['success' => false, 'message' => 'Parâmetro user_id é obrigatório.'], 400);
+    }
+
+    $args = [
+        'customer_id' => $user_id,
+        'status' => ['pending', 'processing', 'completed'],
+        'limit' => -1,
+        'orderby' => 'date',
+        'order' => 'DESC',
+        'type' => 'shop_order',
+        'return' => 'objects',
+        'post_status' => ['wc-pending', 'wc-processing', 'wc-completed'],
+    ];
+
+    $orders = wc_get_orders($args);
+    if (empty($orders)) {
+        return new WP_REST_Response(['success' => false, 'message' => 'Nenhum pedido encontrado para este usuário.'], 404);
+    }
+
+    $result = array_map(function ($order) {
+        return [
+            'id' => $order->get_id(),
+            'cliente' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+            'user_id' => $order->get_meta('user_id'),
+            'penitenciaria' => $order->get_meta('penitenciaria'),
+            'status' => $order->get_status(),
+            'total' => $order->get_total(),
+            'data' => $order->get_date_created()->date('Y-m-d H:i:s'),
+        ];
+    }, $orders);
+
+    return rest_ensure_response($result);
+}
 
 
 // REGISTRO DAS ROTAS
@@ -119,6 +138,12 @@ add_action('rest_api_init', function () {
     register_rest_route('clickjumbo/v1', '/orders/(?P<id>\d+)', [
         'methods' => 'GET',
         'callback' => 'clickjumbo_get_order_details',
+        'permission_callback' => '__return_true',
+    ]);
+
+    register_rest_route('clickjumbo/v1', '/orders/by-user', [
+        'methods' => 'GET',
+        'callback' => 'clickjumbo_get_orders_by_user',
         'permission_callback' => '__return_true',
     ]);
 });
