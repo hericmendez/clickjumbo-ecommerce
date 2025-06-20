@@ -16,13 +16,12 @@ function clickjumbo_get_orders($request)
         'type' => 'shop_order',
         'return' => 'objects',
         'post_status' => ['wc-pending', 'wc-processing', 'wc-completed'],
-        'meta_query' => $user_id ? [[
-            'key' => 'user_id',
-            'value' => intval($user_id),
-            'compare' => '=',
-            'type' => 'NUMERIC',
-        ]] : [],
     ];
+
+    if ($user_id) {
+        $args['customer_id'] = intval($user_id); // ← usa o relacionamento nativo do WooCommerce
+    }
+
 
     $orders = wc_get_orders($args);
 
@@ -43,11 +42,13 @@ function clickjumbo_get_orders($request)
         $result[] = [
             'id' => $order->get_id(),
             'cliente' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+            'user_id' => $order->get_meta('user_id'), // 👈 adiciona aqui
             'penitenciaria' => $order->get_meta('penitenciaria'),
             'status' => $order->get_status(),
             'total' => $order->get_total(),
             'data' => $order->get_date_created()->date('Y-m-d H:i:s'),
         ];
+
     }
 
     return rest_ensure_response($result);
@@ -58,6 +59,10 @@ function clickjumbo_get_order_details($request)
 {
     $id = absint($request['id']);
     $order = wc_get_order($id);
+    $order_post = get_post($order ? $order->get_id() : 0);
+    error_log('post_author: ' . ($order_post->post_author ?? 'não encontrado'));
+
+    error_log('post_author: ' . $order_post->post_author); // deve ser 1
 
     // Se o pedido não existe ou foi deletado (status false ou trash)
     $status = get_post_status($id);

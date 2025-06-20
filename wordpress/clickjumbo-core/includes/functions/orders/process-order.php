@@ -137,12 +137,17 @@ function clickjumbo_handle_process_order($request)
         $order->update_meta_data('user_id', intval($user['id']));
     }
 
-
     if (!empty($user['id'])) {
-        $order->update_meta_data('user_id', intval($user['id']));
+        $order->set_customer_id(intval($user['id'])); // ← Associa corretamente ao autor
+        $order->update_meta_data('user_id', intval($user['id'])); // ← Mantém como metadado para debug ou filtro extra
     }
+
     if (!empty($user['email'])) {
         $order->update_meta_data('user_email', sanitize_email($user['email']));
+    }
+    if (!empty($user['id'])) {
+        $order->set_customer_id(intval($user['id'])); // ⚠️ Essencial
+        $order->update_meta_data('user_id', intval($user['id']));
     }
 
     // Metadados
@@ -155,6 +160,8 @@ function clickjumbo_handle_process_order($request)
 
     $order->calculate_totals();
     $order->save();
+    error_log('Customer ID no pedido: ' . $order->get_customer_id());
+
     error_log('Produtos completos: ' . print_r($produtos_completos, true));
     error_log('Valor Total: ' . $valorTotal);
     error_log(print_r($penitenciaria_obj, true));

@@ -127,13 +127,15 @@ if (empty($sku)) {
                             value="<?= esc_attr($dados_produto['nome']) ?>" required></td>
                 </tr>
                 <tr>
-                    <th><label for="preco">Preço</label></th>
-                    <td><input name="preco" id="preco" type="number" step="0.01" class="regular-text"
-                            value="<?= esc_attr($dados_produto['preco']) ?>" required></td>
+                    <th><label for="preco">Preço (R$)</label></th>
+                    <td>
+                        <input name="preco" id="preco" type="number" step="0.01" min="0.01" class="regular-text" required
+                            value="<?= esc_attr($dados_produto['preco']) ?>" required>
+                        </td>
                 </tr>
                 <tr>
                     <th><label for="peso">Peso (kg)</label></th>
-                    <td><input name="peso" id="peso" type="number" step="0.01" class="regular-text"
+                    <td><input name="peso" id="peso" type="number" step="0.01" min="0.01"class="regular-text"
                             value="<?= esc_attr($dados_produto['peso']) ?>" required></td>
                 </tr>
                 <tr>
@@ -169,8 +171,8 @@ if (empty($sku)) {
                 </tr>
                 <tr>
                     <th><label for="maxUnitsPerClient">Limite por cliente</label></th>
-                    <td><input name="maxUnitsPerClient" id="maxUnitsPerClient" type="number"
-                            value="<?= esc_attr($dados_produto['max']) ?>" class="regular-text"></td>
+                    <td><input name="maxUnitsPerClient" min="1" id="maxUnitsPerClient" type="number"
+                            value="<?= esc_attr($dados_produto['max']) ?>" class="regular-text" required></td>
                 </tr>
                 <tr>
     <th><label for="sku">SKU (deixe em branco para gerar automático)</label></th>
@@ -179,7 +181,7 @@ if (empty($sku)) {
 
                 <tr>
                     <th><label for="imagem">Imagem (mock)</label></th>
-                    <td><input name="imagem" id="imagem" type="file" disabled></td>
+                    <td><input name="imagem" id="imagem" type="file" ></td>
                 </tr>
             </table>
 
