@@ -64,13 +64,18 @@ function clickjumbo_listar_produtos_json($request)
             }
 
             if (!empty($caminhos)) {
-                $mais_profundo = $caminhos[0];
-                $categoria_principal = $mais_profundo[0]->name ?? 'Sem Categoria';
-                $subcategoria = end($mais_profundo)->name ?? 'Sem Subcategoria';
+                $caminho = $caminhos[0]; // Primeiro caminho encontrado
+                $categoria_raiz = reset($caminho);       // Sempre o mais acima
+                $categoria_folha = end($caminho);        // Sempre o mais abaixo
+
+                $categoria_principal = $categoria_raiz->name ?? 'Sem Categoria';
+                $subcategoria = $categoria_folha->name ?? 'Sem Subcategoria';
+
                 if ($categoria_principal === $subcategoria) {
                     $subcategoria = 'Sem Subcategoria';
                 }
             }
+
 
             $penitenciaria = get_post_meta($produto->get_id(), 'prison', true) ?: 'Penitenciária A';
             $max_units = get_post_meta($produto->get_id(), 'maxUnitsPerClient', true) ?: 1;
@@ -110,27 +115,27 @@ function clickjumbo_listar_penitenciarias($request)
         return $produtos_response;
 
     $produtos = $produtos_response->get_data()['content'];
-    $penis_mock = [];
+    $prison_mock = [];
 
     foreach ($produtos as $produto) {
         $nome = $produto['prison'];
         $slug = sanitize_title($nome);
-        $penis_mock[$slug] = $nome;
+        $prison_mock[$slug] = $nome;
     }
 
     // 2. Penitenciárias reais da taxonomia
-    $penis_tax = [];
+    $prison_tax = [];
     $terms = get_terms([
         'taxonomy' => 'penitenciaria',
         'hide_empty' => false,
     ]);
 
     foreach ($terms as $term) {
-        $penis_tax[$term->slug] = $term->name;
+        $prison_tax[$term->slug] = $term->name;
     }
 
     // 3. Combinar e evitar duplicatas
-    $penitenciarias = array_merge($penis_mock, $penis_tax);
+    $penitenciarias = array_merge($prison_mock, $prison_tax);
     $penitenciarias_unicas = [];
 
     foreach ($penitenciarias as $slug => $nome) {

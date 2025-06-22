@@ -24,9 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Remove tudo que não for número
         let val = e.target.value.replace(/\D/g, '').slice(0, 8);
         // Aplica a máscara 11111-111
-        if (val.length > 5) {
-            val = val.replace(/^(\d{5})(\d{1,3})/, "$1-$2");
-        }
+   
         e.target.value = val;
     });
 
@@ -126,8 +124,9 @@ async function verProdutos(slug) {
         (prod) => `
             <tr id="produto-${prod.id}">
                 <td>${prod.name}</td>
-                <td>${prod.price || "—"}</td>
-                <td>${prod.category || "—"}</td>
+                <td>${prod.category || "—"}/${prod.subcategory}</td>
+                <td>R$ ${prod.price.toFixed(2).replace('.',',') || "—"}</td>
+                <td>${`${prod.weight.toFixed(2).replace('.',',')}kg` || "—"}</td>
                 <td>
                     <div class="dropdown">
                         <button class="button">&#x22EE;</button>
@@ -184,6 +183,7 @@ async function verDetalhesProduto(id) {
         `;
 
     modal.style.display = "block";
+    overlay.style.zIndex=99
     overlay.style.display = "block";
   } catch (err) {
     conteudo.innerHTML = `<p style="color:red;">Erro ao carregar os dados.</p>`;

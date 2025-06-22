@@ -14,6 +14,13 @@ const btnContinuar = document.getElementById("btnContinuar");
 const freteContainer = document.getElementById("freteContainer");
 const freteCardsContainer = document.getElementById("freteCardsContainer");
 const prisonField = document.getElementById("prisonField");
+function showSpinner() {
+  document.getElementById("loadingSpinner").style.display = "flex";
+}
+
+function hideSpinner() {
+  document.getElementById("loadingSpinner").style.display = "none";
+}
 
 let cartData = getItem("cartData") || [];
 const prisonData = getItem("prisonData");
@@ -38,16 +45,18 @@ appendCartTotal(getItem("cartTotal"), totalAmount);
 
 // Botão: Calcular Frete
 btnCalcFrete.addEventListener("click", async () => {
+  showSpinner(); // Mostra o spinner
+
   const token = getItem("token");
   if (!token) {
     alert("Faça login para continuar.");
     window.location.href = "login.html";
-    return;
+    return hideSpinner();
   }
 
   if (!cartData.length) {
     alert("Carrinho vazio.");
-    return;
+    return hideSpinner();
   }
 
   const totalWeight = cartData.reduce(
@@ -56,12 +65,11 @@ btnCalcFrete.addEventListener("click", async () => {
   );
   if (totalWeight > 12) {
     alert(`Peso total (${totalWeight.toFixed(2)}kg) excede o limite de 12kg.`);
-    return;
+    return hideSpinner();
   }
 
   const formData = new FormData(form);
   const address = {
-
     nome: formData.get("name"),
     email: formData.get("email"),
     mobile: formData.get("mobile"),
@@ -72,9 +80,9 @@ btnCalcFrete.addEventListener("click", async () => {
     prison_name: prisonData.label,
     prison_slug: prisonData.slug,
   };
-  console.log("address ==> ", address);
+
   const payload = {
-    products: cartData.map((item) => ({
+    cart: cartData.map((item) => ({
       id: item.id,
       qty: item.qty || 1,
     })),
@@ -94,37 +102,39 @@ btnCalcFrete.addEventListener("click", async () => {
       }
     );
     const validateJson = await validateRes.json();
-    if (!validateJson.success) {
-      alert("Erro ao validar carrinho.");
-      return;
-    }
     setItem("cartValidated", validateJson);
+  } catch (error) {
+    alert("Erro ao validar carrinho:", error);
+    return hideSpinner();
+  }
 
+  try {
     // 🚚 Calcula frete
-    const freteRes = await fetch(
-      "http://clickjumbo.local/wp-json/clickjumbo/v1/calculate-shipping",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          cep_origem: address.cep_origem,
-
-          cep_destino: address.prison_slug, // slug
-          peso: totalWeight.toFixed(2),
-          comprimento: 25,
-          largura: 15,
-          altura: 10,
-        }),
-      }
+    const res = await fetch(
+      `http://clickjumbo.local/wp-json/clickjumbo/v1/prison-details/${prisonData.slug}`
     );
+    const prison = await res.json();
+
+    const freteRes = await fetch("/wp-json/clickjumbo/v1/calculate-shipping", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        cep_origem: address.cep_origem,
+        cep_destino: prison.cep,
+        peso: Number(totalWeight.toFixed(2)),
+        comprimento: 25,
+        largura: 15,
+        altura: 10,
+      }),
+    });
 
     const freteJson = await freteRes.json();
     if (!freteJson.success || !freteJson.frete) {
       alert("Erro ao calcular frete.");
-      return;
+      return hideSpinner();
     }
 
     // 💳 Exibe cards de envio
@@ -156,12 +166,11 @@ btnCalcFrete.addEventListener("click", async () => {
         wrapper.classList.add("border-success");
         wrapper.querySelector("input").checked = true;
 
-        // Atualiza freteData
         freteData = {
           ...dados,
           metodo,
           cep_destino: prisonData.slug,
-          cep_origem: address,cep_origem,
+          cep_origem: address.cep_origem,
         };
       });
 
@@ -177,15 +186,18 @@ btnCalcFrete.addEventListener("click", async () => {
 
       freteCardsContainer.appendChild(wrapper);
     });
-    setItem("userData", address);
 
+    setItem("userData", address);
     freteContainer.style.display = "block";
     btnContinuar.disabled = false;
   } catch (err) {
     console.error("Erro ao calcular frete:", err);
     alert("Erro inesperado. Tente novamente.");
+  } finally {
+    hideSpinner(); // Garante que o spinner desaparece sempre
   }
 });
+
 
 // Botão de continuar
 form.addEventListener("submit", (e) => {

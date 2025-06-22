@@ -10,8 +10,8 @@ require_once dirname(__DIR__) . '/orders/generate-receipt.php';
 require_once dirname(__DIR__) . '/../validations/validate-cart.php';
 require_once dirname(__DIR__) . '/../validations/validate-shipping.php';
 require_once dirname(__DIR__) . '/../validations/validate-payment.php';
+require_once dirname(__DIR__) . '/../admin/shipments-panel.php'; // ← necessário para acessar clickjumbo_store_shipping_meta
 
-// REGISTRA ENDPOINT
 add_action('rest_api_init', function () {
     register_rest_route('clickjumbo/v1', '/process-order', [
         'methods' => 'POST',
@@ -20,11 +20,10 @@ add_action('rest_api_init', function () {
     ]);
 });
 
-// FUNÇÃO PRINCIPAL
 function clickjumbo_handle_process_order($request)
 {
     $data = $request->get_json_params();
-    $cart = $data['cart']['products'] ?? null;
+    $cart = $data['cart'] ?? null;
     $shipping = $data['shipping'] ?? null;
     $payment = $data['payment'] ?? null;
     $user_id = intval($data['user_id'] ?? 0);
@@ -34,17 +33,14 @@ function clickjumbo_handle_process_order($request)
     }
 
     $wp_user = get_userdata($user_id);
-    error_log('USER_ID: ' . $user_id);
-    error_log('USER DATA: ' . print_r($wp_user, true));
-
-
     if (!$wp_user) {
         return new WP_REST_Response(['error' => 'ID de usuário inválido ou inexistente'], 401);
     }
 
     // ✅ Validação do carrinho
     $req_cart = new WP_REST_Request('POST', '/clickjumbo/v1/validate-cart');
-    $req_cart->set_body_params(['cart' => $cart]);
+$req_cart->set_body_params(['cart' => $cart]);
+
     $cart_validation = clickjumbo_validate_cart($req_cart);
     if (is_wp_error($cart_validation) || !($cart_validation->get_data()['success'] ?? false)) {
         return new WP_REST_Response(['error' => 'Carrinho inválido', 'debug' => $cart_validation->get_data()], 400);
@@ -84,8 +80,7 @@ function clickjumbo_handle_process_order($request)
     foreach ($cart as $item) {
         $product_id = $item['id'] ?? null;
         $qty = $item['qty'] ?? 1;
-        if (!$product_id)
-            continue;
+        if (!$product_id) continue;
         $produto = clickjumbo_get_product_by_id($product_id);
         if ($produto) {
             $produto['qty'] = $qty;
@@ -129,7 +124,15 @@ function clickjumbo_handle_process_order($request)
     $order->calculate_totals();
     $order->save();
 
-    // Formatando produtos e totais
+    // ✅ Salva os dados de envio para exibição no painel
+    clickjumbo_store_shipping_meta(
+        $order->get_id(),
+        ['valor' => $valorFrete],
+        $slug,
+        $shipping['metodo'] ?? 'PAC'
+    );
+
+    // Formatando para retorno
     foreach ($produtos_completos as &$produto) {
         $produto['price'] = number_format($produto['price'], 2, '.', '');
         $produto['weight'] = number_format($produto['weight'], 3, '.', '');

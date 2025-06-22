@@ -30,27 +30,27 @@ function clickjumbo_prison_list_names($request)
         return $produtos_response;
 
     $produtos = $produtos_response->get_data()['content'];
-    $penis_mock = [];
+    $prison_mock = [];
 
     foreach ($produtos as $produto) {
         $nome = $produto['prison'];
         $slug = sanitize_title($nome);
-        $penis_mock[$slug] = $nome;
+        $prison_mock[$slug] = $nome;
     }
 
     // 2. Penitenciárias reais da taxonomia
-    $penis_tax = [];
+    $prison_tax = [];
     $terms = get_terms([
         'taxonomy' => 'penitenciaria',
         'hide_empty' => false,
     ]);
 
     foreach ($terms as $term) {
-        $penis_tax[$term->slug] = $term->name;
+        $prison_tax[$term->slug] = $term->name;
     }
 
     // 3. Combinar e evitar duplicatas
-    $penitenciarias = array_merge($penis_mock, $penis_tax);
+    $penitenciarias = array_merge($prison_mock, $prison_tax);
     $penitenciarias_unicas = [];
 
     foreach ($penitenciarias as $slug => $nome) {

@@ -7,6 +7,8 @@ require_once __DIR__ . '/partials/prison-products.php';
 require_once __DIR__ . '/partials/prison-styles.php';
 require_once __DIR__ . '/partials/prison-nonce.php';
 require_once __DIR__ . '/partials/prison-styles.php';
+
+
 function clickjumbo_render_prison_panel()
 {
     render_prison_panel_header();

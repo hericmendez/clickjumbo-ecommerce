@@ -7,8 +7,9 @@ function render_products_panel()
             <thead>
                 <tr>
                     <th>Produto</th>
+                    <th>Categoria/subcategoria</th>
                     <th>Preço</th>
-                    <th>Categoria</th>
+                   <th>Peso</th>
                     <th>Ações</th>
                 </tr>
             </thead>

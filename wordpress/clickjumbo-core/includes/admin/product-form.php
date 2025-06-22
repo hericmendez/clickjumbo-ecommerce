@@ -3,20 +3,32 @@
 require_once __DIR__ . '/partials/product-form-handler.php';
 require_once __DIR__ . '/partials/product-form-table.php';
 
+
 function clickjumbo_render_novo_produto_form()
+
+
 {
+
+
+    
     $editando = isset($_GET['editar_produto']);
     $produto_id = $editando ? intval($_GET['editar_produto']) : null;
     $dados_produto = clickjumbo_get_dados_produto($produto_id);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_produto'])) {
         $erro = clickjumbo_handle_product_form($_POST, $produto_id);
-        if (!$erro) return;
+        if (!$erro)
+            return;
         echo '<div class="notice notice-error"><p>' . esc_html($erro) . '</p></div>';
     }
 
     $penitenciarias = get_terms(['taxonomy' => 'penitenciaria', 'hide_empty' => false]);
-    $categorias = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false, 'parent' => 0]);
+    $categorias = get_terms([
+        'taxonomy' => 'product_cat',
+        'hide_empty' => false
+    ]);
+
+
 
     echo '<div class="wrap">';
     echo '<h1 style="margin-bottom: 20px;">' . ($editando ? 'Editar Produto' : 'Cadastrar novo produto') . '</h1>';

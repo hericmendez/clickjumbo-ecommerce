@@ -29,23 +29,30 @@ function clickjumbo_render_product_form_table($dados, $penitenciarias, $categori
                 </select>
             </td>
         </tr>
-        <tr>
-            <th><label for="categoria">Categoria</label></th>
-            <td>
-                <select name="categoria" id="categoria" class="regular-text" required>
-                    <option value="">Selecione...</option>
-                    <?php foreach ($categorias as $c): ?>
-                        <option value="<?= esc_attr($c->term_id) ?>" <?= selected($dados['categoria'], $c->term_id, false) ?>>
-                            <?= esc_html($c->name) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="subcategoria">Subcategoria</label></th>
-            <td><input name="subcategoria" id="subcategoria" type="text" class="regular-text" value="<?= esc_attr($dados['subcategoria']) ?>"></td>
-        </tr>
+<!-- Categoria -->
+<tr>
+    <th><label for="categoria">Categoria</label></th>
+    <td>
+        <select name="categoria" id="categoria" required>
+            <option value="">Selecione uma categoria...</option>
+            <?php foreach ($categorias as $cat): ?>
+                <option value="<?= esc_attr($cat->term_id) ?>"
+                    <?= selected($dados['categoria_id'], $cat->term_id, false) ?>>
+                    <?= esc_html($cat->name) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </td>
+</tr>
+
+<!-- Subcategoria (campo livre) -->
+<tr>
+    <th><label for="subcategoria">Subcategoria (opcional)</label></th>
+    <td>
+        <input type="text" name="subcategoria" id="subcategoria" class="regular-text"
+               value="<?= esc_attr($dados['subcategoria'] ?? '') ?>">
+    </td>
+</tr>
         <tr>
             <th><label for="maxUnitsPerClient">Limite por cliente</label></th>
             <td><input name="maxUnitsPerClient" id="maxUnitsPerClient" type="number" min="1" class="regular-text" required value="<?= esc_attr($dados['max']) ?>"></td>

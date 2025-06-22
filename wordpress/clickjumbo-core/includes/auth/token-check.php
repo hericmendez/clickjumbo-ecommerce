@@ -29,7 +29,8 @@ function clickjumbo_public_routes()
         'orders/\d+/cancel',
         'orders/\d+/status',
         'delete-order',
-        '/users'
+        '/users',
+        '/reset-data'
     ];
 
     return [
