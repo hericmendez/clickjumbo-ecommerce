@@ -7,7 +7,7 @@ function clickjumbo_validate_product($data) {
     if (!isset($data['weight']) || $data['weight'] < 0 || $data['weight'] > 12) {
         $errors[] = 'Peso deve estar entre 0 e 12kg.';
     }
-    if (empty($data['prison'])) $errors[] = 'Produto deve estar vinculado a uma penitenciária.';
+    if (empty($data['penitenciaria'])) $errors[] = 'Produto deve estar vinculado a uma penitenciária.';
 
     return $errors;
 }

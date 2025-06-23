@@ -24,7 +24,7 @@ add_action('rest_api_init', function () {
 // ✅ Público: Apenas nomes/slugs
 function clickjumbo_prison_list_names($request)
 {
-    // 1. Penitenciárias vindas do campo `meta['prison']` (mock)
+    // 1. Penitenciárias vindas do campo `meta['penitenciaria']` (mock)
     $produtos_response = clickjumbo_listar_produtos_json($request);
     if (is_wp_error($produtos_response))
         return $produtos_response;
@@ -33,7 +33,7 @@ function clickjumbo_prison_list_names($request)
     $prison_mock = [];
 
     foreach ($produtos as $produto) {
-        $nome = $produto['prison'];
+        $nome = $produto['penitenciaria'];
         $slug = sanitize_title($nome);
         $prison_mock[$slug] = $nome;
     }
@@ -94,7 +94,7 @@ function clickjumbo_prison_list_full($request) {
         $produtos = $produtos_response->get_data()['content'];
 
         foreach ($produtos as $produto) {
-            $nome = $produto['prison'];
+            $nome = $produto['penitenciaria'];
             $slug = sanitize_title($nome);
 
             // Se ainda não estiver no array vindo da taxonomia, adiciona como mock
@@ -138,7 +138,7 @@ function clickjumbo_prison_detail_by_slug($request) {
         ]);
     }
 
-    // 2. Tenta buscar no mock (meta['prison']) de produtos
+    // 2. Tenta buscar no mock (meta['penitenciaria']) de produtos
     $produtos_response = clickjumbo_listar_produtos_json($request);
     if (is_wp_error($produtos_response)) {
         return new WP_REST_Response([
@@ -150,7 +150,7 @@ function clickjumbo_prison_detail_by_slug($request) {
     $produtos = $produtos_response->get_data()['content'];
 
     foreach ($produtos as $produto) {
-        $nome = $produto['prison'] ?? '';
+        $nome = $produto['penitenciaria'] ?? '';
         if (sanitize_title($nome) === $slug) {
             return rest_ensure_response([
                 'status' => 200,
@@ -189,8 +189,8 @@ function clickjumbo_get_prison_name_by_slug($slug) {
     if (!is_wp_error($produtos_response)) {
         $produtos = $produtos_response->get_data()['content'];
         foreach ($produtos as $produto) {
-            if (sanitize_title($produto['prison'] ?? '') === $slug) {
-                return $produto['prison'];
+            if (sanitize_title($produto['penitenciaria'] ?? '') === $slug) {
+                return $produto['penitenciaria'];
             }
         }
     }

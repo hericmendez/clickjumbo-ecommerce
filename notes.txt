@@ -127,3 +127,10 @@ curl --request POST \
      --header 'Authorization: Bearer token' \
      --header 'Content-Type: application/json' \
      --header 'User-Agent: Aplicação (email para contato técnico)'
+
+
+
+Base URL: https://clickjumbo.local/wp-json/clickjumbo/v1/
+
+Endpoints:
+     

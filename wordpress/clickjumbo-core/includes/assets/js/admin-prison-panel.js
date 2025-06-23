@@ -16,26 +16,25 @@ btnVerLista.onclick = (e) => (e.preventDefault(), mostrarLista());
 btnCadastrar.onclick = (e) => (e.preventDefault(), iniciarCadastro());
 document.addEventListener("DOMContentLoaded", mostrarLista);
 document.addEventListener("DOMContentLoaded", () => {
-    mostrarLista();
+  mostrarLista();
 
-    const cepInput = document.getElementById("cep");
+  const cepInput = document.getElementById("cep");
 
-    cepInput.addEventListener("input", (e) => {
-        // Remove tudo que não for número
-        let val = e.target.value.replace(/\D/g, '').slice(0, 8);
-        // Aplica a máscara 11111-111
-   
-        e.target.value = val;
-    });
+  cepInput.addEventListener("input", (e) => {
+    // Remove tudo que não for número
+    let val = e.target.value.replace(/\D/g, "").slice(0, 8);
+    // Aplica a máscara 11111-111
 
-    // Evita digitação de letras (redundância defensiva para navegadores mais antigos)
-    cepInput.addEventListener("keypress", (e) => {
-        if (!/[0-9]/.test(e.key)) {
-            e.preventDefault();
-        }
-    });
+    e.target.value = val;
+  });
+
+  // Evita digitação de letras (redundância defensiva para navegadores mais antigos)
+  cepInput.addEventListener("keypress", (e) => {
+    if (!/[0-9]/.test(e.key)) {
+      e.preventDefault();
+    }
+  });
 });
-
 
 function iniciarCadastro() {
   modoEdicao = null;
@@ -104,8 +103,11 @@ async function verProdutos(slug) {
     const nomePenitenciaria = prisonData.content?.nome || slug;
 
     const res = await fetch(
-      `/wp-json/clickjumbo/v1/product-list/prison?slug=${slug}`,
+      `http://clickjumbo.local/wp-json/clickjumbo/v1/product-list/penitenciaria?slug=${slug}`,
       {
+        headers: {
+          "X-WP-Nonce": clickjumboData.nonce,
+        },
         credentials: "include",
       }
     );
@@ -125,8 +127,10 @@ async function verProdutos(slug) {
             <tr id="produto-${prod.id}">
                 <td>${prod.name}</td>
                 <td>${prod.category || "—"}/${prod.subcategory}</td>
-                <td>R$ ${prod.price.toFixed(2).replace('.',',') || "—"}</td>
-                <td>${`${prod.weight.toFixed(2).replace('.',',')}kg` || "—"}</td>
+                <td>R$ ${prod.price.toFixed(2).replace(".", ",") || "—"}</td>
+                <td>${
+                  `${prod.weight.toFixed(2).replace(".", ",")}kg` || "—"
+                }</td>
                 <td>
                     <div class="dropdown">
                         <button class="button">&#x22EE;</button>
@@ -183,7 +187,7 @@ async function verDetalhesProduto(id) {
         `;
 
     modal.style.display = "block";
-    overlay.style.zIndex=99
+    overlay.style.zIndex = 99;
     overlay.style.display = "block";
   } catch (err) {
     conteudo.innerHTML = `<p style="color:red;">Erro ao carregar os dados.</p>`;

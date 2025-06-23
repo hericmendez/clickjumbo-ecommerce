@@ -7,34 +7,29 @@ use Firebase\JWT\Key;
 // Rotas públicas
 function clickjumbo_public_routes()
 {
-    $routes = [
-        'login',
-        'register',
-        'check-health',
-        'product-list',
-        'product-list/prison',
-        'prison-list',
-        'prison-list-full',
-        'products-by-prison-admin',
-        'product-details/(?P<id>\d+)',
-        'prison-details/.+',
-        'delete-product/\d+',
-        'register-prison',
-        'update-prison/.+',
-        'delete-prison/.+',
-        'export-products',
-        'orders',
-        'orders/.+',
-        'orders/\d+',
-        'orders/\d+/cancel',
-        'orders/\d+/status',
-        'delete-order',
-        '/users',
-        '/reset-data'
-    ];
-
     return [
-        '#^/clickjumbo/v1/(' . implode('|', $routes) . ')$#',
+        '#^/clickjumbo/v1/login$#',
+        '#^/clickjumbo/v1/register$#',
+        '#^/clickjumbo/v1/check-health$#',
+        '#^/clickjumbo/v1/prison-list$#',
+        '#^/clickjumbo/v1/prison-list-full$#',
+        '#^/clickjumbo/v1/product-list$#',
+        '#^/clickjumbo/v1/product-list/penitenciaria$#',
+        '#^/clickjumbo/v1/products-by-prison-admin$#',
+        '#^/clickjumbo/v1/product-details/\d+$#',
+        '#^/clickjumbo/v1/prison-details/.+$#',
+        '#^/clickjumbo/v1/delete-product/\d+$#',
+        '#^/clickjumbo/v1/register-prison$#',
+        '#^/clickjumbo/v1/update-prison/.+$#',
+        '#^/clickjumbo/v1/delete-prison/.+$#',
+        '#^/clickjumbo/v1/export-products$#',
+        '#^/clickjumbo/v1/orders$#',
+        '#^/clickjumbo/v1/orders/\d+$#',
+        '#^/clickjumbo/v1/orders/\d+/cancel$#',
+        '#^/clickjumbo/v1/orders/\d+/status$#',
+        '#^/clickjumbo/v1/delete-order$#',
+        '#^/clickjumbo/v1/users$#',
+        '#^/clickjumbo/v1/reset-data$#',
         '#^/jwt-auth/v1/token$#',
     ];
 }

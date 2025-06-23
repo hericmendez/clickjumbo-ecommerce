@@ -11,7 +11,7 @@ function clickjumbo_handle_product_form($post, $produto_id = null)
     $peso = floatval($post['peso'] ?? 0);
     $preco = floatval($post['preco'] ?? 0);
     $sku = sanitize_text_field($post['sku'] ?? '');
-    $penitenciaria = sanitize_text_field($post['penitenciaria'] ?? '');
+    $penitenciaria = sanitize_title($post['penitenciaria'] ?? '');
     $categoria_id = intval($post['categoria'] ?? 0);
     $subcategoria = sanitize_text_field($post['subcategoria'] ?? '');
     $maxUnits = intval($post['maxUnitsPerClient'] ?? 1);
@@ -20,43 +20,71 @@ function clickjumbo_handle_product_form($post, $produto_id = null)
         return 'Preencha todos os campos obrigatórios.';
     }
 
-    $dados_produto = [
-        'post_title' => $nome,
+    $post_data = [
         'post_type' => 'product',
         'post_status' => 'publish',
+        'post_title' => $nome,
     ];
 
     if ($produto_id) {
-        $dados_produto['ID'] = $produto_id;
-        wp_update_post($dados_produto);
+        $post_data['ID'] = $produto_id;
+        $produto_id = wp_update_post($post_data);
     } else {
-        $produto_id = wp_insert_post($dados_produto);
-        if (is_wp_error($produto_id)) {
-            return 'Erro ao salvar produto.';
-        }
+        $produto_id = wp_insert_post($post_data);
     }
 
-    // Atribui a categoria como termo da taxonomia correta
+    if (is_wp_error($produto_id)) {
+        error_log('Erro ao salvar produto: ' . $produto_id->get_error_message());
+        return 'Erro ao salvar produto.';
+    }
+
+    // Garantir status publish
+    if (get_post_status($produto_id) !== 'publish') {
+        wp_update_post(['ID' => $produto_id, 'post_status' => 'publish']);
+    }
+
+    // Taxonomias
     if ($categoria_id > 0) {
-        wp_set_object_terms($produto_id, [(int) $categoria_id], 'product_cat', false);
+        $termos = [$categoria_id];
+
+        if (!empty($subcategoria)) {
+            $sub_term = get_term_by('name', $subcategoria, 'product_cat');
+
+            if (!$sub_term) {
+                $criado = wp_insert_term($subcategoria, 'product_cat', ['parent' => $categoria_id]);
+                if (!is_wp_error($criado) && isset($criado['term_id'])) {
+                    $termos[] = $criado['term_id'];
+                }
+            } else {
+                $termos[] = $sub_term->term_id;
+            }
+        }
+
+        wp_set_object_terms($produto_id, $termos, 'product_cat', false);
     }
 
-    // Subcategoria salva apenas como meta livre (não taxonomia)
-// Subcategoria é um termo filho da categoria
-    if (!empty($subcategoria)) {
-        wp_set_object_terms($produto_id, [$subcategoria], 'product_cat', true); // true = adiciona, não substitui
+
+    if (!empty($penitenciaria)) {
+        wp_set_object_terms($produto_id, [$penitenciaria], 'penitenciaria', false);
     }
 
+    // Tipo de produto (obrigatório pro WooCommerce)
+    wp_set_object_terms($produto_id, 'simple', 'product_type', false);
 
-    // Outras metas
+    // Metadados
     update_post_meta($produto_id, '_weight', $peso);
     update_post_meta($produto_id, '_price', $preco);
+    update_post_meta($produto_id, '_regular_price', $preco);
     update_post_meta($produto_id, '_sku', $sku);
-    update_post_meta($produto_id, 'prison', $penitenciaria);
     update_post_meta($produto_id, 'maxUnitsPerClient', $maxUnits);
+    update_post_meta($produto_id, 'subcategoria', $subcategoria);
 
     return null;
 }
+
+
+
+
 
 function clickjumbo_get_dados_produto($produto_id = null)
 {
@@ -80,24 +108,24 @@ function clickjumbo_get_dados_produto($produto_id = null)
         $dados['sku'] = get_post_meta($produto_id, '_sku', true) ?: '';
         $dados['max'] = intval(get_post_meta($produto_id, 'maxUnitsPerClient', true)) ?: 1;
 
+        // Penitenciária
         $pen = wp_get_object_terms($produto_id, 'penitenciaria');
-        $dados['penitenciaria'] = !empty($pen) && !is_wp_error($pen) ? $pen[0]->slug : '';
+        $dados['penitenciaria'] = (!empty($pen) && !is_wp_error($pen)) ? $pen[0]->slug : '';
 
-        $cat = wp_get_object_terms($produto_id, 'product_cat');
-        if (!empty($cat) && !is_wp_error($cat)) {
-    foreach ($cat as $term) {
-        if ($term->parent === 0) {
-            $dados['categoria_id'] = $term->term_id;
-        } else {
-            $dados['subcategoria'] = $term->term_id;
+        // Categoria
+        $cats = wp_get_object_terms($produto_id, 'product_cat');
+        if (!empty($cats) && !is_wp_error($cats)) {
+            foreach ($cats as $term) {
+                if ($term->parent === 0) {
+                    $dados['categoria_id'] = $term->term_id;
+                }
+            }
         }
-    }
-}
-        $dados['categoria_id'] = !empty($cat) && !is_wp_error($cat) ? $cat[0]->term_id : '';
 
-        // Subcategoria vem do campo livre, não da taxonomia
-        $dados['subcategoria'] = get_post_meta($produto_id, 'product_cat', true) ?: '';
+        // Subcategoria: campo livre
+        $dados['subcategoria'] = get_post_meta($produto_id, 'subcategoria', true) ?: '';
     }
 
     return $dados;
 }
+

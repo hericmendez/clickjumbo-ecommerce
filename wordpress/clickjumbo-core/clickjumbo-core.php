@@ -78,3 +78,25 @@ function clickjumbo_core_load_modules()
         }
     }
 }
+add_action('admin_enqueue_scripts', 'clickjumbo_enqueue_admin_assets');
+
+function clickjumbo_enqueue_admin_assets($hook) {
+    // Carrega somente na tela correta
+    if (strpos($hook, 'clickjumbo-prisons') === false) {
+        return;
+    }
+
+    // Caminho para o JS do painel
+    wp_enqueue_script(
+        'clickjumbo-admin-panel',
+        plugins_url('includes/admin/assets/admin-prison-panel.js', __FILE__),
+        ['jquery'],
+        '1.0',
+        true
+    );
+
+    wp_localize_script('clickjumbo-admin-panel', 'clickjumboData', [
+        'nonce' => wp_create_nonce('wp_rest'),
+        'ajax_url' => admin_url('admin-ajax.php') // opcional se quiser usar AJAX do WP também
+    ]);
+}
