@@ -1,66 +1,53 @@
 senha melhor envio: BZ6dFZmZd6n97Qj
 
 
-{
-    "id": 166,
-    "status": "pending",
-    "penitenciaria": "cadeia-001", //aqui deveria ter os dados completos da penitenciária
-    /*
-    Exemplo:
-    "penitenciaria":{
-        "nome": 'cadeia-001',
-        "slug": 'Cadeia 001',
-        "cidade": "Matão",
-        "cep": "15991-534"
-        //...outros dados
-    }
-    */
-    "cliente": {
-        "nome": "Héric Mendes",
-        "email": "heric.mendez00@gmail.com",
-        "endereco": ", " //Manter como string para consulta rápida, endereço já está em 'shipping'
-    },
-    "produtos": [ //lista de produtos está vindo vazia
-         {
-            "id": 101,
-            "name": "Enlace Dupla Face",
-            "category": "Higiene",
-            "subcategory": "Esponja de Banho",
-            "prison": "Penitenciária A",
-            "weight": 0.050,
-            "price": 5.30,
-            "maxUnitsPerClient": 1,
-            "thumb": "mock/images/enlace_dupla_face.png"
-        },
-        {
-            "id": 103,
-            "name": "Colgate",
-            "category": "Higiene",
-            "subcategory": "Escova de Dente",
-            "prison": "Penitenciária A",
-            "weight": 0.08,
-            "maxUnitsPerClient": 1,
-            "thumb": "mock/images/colgate.png"
-        },
-    ],
-      "shipping": { //incluir objeto
-    "prison_slug": "cadeia-001",
-    "cart_weight": 3.0,
-    "method": "PAC",
-    "sender_address": {
-      "cep": "15991-534",
-      "rua": "Rua Exemplo",
-      "cidade": "São Paulo",
-      "estado": "SP"
-    },
-    "frete_valor": 25.00
-  },
-    "pesoTotal": 0.00 //incluir
-    "valorTotal": "0.00", //está vindo zerado
-    "pagamento": {
-        "metodo": "pix",
-        "status": "pending",
-        "invoice_url": ""
-    },
-    "data": "2025-06-10 12:31:32" //converter para DD/MM/YYYY no painel
-}
+🔁 1. Resetar Produtos (product)
+sql
+Copiar código
+-- Deleta todos os posts do tipo "product"
+DELETE FROM wp_posts
+WHERE post_type = 'product';
+
+-- Remove metadados dos produtos deletados
+DELETE pm FROM wp_postmeta pm
+LEFT JOIN wp_posts p ON pm.post_id = p.ID
+WHERE p.ID IS NULL;
+🧼 2. Resetar Categorias e Subcategorias (product_cat)
+sql
+Copiar código
+-- Remove termos da taxonomia product_cat
+DELETE t FROM wp_terms t
+JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id
+WHERE tt.taxonomy = 'product_cat';
+
+-- Remove taxonomias relacionadas
+DELETE FROM wp_term_taxonomy WHERE taxonomy = 'product_cat';
+
+-- Remove relacionamentos com produtos (precaução extra)
+DELETE tr FROM wp_term_relationships tr
+LEFT JOIN wp_posts p ON tr.object_id = p.ID
+WHERE p.ID IS NULL;
+🧽 3. Resetar Penitenciárias (penitenciaria)
+sql
+Copiar código
+-- Remove termos da taxonomia penitenciaria
+DELETE t FROM wp_terms t
+JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id
+WHERE tt.taxonomy = 'penitenciaria';
+
+-- Remove taxonomias relacionadas
+DELETE FROM wp_term_taxonomy WHERE taxonomy = 'penitenciaria';
+
+-- Remove relacionamentos órfãos
+DELETE tr FROM wp_term_relationships tr
+LEFT JOIN wp_posts p ON tr.object_id = p.ID
+WHERE p.ID IS NULL;
+
+💡 Extras (Opcional)
+Se você usa slugs personalizados salvos como metadados, pode limpar os produtos assim:
+
+sql
+Copiar código
+-- Remover metadados específicos que você criou
+DELETE FROM wp_postmeta
+WHERE meta_key IN ('subcategoria', 'maxUnitsPerClient', 'thumb');

@@ -83,7 +83,7 @@ foreach ($terms as $term) {
                 'price' => (float) $produto->get_price(),
                 'maxUnitsPerClient' => (int) $max_units,
                 'thumb' => esc_url($thumb),
-                'raw_data' => $produto->get_data(), // Limpo e suficiente na maioria dos casos
+                //'raw_data' => $produto->get_data(), 
 
             ];
         }

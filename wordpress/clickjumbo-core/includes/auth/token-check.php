@@ -30,9 +30,11 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/delete-order$#',
         '#^/clickjumbo/v1/users$#',
         '#^/clickjumbo/v1/reset-data$#',
+        '#^/clickjumbo/v1/register-product-auth$#', // ✅ aqui!
         '#^/jwt-auth/v1/token$#',
     ];
 }
+
 
 
 

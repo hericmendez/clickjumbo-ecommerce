@@ -32,7 +32,9 @@ function clickjumbo_get_categories(WP_REST_Request $request)
     $terms = get_terms([
         'taxonomy' => $taxonomy,
         'hide_empty' => false,
+        'parent' => 0 // ← SOMENTE CATEGORIAS PRINCIPAIS
     ]);
+
 
     if (is_wp_error($terms)) {
         return new WP_REST_Response([

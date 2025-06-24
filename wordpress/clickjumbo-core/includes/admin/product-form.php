@@ -1,43 +1,70 @@
 <?php
-// includes/admin/product-create-form.php
-require_once __DIR__ . '/partials/product-form-handler.php';
 require_once __DIR__ . '/partials/product-form-table.php';
-
 
 function clickjumbo_render_novo_produto_form()
 {
-
-
-
-    $editando = isset($_GET['editar_produto']);
-    $produto_id = $editando ? intval($_GET['editar_produto']) : null;
-    $dados_produto = clickjumbo_get_dados_produto($produto_id);
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_produto'])) {
-        $erro = clickjumbo_handle_product_form($_POST, $produto_id);
-        if (!$erro) {
-            wp_redirect(admin_url('admin.php?page=clickjumbo-prisons&produto=ok'));
-            exit;
-        }
-
-        echo '<div class="notice notice-error"><p>' . esc_html($erro) . '</p></div>';
-    }
-
     $penitenciarias = get_terms(['taxonomy' => 'penitenciaria', 'hide_empty' => false]);
-    $categorias = get_terms([
-        'taxonomy' => 'product_cat',
-        'hide_empty' => false
-    ]);
-
-
+    $categorias = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false]);
 
     echo '<div class="wrap">';
-    echo '<h1 style="margin-bottom: 20px;">' . ($editando ? 'Editar Produto' : 'Cadastrar novo produto') . '</h1>';
+    echo '<h1 style="margin-bottom: 20px;">Cadastrar novo produto</h1>';
+    echo '<form id="produto-form">';
+    clickjumbo_render_product_form_table([], $penitenciarias, $categorias);
+    echo '<p style="margin-top: 15px;"><button class="button button-primary" type="submit">Cadastrar Produto</button></p>';
+    echo '</form>';
+    echo '<div id="mensagem-produto" style="margin-top:15px;"></div>';
+    echo '</div>';
 
-    echo '<form method="POST" enctype="multipart/form-data">';
-    clickjumbo_render_product_form_table($dados_produto, $penitenciarias, $categorias);
-    echo '<p style="margin-top: 15px;"><button class="button button-primary" type="submit" name="cadastrar_produto">';
-    echo $editando ? 'Salvar Alterações' : 'Cadastrar Produto';
-    echo '</button></p>';
-    echo '</form></div>';
+    // Incluir o nonce e script
+    wp_nonce_field('wp_rest', '_wpnonce');
+    ?>
+
+    <script>
+        const form = document.getElementById('produto-form');
+        const msgBox = document.getElementById('mensagem-produto');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            msgBox.innerHTML = 'Enviando...';
+
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('nome'),
+                weight: parseFloat(formData.get('peso')),
+                price: parseFloat(formData.get('preco')),
+                sku: formData.get('sku'),
+                categoria: formData.get('categoria'),
+                subcategory: formData.get('subcategoria'),
+                penitenciaria: formData.get('penitenciaria'),
+                maxUnitsPerClient: parseInt(formData.get('maxUnitsPerClient')),
+                thumb: '' // ou: formData.get('thumb')
+            };
+
+            try {
+                const res = await fetch('/wp-json/clickjumbo/v1/register-product-auth', {
+           
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': document.querySelector('input[name="_wpnonce"]').value
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin'
+                });
+     console.log("res ==> ", res);
+
+                const json = await res.json();
+                if (json.success) {
+                    msgBox.innerHTML = '<div class="notice notice-success"><p>Produto cadastrado com sucesso!</p></div>';
+                    form.reset();
+                } else {
+                    msgBox.innerHTML = '<div class="notice notice-error"><p>' + (json.message || 'Erro ao cadastrar produto.') + '</p></div>';
+                }
+            } catch (err) {
+                msgBox.innerHTML = '<div class="notice notice-error"><p>Erro ao conectar com o servidor.</p></div>';
+                console.error(err);
+            }
+        });
+    </script>
+    <?php
 }

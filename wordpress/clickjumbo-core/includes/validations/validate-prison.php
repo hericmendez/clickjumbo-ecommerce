@@ -21,7 +21,7 @@ function validate_product_penitenciaria($post_id, $post, $update) {
         // Deleta o produto (opcional: impede publicação com erro)
         wp_update_post([
             'ID' => $post_id,
-            'post_status' => 'draft'
+            'post_status' => 'publish'
         ]);
 
         // Reaplica o hook

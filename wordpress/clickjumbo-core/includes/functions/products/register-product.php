@@ -6,7 +6,14 @@ add_action('rest_api_init', function () {
         'callback' => 'clickjumbo_register_product',
         'permission_callback' => '__return_true',
     ]);
+
+    register_rest_route('clickjumbo/v1', '/register-product-auth', [
+        'methods' => 'POST',
+        'callback' => 'clickjumbo_register_product',
+        'permission_callback' => "__return_true"
+    ]);
 });
+
 
 function clickjumbo_register_product($request)
 {
@@ -21,13 +28,32 @@ function clickjumbo_register_product($request)
             ], 400);
         }
     }
+    $post_author = get_current_user_id();
+    if (!$post_author) {
+        $post_author = 1; // fallback
+    }
 
     // Criar produto
     $post_id = wp_insert_post([
         'post_type' => 'product',
         'post_status' => 'publish',
         'post_title' => sanitize_text_field($data['name']),
+        'post_author' => 1
     ]);
+
+    // Corrige o status para publicado (se o WooCommerce forçou 'draft')
+    wp_update_post([
+        'ID' => $post_id,
+        'post_status' => 'publish'
+    ]);
+
+    // Campos obrigatórios extras pro WooCommerce aceitar como publicado
+    update_post_meta($post_id, '_manage_stock', 'no');
+    update_post_meta($post_id, '_stock_status', 'instock');
+    wp_set_object_terms($post_id, 'visible', 'product_visibility');
+
+    error_log('Post criado: ' . $post_id);
+    error_log('Status final: ' . get_post_status($post_id));
 
     if (is_wp_error($post_id)) {
         return new WP_REST_Response([
@@ -35,6 +61,17 @@ function clickjumbo_register_product($request)
             'message' => 'Erro ao criar o produto.'
         ], 500);
     }
+    // Reforça publicação no nível do banco, após tudo
+    remove_action('save_post', 'wc_maybe_set_product_status'); // ← evita status override
+    wp_update_post([
+        'ID' => $post_id,
+
+    ]);
+
+    // Finaliza com campos mínimos obrigatórios do WooCommerce
+    update_post_meta($post_id, '_manage_stock', 'no');
+    update_post_meta($post_id, '_stock_status', 'instock');
+    wp_set_object_terms($post_id, 'visible', 'product_visibility');
 
     // Metadados
     update_post_meta($post_id, '_price', floatval($data['price']));
@@ -43,6 +80,12 @@ function clickjumbo_register_product($request)
     update_post_meta($post_id, '_weight', isset($data['weight']) ? floatval($data['weight']) : 0);
     update_post_meta($post_id, 'maxUnitsPerClient', isset($data['maxUnitsPerClient']) ? intval($data['maxUnitsPerClient']) : 1);
     update_post_meta($post_id, 'thumb', esc_url_raw($data['thumb'] ?? ''));
+    // Estoque
+    update_post_meta($post_id, '_manage_stock', 'no');
+    update_post_meta($post_id, '_stock_status', 'instock');
+
+    // Visibilidade
+    wp_set_object_terms($post_id, 'visible', 'product_visibility');
 
     // Subcategoria (salva para referência no front, independentemente de ser vinculada)
     $subcat_name = sanitize_text_field($data['subcategory'] ?? '');
@@ -80,7 +123,7 @@ function clickjumbo_register_product($request)
 
     // Buscar ou criar subcategoria (filha da categoria)
     if (!empty($subcat_name) && $categoria_id) {
-            error_log("Registrando subcategoria: $subcat_name");
+        error_log("Registrando subcategoria: $subcat_name");
 
         $subcat_term = get_term_by('name', $subcat_name, 'product_cat');
         if (!$subcat_term) {

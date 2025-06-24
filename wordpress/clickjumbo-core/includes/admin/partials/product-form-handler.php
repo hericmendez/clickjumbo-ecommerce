@@ -46,19 +46,36 @@ function clickjumbo_handle_product_form($post, $produto_id = null)
     // Taxonomias
     if ($categoria_id > 0) {
         $termos = [$categoria_id];
+if (!empty($subcategoria) && $categoria_id > 0) {
+    $sub_term = null;
 
-        if (!empty($subcategoria)) {
-            $sub_term = get_term_by('name', $subcategoria, 'product_cat');
+    // Busca subcategoria apenas se for filha da categoria selecionada
+    $possiveis = get_terms([
+        'taxonomy' => 'product_cat',
+        'parent' => $categoria_id,
+        'hide_empty' => false,
+    ]);
 
-            if (!$sub_term) {
-                $criado = wp_insert_term($subcategoria, 'product_cat', ['parent' => $categoria_id]);
-                if (!is_wp_error($criado) && isset($criado['term_id'])) {
-                    $termos[] = $criado['term_id'];
-                }
-            } else {
-                $termos[] = $sub_term->term_id;
-            }
+    foreach ($possiveis as $term) {
+        if (strcasecmp($term->name, $subcategoria) === 0) {
+            $sub_term = $term;
+            break;
         }
+    }
+
+    // Se não existir, cria
+    if (!$sub_term) {
+        $criado = wp_insert_term($subcategoria, 'product_cat', ['parent' => $categoria_id]);
+        if (!is_wp_error($criado)) {
+            $sub_term = get_term($criado['term_id'], 'product_cat');
+        }
+    }
+
+    if ($sub_term && !is_wp_error($sub_term)) {
+        $termos[] = $sub_term->term_id;
+    }
+}
+
 
         wp_set_object_terms($produto_id, $termos, 'product_cat', false);
     }
