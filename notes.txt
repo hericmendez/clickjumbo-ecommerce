@@ -133,4 +133,6 @@ curl --request POST \
 Base URL: https://clickjumbo.local/wp-json/clickjumbo/v1/
 
 Endpoints:
-     
+Login:
+POST '/login'
+Payload:

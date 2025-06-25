@@ -1,0 +1,54 @@
+senha melhor envio: BZ6dFZmZd6n97Qj
+wp db cli
+
+🔁 1. Resetar Produtos (product)
+
+sql
+Copiar código
+-- Deleta todos os posts do tipo "product"
+DELETE FROM wp_posts
+WHERE post_type = 'product';
+
+-- Remove metadados dos produtos deletados
+DELETE pm FROM wp_postmeta pm
+LEFT JOIN wp_posts p ON pm.post_id = p.ID
+WHERE p.ID IS NULL;
+🧼 2. Resetar Categorias e Subcategorias (product_cat)
+sql
+Copiar código
+-- Remove termos da taxonomia product_cat
+DELETE t FROM wp_terms t
+JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id
+WHERE tt.taxonomy = 'product_cat';
+
+-- Remove taxonomias relacionadas
+DELETE FROM wp_term_taxonomy WHERE taxonomy = 'product_cat';
+
+-- Remove relacionamentos com produtos (precaução extra)
+DELETE tr FROM wp_term_relationships tr
+LEFT JOIN wp_posts p ON tr.object_id = p.ID
+WHERE p.ID IS NULL;
+🧽 3. Resetar Penitenciárias (penitenciaria)
+sql
+Copiar código
+-- Remove termos da taxonomia penitenciaria
+DELETE t FROM wp_terms t
+JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id
+WHERE tt.taxonomy = 'penitenciaria';
+
+-- Remove taxonomias relacionadas
+DELETE FROM wp_term_taxonomy WHERE taxonomy = 'penitenciaria';
+
+-- Remove relacionamentos órfãos
+DELETE tr FROM wp_term_relationships tr
+LEFT JOIN wp_posts p ON tr.object_id = p.ID
+WHERE p.ID IS NULL;
+
+💡 Extras (Opcional)
+Se você usa slugs personalizados salvos como metadados, pode limpar os produtos assim:
+
+sql
+Copiar código
+-- Remover metadados específicos que você criou
+DELETE FROM wp_postmeta
+WHERE meta_key IN ('subcategoria', 'maxUnitsPerClient', 'thumb');
