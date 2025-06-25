@@ -76,9 +76,13 @@ function clickjumbo_render_novo_produto_form()
         </td>
     </tr>
 </table>
-
+<div>
 <p style="margin-top: 15px;"><button class="button button-primary" type="submit">Salvar Produto</button></p>
+
+</div>
+
 </form>
+<a href="/wp-admin/admin.php?page=clickjumbo-prisons" style="margin-top: 15px;"><button class="button button-primary" >Voltar para Produtos</button></a>
 <div id="mensagem-produto" style="margin-top:15px;"></div>
 </div>
 

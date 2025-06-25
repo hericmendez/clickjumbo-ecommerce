@@ -1,19 +1,34 @@
 clickjumbo-core/
-    ├── clickjumbo-core copy.txt
     ├── clickjumbo-core.php
+    ├── clickjumbo-core.zip
     ├── clickjumbo-core_tree.txt
-    ├── clickjumbo_extra_features.zip
     ├── composer.json
     ├── composer.lock
+    ├── debug.json
     ├── generate-tree.js
     ├── includes/
     │   ├── admin/
+    │   │   ├── melhor-envio-settings.php
     │   │   ├── menu-admin.php
+    │   │   ├── order-details-modal.php
     │   │   ├── orders-panel.php
+    │   │   ├── partials/
+    │   │   │   ├── prison-form.php
+    │   │   │   ├── prison-header.php
+    │   │   │   ├── prison-nonce.php
+    │   │   │   ├── prison-products.php
+    │   │   │   ├── prison-styles.php
+    │   │   │   ├── prison-table.php
+    │   │   │   └── product-form-table.php
     │   │   ├── prison-panel.php
-    │   │   ├── product-create-form.php
+    │   │   ├── product-form.php
     │   │   ├── product-import-form.php
-    │   │   └── products-panel.php
+    │   │   ├── products-panel.php
+    │   │   ├── shipments-panel.php
+    │   │   └── users-panel.php
+    │   ├── assets/
+    │   │   └── js/
+    │   │       └── admin-prison-panel.js
     │   ├── auth/
     │   │   ├── login.php
     │   │   ├── register.php
@@ -34,17 +49,25 @@ clickjumbo-core/
     │   │   │   ├── get-prisons.php
     │   │   │   ├── register-prisons.php
     │   │   │   └── update-prison.php
-    │   │   └── products/
-    │   │       ├── delete-product.php
-    │   │       ├── get-product-list.php
-    │   │       ├── import-export-products.php
-    │   │       ├── register-product.php
-    │   │       ├── register-taxonomies.php
-    │   │       └── update-product.php
+    │   │   ├── products/
+    │   │   │   ├── delete-product.php
+    │   │   │   ├── get-categories.php
+    │   │   │   ├── get-products.php
+    │   │   │   ├── get-taxonomies.php
+    │   │   │   ├── import-export-products.php
+    │   │   │   ├── register-category.php
+    │   │   │   ├── register-product.php
+    │   │   │   ├── register-taxonomies.php
+    │   │   │   ├── save-product.php
+    │   │   │   ├── update-product.php
+    │   │   │   └── upload-product.php
+    │   │   └── users/
+    │   │       └── get-users.php
     │   ├── utils/
     │   │   ├── check-health.php
     │   │   ├── formatting.js
-    │   │   └── orders-health.php
+    │   │   ├── orders-health.php
+    │   │   └── reset-clickjumbo.php
     │   ├── utils.php
     │   └── validations/
     │       ├── validate-cart.php
@@ -53,5 +76,6 @@ clickjumbo-core/
     │       ├── validate-product.php
     │       └── validate-shipping.php
     ├── notes.txt
-    ├── tempCodeRunnerFile.js
+    ├── old_files/
+    │   └── product-form-handler.php
     └── teste.csv
