@@ -25,103 +25,114 @@ function clickjumbo_get_products($request)
 {
     try {
         $slug_param = sanitize_title($request->get_param('slug') ?? '');
+        $filtro_nome = sanitize_text_field($request->get_param('nome') ?? '');
+        $filtro_categoria = sanitize_text_field($request->get_param('categoria') ?? '');
+        $filtro_penitenciaria = sanitize_text_field($request->get_param('penitenciaria') ?? '');
+
+        $ordenar_por = sanitize_text_field($request->get_param('ordenar_por')) ?: 'id';
+        $direcao = strtoupper(sanitize_text_field($request->get_param('direcao')) ?: 'DESC');
+
+        $page = max(1, intval($request->get_param('pagina') ?? 1));
+        $per_page = max(1, min(100, intval($request->get_param('limite') ?? 10)));
+
+        $orderby_map = [
+            'id' => 'ID',
+            'nome' => 'title',
+            'preco' => 'price',
+            'data' => 'date'
+        ];
 
         $args = [
             'post_status' => 'publish',
-            'limit' => 100,
             'post_type' => 'product',
-            'orderby' => 'date',
-            'order' => 'DESC',
+            'orderby' => $orderby_map[$ordenar_por] ?? 'ID',
+            'order' => in_array($direcao, ['ASC', 'DESC']) ? $direcao : 'DESC',
+            'posts_per_page' => $per_page,
+            'paged' => $page,
         ];
 
-        $produtos = wc_get_products($args);
+        $query = new WP_Query($args);
+        $produtos = array_filter(array_map('wc_get_product', wp_list_pluck($query->posts, 'ID')));
         $resultado = [];
+        $ids_incluidos = [];
 
-$ids_incluidos = [];
+        foreach ($produtos as $produto) {
+            $produto_id = $produto->get_id();
+            if (isset($ids_incluidos[$produto_id])) continue;
 
-foreach ($produtos as $produto) {
-    $produto_id = $produto->get_id();
+            $nome = $produto->get_name();
+            if ($filtro_nome && stripos($nome, $filtro_nome) === false) continue;
 
-    // Evita duplicatas
-    if (in_array($produto_id, $ids_incluidos)) continue;
+            $is_padrao = get_post_meta($produto_id, '_cj_is_padrao', true) === 'yes';
+            $is_premium = get_post_meta($produto_id, '_cj_is_premium', true) === 'yes';
 
-    // --- FLAGS PADRÃO E PREMIUM ---
-    $is_padrao = get_post_meta($produto_id, '_cj_is_padrao', true) === 'yes';
-    $is_premium = get_post_meta($produto_id, '_cj_is_premium', true) === 'yes';
-
-    // --- PENITENCIÁRIAS ---
-    $penitenciarias = [];
-    $penit_terms = get_the_terms($produto_id, 'penitenciaria');
-
-    if (!empty($penit_terms) && !is_wp_error($penit_terms)) {
-        foreach ($penit_terms as $term) {
-            $penitenciarias[] = [
-                'slug' => $term->slug,
-                'label' => $term->name
-            ];
-        }
-    }
-
-    // Produtos padrão recebem "todas"
-    if ($is_padrao || empty($penitenciarias)) {
-        $penitenciarias = [[ 'slug' => 'todas', 'label' => 'Todas' ]];
-    }
-
-    // Se houver filtro por slug, aplica regra:
-    // - Se produto não for padrão e não pertencer à penitenciária, pula
-    if ($slug_param && !$is_padrao) {
-        $slugs = wp_list_pluck($penitenciarias, 'slug');
-        if (!in_array($slug_param, $slugs)) {
-            continue;
-        }
-    }
-
-    // --- CATEGORIA E SUBCATEGORIA ---
-    $categoria_principal = 'Sem Categoria';
-    $subcategoria = 'Sem Subcategoria';
-
-    $terms = get_the_terms($produto_id, 'product_cat');
-    if (!empty($terms) && !is_wp_error($terms)) {
-        foreach ($terms as $term) {
-            if ($term->parent == 0 && $categoria_principal === 'Sem Categoria') {
-                $categoria_principal = $term->name;
-            } elseif ($term->parent != 0) {
-                $parent = get_term($term->parent, 'product_cat');
-                if ($parent && !is_wp_error($parent)) {
-                    $categoria_principal = $parent->name;
-                    $subcategoria = $term->name;
-                    break;
+            $penitenciarias = [];
+            $penit_terms = get_the_terms($produto_id, 'penitenciaria');
+            if (!empty($penit_terms) && !is_wp_error($penit_terms)) {
+                foreach ($penit_terms as $term) {
+                    $penitenciarias[] = [
+                        'slug' => $term->slug,
+                        'label' => $term->name
+                    ];
                 }
             }
+
+            if ($is_padrao || empty($penitenciarias)) {
+                $penitenciarias = [[ 'slug' => 'todas', 'label' => 'Todas' ]];
+            }
+
+            $slugs = wp_list_pluck($penitenciarias, 'slug');
+            if ($slug_param && !$is_padrao && !in_array($slug_param, $slugs)) continue;
+            if ($filtro_penitenciaria && !$is_padrao && !in_array($filtro_penitenciaria, $slugs)) continue;
+
+            $categoria_principal = 'Sem Categoria';
+            $subcategoria = 'Sem Subcategoria';
+            $terms = get_the_terms($produto_id, 'product_cat');
+            if (!empty($terms) && !is_wp_error($terms)) {
+                foreach ($terms as $term) {
+                    if ($term->parent == 0 && $categoria_principal === 'Sem Categoria') {
+                        $categoria_principal = $term->name;
+                    } elseif ($term->parent != 0) {
+                        $parent = get_term($term->parent, 'product_cat');
+                        if ($parent && !is_wp_error($parent)) {
+                            $categoria_principal = $parent->name;
+                            $subcategoria = $term->name;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if ($filtro_categoria && stripos($categoria_principal, $filtro_categoria) === false) continue;
+
+            $criado_em_raw = get_post_meta($produto_id, '_cj_criado_em', true);
+            $criado_em = $criado_em_raw ? date(DATE_ISO8601, strtotime($criado_em_raw)) : null;
+
+            $resultado[] = [
+                'id' => $produto_id,
+                'nome' => $nome,
+                'categoria' => $categoria_principal,
+                'subcategoria' => $subcategoria,
+                'penitenciarias' => $penitenciarias,
+                'padrao' => $is_padrao,
+                'premium' => $is_premium,
+                'peso' => (float) $produto->get_weight(),
+                'preco' => (float) $produto->get_price(),
+                'maximo_por_cliente' => (int) (get_post_meta($produto_id, 'maximo_por_cliente', true) ?: 1),
+                'thumb' => esc_url(get_the_post_thumbnail_url($produto_id, 'medium')),
+                'criado_em' => $criado_em,
+            ];
+
+            $ids_incluidos[$produto_id] = true;
         }
-    }
-$criado_em_raw = get_post_meta($produto_id, '_cj_criado_em', true);
-$criado_em = $criado_em_raw ? date('d-m-Y H:i', strtotime($criado_em_raw)) : null;
-
-    // --- DADOS FINAIS ---
-    $resultado[] = [
-        'id' => $produto_id,
-        'nome' => $produto->get_name(),
-        'categoria' => $categoria_principal,
-        'subcategoria' => $subcategoria,
-        'penitenciarias' => $penitenciarias,
-        'padrao' => $is_padrao,
-        'premium' => $is_premium,
-        'peso' => (float) $produto->get_weight(),
-        'preco' => (float) $produto->get_price(),
-        'maximo_por_cliente' => (int) (get_post_meta($produto_id, 'maximo_por_cliente', true) ?: 1),
-        'thumb' => esc_url(get_the_post_thumbnail_url($produto_id, 'medium')),
-        'criado_em' => $criado_em,
-
-    ];
-
-    $ids_incluidos[] = $produto_id;
-}
-
 
         return rest_ensure_response([
             'status' => 200,
             'message' => 'ok',
+            'total' => $query->found_posts,
+            'pagina' => $page,
+            'por_pagina' => $per_page,
+            'total_paginas' => ceil($query->found_posts / $per_page),
             'content' => $resultado,
         ]);
     } catch (Exception $e) {
