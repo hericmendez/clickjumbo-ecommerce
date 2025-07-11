@@ -5,9 +5,10 @@ add_action('rest_api_init', function () {
     register_rest_route('clickjumbo/v1', '/delete-prison/(?P<slug>[a-zA-Z0-9\-]+)', [
         'methods' => 'DELETE',
         'callback' => 'clickjumbo_delete_prison',
-        'permission_callback' => function () {
+       /*'permission_callback' => function () {
             return current_user_can('manage_options');
-        }
+        }*/ 
+        'permission_callback'=> '__return_true'
     ]);
 });
 

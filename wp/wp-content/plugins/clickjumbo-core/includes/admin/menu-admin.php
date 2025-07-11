@@ -49,9 +49,31 @@ add_action('admin_menu', function () {
         'Novo Produto',
         'Novo Produto',
         'manage_options',
-        'clickjumbo-novo-produto',
+                'clickjumbo-novo-produto',
         'clickjumbo_render_novo_produto_form'
+
     );
+                add_submenu_page(
+       'clickjumbo-dashboard', // Página pai como null faz com que ela não apareça no menu
+        'penitenciárias',
+        'Penitenciárias',
+        'manage_options',
+        'clickjumbo-prisons',
+        'clickjumbo_render_prisons_panel'
+    );
+
+
+
+    add_submenu_page(
+        null, // null para não exibir no menu lateral
+        'Salvar Penitenciária',
+        'Salvar Penitenciária',
+        'manage_options',
+        'clickjumbo-nova-penitenciaria',
+        'clickjumbo_render_nova_penitenciaria_form'
+    );
+
+
     add_submenu_page(
         null,
         'Importar CSV',
@@ -70,17 +92,7 @@ add_action('admin_menu', function () {
         'clickjumbo_export_products_csv'
     );
 
-    // Submenu: Produtos
-/*     add_submenu_page(
-        'clickjumbo-dashboard',
-        'Produtos',
-        'Produtos',
-        'manage_options',
-        'clickjumbo-products',
-        'clickjumbo_render_products_panel'
-    ); */
 
-    // Submenu: Pedidos
     add_submenu_page(
         'clickjumbo-dashboard',
         'Pedidos',

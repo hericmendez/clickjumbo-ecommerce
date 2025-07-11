@@ -9,7 +9,7 @@ function clickjumbo_render_products_panel() {
     ?>
 
     <div class="wrap">
-        <h1 class="mb-4">Gerenciar Produtos</h1>
+        <h1 class="mb-4 mt-4 fw-bold">Gerenciar Produtos</h1>
 
         <div class="border border-secondary p-4 shadow-sm mb-4" >
             <h2 class="h5">Filtros de busca </h2>
@@ -44,8 +44,12 @@ function clickjumbo_render_products_panel() {
                 </div>
             </form>
         </div>
-<div class="text-muted mb-2" id="info-itens">Exibindo 0 de 0 itens.</div>
 
+       <div class="d-flex flex-row justify-content-between align-items-center">
+                            <div class="text-muted mb-2" id="info-itens">Exibindo 0 de 0 itens.</div>
+                            
+                    <a class="btn btn-primary ms-2" href="#" onclick="newPrison()">Cadastrar novo Produto</a>
+        </div>
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
                 <thead class="table-light">
@@ -56,7 +60,7 @@ function clickjumbo_render_products_panel() {
                         <th>Penitenciárias</th>
                         <th onclick="ordenar('preco')">Preço</th>
                         <th>Peso</th>
-                        <th>Criado em</th>
+                
                         <th>Máx. por cliente</th>
                         <th>Ações</th>
                     </tr>
@@ -76,6 +80,25 @@ function clickjumbo_render_products_panel() {
       <option value="50">50</option>
     </select>
   </div>
+  <div class="modal fade" id="modalDetalhesProduto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalhes do Produto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row" id="detalhes-produto-content">
+          <div class="text-muted">Carregando...</div>
+        </dl>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </nav>
 
         </div>
@@ -88,6 +111,42 @@ const wpApiSettings = {
 </script>
 
     <script>
+        
+function verDetalhesProduto(id) {
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalhesProduto'));
+    const content = document.getElementById('detalhes-produto-content');
+    content.innerHTML = '<div class="text-muted">Carregando...</div>';
+
+    fetch(`/wp/wp-json/clickjumbo/v1/product-details/${id}`)
+        .then(res => res.json())
+        .then(json => {
+            const p = json.content;
+            if (!p) throw new Error("Dados não encontrados");
+
+            const pris = p.penitenciarias?.map(p => p.label).join(', ') || '—';
+
+            content.innerHTML = `
+                <dt class="col-sm-3">ID</dt><dd class="col-sm-9">${p.id}</dd>
+                <dt class="col-sm-3">Nome</dt><dd class="col-sm-9">${p.nome}</dd>
+                <dt class="col-sm-3">Categoria</dt><dd class="col-sm-9">${p.categoria} / ${p.subcategoria || '—'}</dd>
+                <dt class="col-sm-3">Penitenciárias</dt><dd class="col-sm-9">${pris}</dd>
+                <dt class="col-sm-3">Peso</dt><dd class="col-sm-9">${p.peso.toFixed(2)} kg</dd>
+                <dt class="col-sm-3">Preço</dt><dd class="col-sm-9">R$ ${p.preco.toFixed(2).replace('.', ',')}</dd>
+                <dt class="col-sm-3">SKU</dt><dd class="col-sm-9">${p.sku || '—'}</dd>
+                <dt class="col-sm-3">Máximo por cliente</dt><dd class="col-sm-9">${p.maximo_por_cliente || '—'}</dd>
+                <dt class="col-sm-3">Premium</dt><dd class="col-sm-9">${p.premium ? 'Sim' : 'Não'}</dd>
+                <dt class="col-sm-3">Padrão</dt><dd class="col-sm-9">${p.padrao ? 'Sim' : 'Não'}</dd>
+                <dt class="col-sm-3">Criado em</dt><dd class="col-sm-9">${p.criado_em ? new Date(p.criado_em).toLocaleString('pt-BR') : '—'}</dd>
+            `;
+        })
+        .catch(err => {
+            console.error(err);
+            content.innerHTML = '<div class="text-danger">Erro ao carregar detalhes.</div>';
+        });
+
+    modal.show();
+}        
+    
 let paginaAtual = 1;
 let limitePorPagina = 10; // valor inicial padrão
 
@@ -107,15 +166,19 @@ let totalItens = 0;
         data.forEach(item => {
             const opt = document.createElement('option');
             opt.value = item.slug || item.term_id;
-            opt.textContent = item.name;
+            opt.textContent = item.name || item.label;
             select.appendChild(opt);
         });
     }
+const slugPenitenciaria = new URLSearchParams(window.location.search).get('penitenciaria');
 
-    async function carregarFiltros() {
-        await fetchOptions('/wp/wp-json/clickjumbo/v1/prison-list-full', 'filtro-penitenciaria');
+    async function carregarFiltros() {1
+        await fetchOptions('/wp/wp-json/clickjumbo/v1/prison-list', 'filtro-penitenciaria');
         await fetchOptions('/wp/wp-json/clickjumbo/v1/get-categories', 'filtro-categoria');
     }
+if (slugPenitenciaria) {
+    document.getElementById('filtro-penitenciaria').value = slugPenitenciaria;
+}
 
     function ordenar(campo) {
         if (ordenacao.campo === campo) {
@@ -168,6 +231,7 @@ function renderizarPaginacao(pagina, totalPaginas) {
         return li;
     };
 
+
     // Botão anterior
     pag.appendChild(criarBotao('‹', pagina - 1, false, pagina === 1));
 
@@ -195,6 +259,9 @@ function renderizarPaginacao(pagina, totalPaginas) {
 
 
 async function carregarProdutos(pagina = 1) {
+    const urlParams = new URLSearchParams(window.location.search);
+const slugPenitenciaria = urlParams.get('penitenciaria') || '';
+
     const tbody = document.getElementById('tabela-produtos');
     tbody.innerHTML = '<tr><td colspan="9">Carregando produtos...</td></tr>';
 paginaAtual = pagina;
@@ -205,14 +272,15 @@ limitePorPagina = parseInt(document.getElementById('filtro-itens-por-pagina')?.v
     ordenacao = { campo, direcao };
 
     const params = new URLSearchParams({
-        nome: document.getElementById('filtro-nome').value,
-        penitenciaria: document.getElementById('filtro-penitenciaria').value,
-        categoria: document.getElementById('filtro-categoria').value,
+        nome: document.getElementById('filtro-nome')?.value || '',
+        penitenciaria: slugPenitenciaria || document.getElementById('filtro-penitenciaria')?.value || '',
+        categoria: document.getElementById('filtro-categoria')?.value || '',
         ordenar_por: ordenacao.campo,
         direcao: ordenacao.direcao,
         pagina: paginaAtual,
         limite: limitePorPagina
     });
+
 
     const res = await fetch('/wp/wp-json/clickjumbo/v1/product-list?' + params.toString());
     const produtos = await res.json();
@@ -226,7 +294,6 @@ limitePorPagina = parseInt(document.getElementById('filtro-itens-por-pagina')?.v
             <td>${formatPrisons(produto.penitenciarias)}</td>
             <td>R$ ${formatDecimal(produto.preco)}</td>
             <td>${formatDecimal(produto.peso)} kg</td>
-            <td>${formatData(produto.criado_em)}</td>
             <td>${produto.maximo_por_cliente} ${produto.maximo_por_cliente > 1 ? 'unidades' : 'unidade'}</td>
             <td>
                 <div class="dropdown">
@@ -234,6 +301,8 @@ limitePorPagina = parseInt(document.getElementById('filtro-itens-por-pagina')?.v
                     Ações
                   </button>
                   <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" onclick="verDetalhesProduto(${produto.id})">Ver Detalhes</a></li>
+
                     <li><a class="dropdown-item" href="#" onclick="editarProduto(${produto.id})">Editar</a></li>
                     <li><a class="dropdown-item text-danger" href="#" onclick="excluirProduto(${produto.id}, '${produto.nome}')">Excluir</a></li>
                   </ul>

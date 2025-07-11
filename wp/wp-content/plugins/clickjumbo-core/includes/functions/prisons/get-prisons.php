@@ -75,44 +75,60 @@ function clickjumbo_prison_list_full($request) {
     ]);
 
     foreach ($terms as $term) {
-        $slug = $term->slug;
-        $resultado[$slug] = [
+        $resultado[] = [
+            'id' => $term->term_id,
             'nome' => $term->name,
-            'slug' => $slug,
+            'slug' => $term->slug,
             'cidade' => get_term_meta($term->term_id, 'cidade', true) ?: 'não cadastrado',
             'estado' => get_term_meta($term->term_id, 'estado', true) ?: 'não cadastrado',
             'cep' => get_term_meta($term->term_id, 'cep', true) ?: 'não cadastrado',
+            'logradouro' => get_term_meta($term->term_id, 'logradouro', true) ?: 'não cadastrado',
+            'numero' => get_term_meta($term->term_id, 'numero', true) ?: 'não cadastrado',
+            'complemento' => get_term_meta($term->term_id, 'complemento', true) ?: '',
+            'referencia' => get_term_meta($term->term_id, 'referencia', true) ?: '',
+            'criado_em' => get_term_meta($term->term_id, 'criado_em', true) ?: '',
         ];
     }
 
-    $produtos_response = clickjumbo_get_products($request);
-    if (!is_wp_error($produtos_response)) {
-        $produtos = $produtos_response->get_data()['content'];
-
-        foreach ($produtos as $produto) {
-            if (!empty($produto['penitenciarias']) && is_array($produto['penitenciarias'])) {
-                foreach ($produto['penitenciarias'] as $p) {
-                    $slug = sanitize_title($p['slug']);
-                    if (!isset($resultado[$slug])) {
-                        $resultado[$slug] = [
-                            'nome' => $p['label'],
-                            'slug' => $p['slug'],
-                            'cidade' => 'não cadastrado',
-                            'estado' => 'não cadastrado',
-                            'cep' => 'não cadastrado',
-                        ];
-                    }
-                }
-            }
-        }
+    // 🔍 Filtro por nome
+$search = strtolower(sanitize_text_field($request->get_param('search') ?? ''));
+    if (!empty($search)) {
+        $resultado = array_filter($resultado, function ($item) use ($search) {
+            return strpos(strtolower($item['nome']), $search) !== false;
+        });
     }
+
+    // 🔃 Ordenação
+
+    $order_by = strtolower($request->get_param('order_by') ?? 'id');
+
+    $order = strtolower($request->get_param('order') ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+    usort($resultado, function ($a, $b) use ($order_by, $order) {
+        $valA = $a[$order_by] ?? '';
+        $valB = $b[$order_by] ?? '';
+        return $order === 'asc' ? ($valA <=> $valB) : ($valB <=> $valA);
+    });
+
+    // 📄 Paginação
+    $pagina = max(1, intval($request->get_param('page') ?? 1));
+    $por_pagina = max(1, intval($request->get_param('per_page') ?? 10));
+    $total_itens = count($resultado);
+    $total_paginas = ceil($total_itens / $por_pagina);
+    $offset = ($pagina - 1) * $por_pagina;
+    $paginado = array_slice($resultado, $offset, $por_pagina);
 
     return rest_ensure_response([
         'status' => 200,
         'message' => 'ok',
-        'content' => array_values($resultado),
+        'content' => $paginado,
+        'total_itens' => $total_itens,
+        'pagina_atual' => $pagina,
+        'itens_por_pagina' => $por_pagina,
+        'total_paginas' => $total_paginas,
     ]);
 }
+
 
 // Protegido: detalhes por slug
 function clickjumbo_prison_detail_by_slug($request) {
@@ -120,17 +136,23 @@ function clickjumbo_prison_detail_by_slug($request) {
 
     $term = get_term_by('slug', $slug, 'penitenciaria');
     if ($term && !is_wp_error($term)) {
-        return rest_ensure_response([
-            'status' => 200,
-            'message' => 'ok',
-            'content' => [
-                'nome' => $term->name,
-                'slug' => $term->slug,
-                'cidade' => get_term_meta($term->term_id, 'cidade', true) ?: 'não cadastrado',
-                'estado' => get_term_meta($term->term_id, 'estado', true) ?: 'não cadastrado',
-                'cep' => get_term_meta($term->term_id, 'cep', true) ?: 'não cadastrado',
-            ],
-        ]);
+return rest_ensure_response([
+    'status' => 200,
+    'message' => 'ok',
+    'content' => [
+        'nome' => $term->name,
+        'slug' => $term->slug,
+        'cidade' => get_term_meta($term->term_id, 'cidade', true) ?: 'não cadastrado',
+        'estado' => get_term_meta($term->term_id, 'estado', true) ?: 'não cadastrado',
+        'cep' => get_term_meta($term->term_id, 'cep', true) ?: 'não cadastrado',
+        'logradouro' => get_term_meta($term->term_id, 'logradouro', true) ?: 'não cadastrado',
+        'numero' => get_term_meta($term->term_id, 'numero', true) ?: 'não cadastrado',
+        'complemento' => get_term_meta($term->term_id, 'complemento', true) ?: '',
+        'referencia' => get_term_meta($term->term_id, 'referencia', true) ?: '',
+        'criado_em' => get_term_meta($term->term_id, 'criado_em', true) ?: '',
+    ],
+]);
+
     }
 
     $produtos_response = clickjumbo_get_products($request);

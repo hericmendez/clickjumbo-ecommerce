@@ -320,6 +320,7 @@ formData.set('categoria', categoriaSelecionada || '');
 
 mostrarDebug(formData);
 
+
     try {
         const res = await fetch('https://clickjumbo.com.br/wp/wp-json/clickjumbo/v1/save-product', {
             method: 'POST',
