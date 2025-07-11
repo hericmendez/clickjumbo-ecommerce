@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="css/cart.css" />
+    <link rel="stylesheet" href="css/footer.css" />
+
+    <title>Checkout - Carrinho</title>
+  </head>
+
+  <body>
+    <div id="loadingSpinner" class="spinner-overlay" style="display: none">
+      <div
+        class="spinner text-primary"
+        role="status"
+        style="width: 4rem; height: 4rem"
+      >
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+    <div id="navbar"></div>
+
+    <main class="container py-4">
+      <h3 class="mb-3">🛒 Seu Carrinho</h3>
+      <div id="display" class="cartItemList mb-4"></div>
+
+      <div class="card">
+        <div class="card-header fs-4 fw-bold text-center">Finalizar Pedido</div>
+        <div class="card-body">
+          <div id="totalAmount" class="mb-4"></div>
+
+          <h5>Dados do Cliente</h5>
+          <form id="form" novalidate>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  class="form-control"
+                  placeholder="Nome"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  class="form-control"
+                  placeholder="Email"
+                  required
+                />
+              </div>
+              <div class="col-12">
+                <input
+                  id="mobile"
+                  name="mobile"
+                  type="tel"
+                  class="form-control"
+                  placeholder="Telefone"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <input
+                  id="street"
+                  name="street"
+                  type="text"
+                  class="form-control"
+                  placeholder="Rua"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <input
+                  id="city"
+                  name="city"
+                  type="text"
+                  class="form-control"
+                  placeholder="Cidade"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <input
+                  id="state"
+                  name="state"
+                  type="text"
+                  class="form-control"
+                  placeholder="Estado"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <input
+                  id="cep"
+                  name="cep"
+                  type="text"
+                  class="form-control"
+                  placeholder="CEP"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="prisonField" class="form-label"
+                >Penitenciária selecionada</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="prisonField"
+                readonly
+              />
+            </div>
+            <!-- Opções de frete -->
+            <div id="freteContainer" class="mb-4" style="display: none">
+              <label class="form-label" id="shipping-label"
+                >Método de envio:</label
+              >
+              <div
+                id="freteCardsContainer"
+                class="d-flex flex-column gap-3"
+              ></div>
+            </div>
+            <!-- Botões -->
+            <div class="d-grid gap-2">
+              <button
+                type="button"
+                id="btnCalcFrete"
+                class="btn btn-outline-primary"
+              >
+                Calcular Frete
+              </button>
+              <button
+                type="submit"
+                id="btnContinuar"
+                class="btn btn-success"
+                disabled
+              >
+                Continuar para pagamento
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <div id="notifyDiv1"></div>
+    <div id="notifyDiv2"></div>
+    <div id="footerDiv" class="mt-5"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="scripts/navbar.script.js"></script>
+    <script type="module" src="scripts/footer.script.js"></script>
+    <script type="module" src="scripts/cart.js"></script>
+  </body>
+</html>

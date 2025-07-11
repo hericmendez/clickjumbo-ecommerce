@@ -1,0 +1,18 @@
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /wp/
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /wp/index.php [L]
+</IfModule>
+# END WordPress
+
+# Redireciona a raiz do domínio para /app/
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^$ /app/ [L,R=302]
+</IfModule>

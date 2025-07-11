@@ -1,0 +1,99 @@
+{
+    "status": 200,
+    "message": "ok",
+    "content": [
+        {
+            "id": 314,
+            "name": "pão",
+            "category": "83",
+            "subcategory": "Sem Subcategoria",
+            "penitenciaria": "HERIC VINICIUS MENDES",
+            "weight": 0.29999999999999999,
+            "price": 4.5,
+            "maxUnitsPerClient": 3,
+            "thumb": "http://mock/images/biscoito_trakinas.png",
+            "raw_data": {
+                "id": 314,
+                "name": "pão",
+                "slug": "pao-20",
+                "date_created": {
+                    "date": "2025-06-23 15:52:53.000000",
+                    "timezone_type": 3,
+                    "timezone": "America/Sao_Paulo"
+                },
+                "date_modified": {
+                    "date": "2025-06-23 15:52:53.000000",
+                    "timezone_type": 3,
+                    "timezone": "America/Sao_Paulo"
+                },
+                "status": "publish",
+                "featured": false,
+                "catalog_visibility": "visible",
+                "description": "",
+                "short_description": "",
+                "sku": "123453536",
+                "global_unique_id": "",
+                "price": "4.5",
+                "regular_price": "4.5",
+                "sale_price": "",
+                "date_on_sale_from": null,
+                "date_on_sale_to": null,
+                "total_sales": "0",
+                "tax_status": "taxable",
+                "tax_class": "",
+                "manage_stock": false,
+                "stock_quantity": null,
+                "stock_status": "instock",
+                "backorders": "no",
+                "low_stock_amount": "",
+                "sold_individually": false,
+                "weight": "0.3",
+                "length": "",
+                "width": "",
+                "height": "",
+                "upsell_ids": [],
+                "cross_sell_ids": [],
+                "parent_id": 0,
+                "reviews_allowed": true,
+                "purchase_note": "",
+                "attributes": [],
+                "default_attributes": [],
+                "menu_order": 0,
+                "post_password": "",
+                "virtual": false,
+                "downloadable": false,
+                "category_ids": [
+                    95
+                ],
+                "tag_ids": [],
+                "shipping_class_id": 0,
+                "downloads": [],
+                "image_id": "",
+                "gallery_image_ids": [],
+                "download_limit": -1,
+                "download_expiry": -1,
+                "rating_counts": [],
+                "average_rating": 0,
+                "review_count": 0,
+                "cogs_value": null,
+                "meta_data": [
+                    {
+                        "id": 2436,
+                        "key": "maxUnitsPerClient",
+                        "value": "3"
+                    },
+                    {
+                        "id": 2437,
+                        "key": "thumb",
+                        "value": "http://mock/images/biscoito_trakinas.png"
+                    },
+                    {
+                        "id": 2438,
+                        "key": "subcategoria",
+                        "value": ""
+                    }
+                ]
+            }
+        }
+    ]
+}
