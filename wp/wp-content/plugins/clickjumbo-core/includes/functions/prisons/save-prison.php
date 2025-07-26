@@ -19,6 +19,7 @@ function clickjumbo_save_prison($request)
     $campos_obrigatorios = [
         'nome' => 'Nome',
         'cidade' => 'Cidade',
+        'bairro' => 'Bairro',
         'estado' => 'Estado',
         'cep' => 'CEP',
         'logradouro' => 'Logradouro',
@@ -43,6 +44,7 @@ function clickjumbo_save_prison($request)
 
     $nome = sanitize_text_field($params['nome']);
     $cidade = sanitize_text_field($params['cidade']);
+    $cidade = sanitize_text_field($params['bairro']);
     $estado = sanitize_text_field($params['estado']);
     $cep = preg_replace('/[^0-9]/', '', $params['cep']);
     $logradouro = sanitize_text_field($params['logradouro']);
@@ -68,7 +70,7 @@ function clickjumbo_save_prison($request)
         }
 
 wp_update_term($term->term_id, 'penitenciaria', ['name' => $nome]);
-
+        pdate_term_meta($term->term_id, 'bairro', $bairro);
         update_term_meta($term->term_id, 'cidade', $cidade);
         update_term_meta($term->term_id, 'estado', $estado);
         update_term_meta($term->term_id, 'cep', $cep);
@@ -78,9 +80,10 @@ wp_update_term($term->term_id, 'penitenciaria', ['name' => $nome]);
         update_term_meta($term->term_id, 'referencia', $referencia);
 $term_id = $term->term_id;
 
-$prison_data = [
+$dados_penitenciaria = [
     'nome' => $term->name,
     'slug' => $term->slug,
+    'bairro' => get_term_meta($term_id, 'bairro', true),
     'cidade' => get_term_meta($term_id, 'cidade', true),
     'estado' => get_term_meta($term_id, 'estado', true),
     'cep' => get_term_meta($term_id, 'cep', true),
@@ -96,7 +99,7 @@ $prison_data = [
             'success' => true,
             'message' => 'Penitenciária atualizada com sucesso.',
             'slug' => $slug,
-            'prison' => $prison_data
+            'dados_penitenciaria' => $dados_penitenciaria
 
         ]);
     }
@@ -119,7 +122,7 @@ $prison_data = [
     }
 
     $term_id = $result['term_id'];
-
+    update_term_meta($term_id, 'bairro', $cidade);
     update_term_meta($term_id, 'cidade', $cidade);
     update_term_meta($term_id, 'estado', $estado);
     update_term_meta($term_id, 'cep', $cep);
@@ -131,9 +134,10 @@ $prison_data = [
     $term_obj = get_term_by('slug', sanitize_title($nome), 'penitenciaria');
     $term_id = $term_obj->term_id;
 
-    $prison_data = [
+    $dados_penitenciaria = [
         'nome' => $term_obj->name,
         'slug' => $term_obj->slug,
+        'bairro' => get_term_meta($term_id, 'bairro', true),
         'cidade' => get_term_meta($term_id, 'cidade', true),
         'estado' => get_term_meta($term_id, 'estado', true),
         'cep' => get_term_meta($term_id, 'cep', true),
@@ -148,6 +152,6 @@ $prison_data = [
         'success' => true,
         'message' => 'Penitenciária registrada com sucesso.',
         'slug' => get_term($term_id)->slug,
-        'prison' => $prison_data
+        'dados_penitenciaria' => $dados_penitenciaria
     ]);
 }

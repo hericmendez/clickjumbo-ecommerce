@@ -13,8 +13,8 @@ function clickjumbo_render_orders_panel()
     </script>
 
     <div class="wrap">
-        <h1>Painel de Pedidos</h1>
-
+        <h1 class="mt-4 mb-4 fw-bold">Painel de Pedidos</h1>
+    <hr class="mt-0 p-0"/>
 <input type="text" id="search-input" class="form-control mb-3" placeholder="Buscar por cliente ou penitenciária...">
 <div class="table-responsive">  <table class="table table-striped table-hover align-middle">
             <thead>

@@ -26,7 +26,10 @@ main {
 
   .nav-link{
     text-decoration: none;
-    color: #fff;
+    
     font-weight: bold;
     
+  }
+  .nav-link:hover{
+      color:#fdcc2c;
   }

@@ -63,18 +63,18 @@ function abrirModalDetalhesPedido(pedido) {
   document.getElementById('pedido-endereco').textContent = pedido.cliente?.endereco || '—';
 
   // Envio
-  const shipping = pedido.shipping ?? {};
-  document.getElementById('pedido-envio-metodo').textContent = shipping.method || '—';
-  document.getElementById('pedido-envio-peso').textContent = shipping.cart_weight?.toString().replace('.', ',') || '—';
+  const envio = pedido.envio ?? {};
+  document.getElementById('pedido-envio-metodo').textContent = envio.method || '—';
+  document.getElementById('pedido-envio-peso').textContent = envio.peso_carrinho?.toString().replace('.', ',') || '—';
 
-  if (shipping.sender_address) {
-    const s = shipping.sender_address;
+  if (envio.remtente) {
+    const s = envio.remtente;
     document.getElementById('pedido-envio-remetente').textContent = `${s.rua}, ${s.cidade} - ${s.estado}, CEP ${s.cep}`;
   } else {
     document.getElementById('pedido-envio-remetente').textContent = '—';
   }
 
-  document.getElementById('pedido-frete').textContent = (shipping.frete_valor ?? 0).toFixed(2).replace('.', ',');
+  document.getElementById('pedido-frete').textContent = (envio.frete_valor ?? 0).toFixed(2).replace('.', ',');
 
   // Totais e pagamento
 document.getElementById('pedido-carrinho').textContent = pedido.total || '—';

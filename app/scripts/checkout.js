@@ -3,17 +3,17 @@
 import { API_URL } from "./baseUrl.js";
 import { getItem, removeItem } from "../functions/localStorage.js";
 
-const cartData = getItem("cartData") || [];
-const freteInfo = getItem("freteData");
+const dadosCarrinho = getItem("dadosCarrinho") || [];
+const freteInfo = getItem("dadosFrete");
 const token = getItem("token");
-const userData = getItem("userData");
-console.log("userData ==> ", userData);
-const cartItemsContainer = document.getElementById("cart-items");
-const cartCount = document.getElementById("cart-count");
-const cartSummary = document.getElementById("cart-summary");
-const shippingSummary = document.getElementById("shipping-summary");
+const dadosUsuario = getItem("dadosUsuario");
+console.log("dadosUsuario ==> ", dadosUsuario);
+const cartItemsContainer = document.getElementById("itens-carrinho");
+const qtdeCarrinho = document.getElementById("qtde-carinho");
+console.log("qtdeCarrinho ==> ", qtdeCarrinho);
+const resumoCarrinho = document.getElementById("resumo-carrinho");
+const resumoEnvio = document.getElementById("resumo-envio");
 const submitBtn = document.getElementById("submitBtn");
-const form = document.getElementById("checkout-form");
 
 const modal = new bootstrap.Modal(document.getElementById("paymentModal"));
 const modalBody = document.getElementById("paymentModalBody");
@@ -21,29 +21,29 @@ const confirmBtn = document.getElementById("confirmPaymentBtn");
 
 function renderCart() {
   let total = 0;
-  let weight = 0;
+  let peso = 0;
   cartItemsContainer.innerHTML = "";
-  cartSummary.innerHTML = "";
+  resumoCarrinho.innerHTML = "";
 
-  cartData.forEach((item) => {
+  dadosCarrinho.forEach((item) => {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex justify-content-between lh-sm";
     li.innerHTML = `
       <div>
-        <strong>${item.name}</strong><br />
-        <small>${item.weight || 0}kg x ${item.qty}</small>
+        <strong>${item.nome}</strong><br />
+        <small>${item.peso || 0}kg x ${item.qtde}</small>
       </div>
-      <span>R$ ${(item.price * item.qty).toFixed(2)}</span>
+      <span>R$ ${(item.preco * item.qtde).toFixed(2)}</span>
     `;
     cartItemsContainer.appendChild(li);
-    total += item.price * item.qty;
-    weight += item.weight * item.qty;
+    total += item.preco * item.qtde;
+    peso += item.peso * item.qtde;
   });
 
-  cartCount.textContent = cartData.length;
+  qtdeCarrinho.textContent = dadosCarrinho.length;
 
   const items = [
-    [`Peso total`, `${weight.toFixed(2)} kg`],
+    [`Peso total`, `${peso.toFixed(2)} kg`],
     [`Frete (${freteInfo?.metodo})`, `R$ ${freteInfo?.valor.toFixed(2)}`],
     [`Total`, `R$ ${(total + freteInfo?.valor).toFixed(2)}`],
   ];
@@ -51,12 +51,12 @@ function renderCart() {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex justify-content-between lh-sm";
     li.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
-    cartSummary.appendChild(li);
+    resumoCarrinho.appendChild(li);
   });
 }
 
 function renderShipping() {
-  shippingSummary.innerHTML = "";
+  resumoEnvio.innerHTML = "";
   const dados = [
     [`Método`, freteInfo?.metodo || "PAC"],
     [`CEP destino`, freteInfo?.cep_destino || "-"],
@@ -68,25 +68,25 @@ function renderShipping() {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex justify-content-between lh-sm";
     li.innerHTML = `<span>${label}</span><span>${value}</span>`;
-    shippingSummary.appendChild(li);
+    resumoEnvio.appendChild(li);
   });
 }
 
 function togglePaymentInstructions() {
-  const method = document.querySelector(
+  const metodoPagamento = document.querySelector(
     "input[name='paymentMethod']:checked"
   )?.value;
   document.getElementById("card-details").style.display =
-    method === "card" ? "block" : "none";
+    metodoPagamento === "card" ? "block" : "none";
   document
     .getElementById("pix-instructions")
-    .classList.toggle("d-none", method !== "pix");
+    .classList.toggle("d-none", metodoPagamento !== "pix");
   document
     .getElementById("boleto-instructions")
-    .classList.toggle("d-none", method !== "boleto");
+    .classList.toggle("d-none", metodoPagamento !== "boleto");
 }
 
-async function gerarPagamento(metodo, valor, userData) {
+async function gerarPagamento(metodo, valor, dadosUsuario) {
   if (metodo === "pix") {
     return {
       success: true,
@@ -99,15 +99,15 @@ async function gerarPagamento(metodo, valor, userData) {
 
   if (metodo === "boleto") {
     const res = await fetch(`${API_URL}/generate-boleto`, {
-      method: "POST",
+      metodoPagamento: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         user: {
-          nome: userData.nome,
-          email: userData.email,
+          nome: dadosUsuario.nome,
+          email: dadosUsuario.email,
         },
         valor_total: valor,
       }),
@@ -116,36 +116,36 @@ async function gerarPagamento(metodo, valor, userData) {
     return await res.json();
   }
 }
-async function processarPedido(metodo, valorTotal, userData) {
+async function processarPedido(metodo, valorTotal, dadosUsuario) {
   const payload = {
     user: {
-      name: userData.name,
-      email: userData.email,
+      nome: dadosUsuario.nome,
+      email: dadosUsuario.email,
     },
-    cart: {
-      products: cartData.map((item) => ({
+    carrinho: {
+      produtos: dadosCarrinho.map((item) => ({
         id: item.id,
-        qty: item.qty,
+        qtde: item.qtde,
       })),
     },
-    shipping: {
-      prison_name: prisonData.label,
-      cart_weight: cartData.reduce(
-        (acc, curr) => acc + curr.qty * curr.weight,
+    envio: {
+      nome_penitenciaria: dadosPenitenciaria.label,
+      peso_carrinho: dadosCarrinho.reduce(
+        (acc, curr) => acc + curr.qtde * curr.peso,
         0
       ),
-      method: freteInfo.metodo,
-      sender_address: {
+      metodoPagamento: freteInfo.metodo,
+      remetente: {
         cep: freteInfo.cep_origem,
-        rua: userData.street,
-        cidade: userData.city,
-        estado: userData.state,
+        rua: dadosUsuario.rua,
+        cidade: dadosUsuario.cidade,
+        estado: dadosUsuario.estado,
       },
       frete_valor: freteInfo.valor,
     },
-    payment: {
-      method: metodo,
-      payment_data: {
+    pagamento: {
+      metodoPagamento: metodo,
+      dados_pagamento: {
         valor_recebido: valorTotal,
         id_transacao: `TRANS_${Date.now()}`,
       },
@@ -153,7 +153,7 @@ async function processarPedido(metodo, valorTotal, userData) {
   };
 
   const res = await fetch(`${API_URL}/process-order`, {
-    method: "POST",
+    metodoPagamento: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -175,14 +175,14 @@ submitBtn.addEventListener("click", async () => {
   }
 
   try {
-    const valorProdutos = cartData.reduce(
-      (acc, item) => acc + item.price * item.qty,
+    const valorProdutos = dadosCarrinho.reduce(
+      (acc, item) => acc + item.preco * item.qtde,
       0
     );
     const valorFrete = freteInfo?.valor || 0;
     const valorTotal = valorProdutos + valorFrete;
 
-    const pagamento = await gerarPagamento(paymentMethod, valorTotal, userData);
+    const pagamento = await gerarPagamento(paymentMethod, valorTotal, dadosUsuario);
     if (!pagamento.success) {
       alert("Erro ao gerar pagamento.");
       return;
@@ -220,9 +220,9 @@ submitBtn.addEventListener("click", async () => {
       const pedido = await processarPedido(paymentMethod, valorTotal);
       if (pedido.success) {
         alert("✅ Pedido finalizado com sucesso!");
-        removeItem("cartData");
-        removeItem("cartValidated");
-        removeItem("freteData");
+        removeItem("dadosCarrinho");
+        removeItem("carrinhoValido");
+        removeItem("dadosFrete");
         window.location.href = "index.html";
       } else {
         alert("❌ Erro ao processar pedido.");
@@ -253,7 +253,7 @@ renderCart();
 renderShipping();
 togglePaymentInstructions();
 
-if (cartData.length === 0) {
+if (dadosCarrinho.length === 0) {
   cartItemsContainer.innerHTML =
     "<li class='list-group-item'>Carrinho vazio</li>";
   submitBtn.disabled = true;

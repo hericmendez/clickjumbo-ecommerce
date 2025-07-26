@@ -5,16 +5,16 @@ function renderSubcategories(
   subcats,
   handleAddToCart,
   handleRemoveOne,
-  cartData
+  dadosCarrinho
 ) {
   container.innerHTML = ""; // limpa o conteúdo anterior
-
+  console.log("renderSubcategories subcats:", subcats);
   Object.entries(subcats).forEach(([subcatName, items]) => {
     const subHeader = document.createElement("div");
     subHeader.style =
       "display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;";
     subHeader.className = "sub-header";
-
+    
     const heading = document.createElement("h3");
     heading.textContent = subcatName;
     heading.style = "margin: 0;";
@@ -53,7 +53,7 @@ function renderSubcategories(
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
-
+    
     const mobileList = document.createElement("div");
     mobileList.classList.add(
       "toggle-section",
@@ -63,25 +63,26 @@ function renderSubcategories(
 
     items.forEach((item) => {
       // mesmo código de itens (tabela + mobile)
-      const { id, name, thumb, price, weight, maxUnitsPerClient } = item;
-      const carrinhoItem = cartData.find((prod) => prod.id === id);
-      const qtdeAtual = carrinhoItem ? carrinhoItem.qty : 0;
+      const { id, nome, thumb, preco, peso, maximo_por_cliente } = item;
+      const carrinhoItem = dadosCarrinho.find((prod) => prod.id === id);
+      console.log(carrinhoItem)
+      const qtdeAtual = carrinhoItem ? carrinhoItem.qtde : 0;
       const fallbackThumb = "https://placehold.co/400x400/orange/white";
 
       const tr = document.createElement("tr");
       const tdProduto = document.createElement("td");
       tdProduto.innerHTML = `
         <div class="d-flex align-items-center gap-2">
-          <img src="${fallbackThumb}" alt="${name}" style="width:80px; height:80px; object-fit:cover;">
-          <span style="font-weight: 600;">${name.toUpperCase()}</span>
+            <img style="width: 100px;" src=${thumb|| fallbackThumb} alt="${nome}"/>
+          <span style="font-weight: 600;">${nome.toUpperCase()}</span>
         </div>
       `;
       const tdPreco = document.createElement("td");
-      tdPreco.textContent = `R$ ${price.toFixed(2).replace(".", ",")}`;
+      tdPreco.textContent = `R$ ${preco.toFixed(2).replace(".", ",")}`;
       const tdPeso = document.createElement("td");
-      tdPeso.textContent = `${weight}kg`;
+      tdPeso.textContent = `${peso}kg`;
       const tdQtd = document.createElement("td");
-      tdQtd.textContent = `${qtdeAtual} / ${maxUnitsPerClient}`;
+      tdQtd.textContent = `${qtdeAtual} / ${maximo_por_cliente}`;
 
       const tdAcoes = document.createElement("td");
       tdAcoes.style.whiteSpace = "nowrap";
@@ -91,7 +92,7 @@ function renderSubcategories(
       addBtn.textContent = "+";
       addBtn.setAttribute("class", "btn btn-success mx-1");
       addBtn.style = "font-size: 1.25rem; padding: 0.5rem 1rem;";
-      addBtn.disabled = maxUnitsPerClient <= qtdeAtual;
+      addBtn.disabled = maximo_por_cliente <= qtdeAtual;
       addBtn.addEventListener("click", () => handleAddToCart(item));
 
       const removeBtn = document.createElement("button");
@@ -110,15 +111,15 @@ function renderSubcategories(
       card.className = "border p-2 rounded d-flex";
       card.style = "gap: 0.75rem; align-items: center;";
       const img = document.createElement("img");
-      img.src = fallbackThumb;
-      img.alt = name;
+      img.src = thumb;
+      img.alt = nome;
       img.style = "width: 80px; height: 80px; object-fit: cover;";
       const info = document.createElement("div");
       info.style = "flex: 1;";
       info.innerHTML = `
-        <div style="font-weight: 600;">${name.toUpperCase()} (${weight}kg)</div>
-        <div>R$ ${price.toFixed(2).replace(".", ",")}</div>
-        <div>Qtd: ${qtdeAtual} / ${maxUnitsPerClient}</div>
+        <div style="font-peso: 600;">${nome.toUpperCase()} (${peso}kg)</div>
+        <div>R$ ${preco.toFixed(2).replace(".", ",")}</div>
+        <div>Qtd: ${qtdeAtual} / ${maximo_por_cliente}</div>
       `;
       const actions = document.createElement("div");
       actions.className = "d-flex flex-column gap-1";
@@ -155,44 +156,64 @@ export const appendData = (
   parent,
   handleAddToCart,
   handleRemoveOne,
-  cartData = []
+  dadosCarrinho = []
 ) => {
   parent.innerHTML = null;
-
+console.log("appendData items:", data)
   const hr = document.createElement("hr");
   hr.style = "margin-top: 2rem; margin-bottom: 2rem;width: 100%;";
   const categoryMap = {};
   data.forEach((item) => {
-    const { category, subcategory } = item;
-    if (!categoryMap[category]) categoryMap[category] = {};
-    if (!categoryMap[category][subcategory])
-      categoryMap[category][subcategory] = [];
-    categoryMap[category][subcategory].push(item);
+    const { categoria, subcategoria } = item;
+    if (!categoryMap[categoria]) categoryMap[categoria] = {};
+    if (!categoryMap[categoria][subcategoria])
+      categoryMap[categoria][subcategoria] = [];
+    categoryMap[categoria][subcategoria].push(item);
   });
 
-  Object.entries(categoryMap).forEach(([category, subcats]) => {
+  Object.entries(categoryMap).forEach(([categoria, subcats]) => {
     // Cria o container para título + select
     const categoryHeaderContainer = document.createElement("div");
     categoryHeaderContainer.className =
       "d-flex justify-content-between align-items-center mt-4 mb-2 flex-wrap gap-2";
-
+    const dadosPenitenciaria = JSON.parse(localStorage.getItem("dadosPenitenciaria"));
+    
     // Título da categoria
     const categoryHeading = document.createElement("h2");
-    categoryHeading.textContent = category;
+    categoryHeading.textContent = `${categoria} na ${dadosPenitenciaria?.nome}`;
     categoryHeading.className = "m-0";
     categoryHeading.style.fontSize = "2rem";
-
+  const hr = document.createElement("hr");
     // Select de ordenação
     const selectContainer = document.createElement("div");
 
     // Adiciona os dois elementos ao container
-    categoryHeaderContainer.appendChild(categoryHeading);
-    categoryHeaderContainer.appendChild(selectContainer);
 
-    // Adiciona o container ao DOM
     parent.appendChild(categoryHeaderContainer);
+    categoryHeaderContainer.appendChild(categoryHeading);
+        categoryHeaderContainer.appendChild(selectContainer);
+    // Adiciona o container ao DOM
 
-    const hr = document.createElement("hr");
+    
+    const details = document.createElement("details");
+    
+    
+    details.innerHTML = dadosPenitenciaria? `
+    
+      <summary>Ver endereço de ${dadosPenitenciaria?.nome}</summary>
+      <div class="p-2 border border-rounded-4 flex borde">
+  <p>${dadosPenitenciaria?.logradouro}, ${dadosPenitenciaria.numero}${dadosPenitenciaria.bairro?" - "+dadosPenitenciaria?.bairro : ""}
+  <br/>
+  ${dadosPenitenciaria.referencia +'<br/>' || ""}
+  ${dadosPenitenciaria?.cidade} - ${dadosPenitenciaria?.estado}
+  <br/>
+  CEP ${dadosPenitenciaria.cep}
+  <br/>
+    ${dadosPenitenciaria.telefone || ""}
+  </p>
+</div>
+    `: "Endereço indisponível."
+    parent.appendChild(details);
     parent.appendChild(hr);
 
     // Container específico dos subcats
@@ -209,7 +230,7 @@ export const appendData = (
         Object.fromEntries(sorted),
         handleAddToCart,
         handleRemoveOne,
-        cartData
+        dadosCarrinho
       );
     });
 
@@ -222,7 +243,7 @@ export const appendData = (
       Object.fromEntries(initialSorted),
       handleAddToCart,
       handleRemoveOne,
-      cartData
+      dadosCarrinho
     );
 
     const hrBottom = document.createElement("hr");

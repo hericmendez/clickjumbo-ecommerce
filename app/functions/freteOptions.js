@@ -1,11 +1,11 @@
 // Gera opções de frete
-export function renderFreteOptions(freteData) {
+export function renderFreteOptions(dadosFrete) {
     const container = document.getElementById("frete-opcoes");
     if (!container) return;
   
     container.innerHTML = "<p>Escolha o método de envio:</p>";
   
-    Object.entries(freteData).forEach(([metodo, dados]) => {
+    Object.entries(dadosFrete).forEach(([metodo, dados]) => {
       const wrapper = document.createElement("div");
       wrapper.className = "form-check";
   

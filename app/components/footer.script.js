@@ -1,4 +1,4 @@
-import { footer } from "../components/footer.js";
+import { footer } from "./footer.js";
 
 const footerDiv = document.getElementById("footerDiv");
 

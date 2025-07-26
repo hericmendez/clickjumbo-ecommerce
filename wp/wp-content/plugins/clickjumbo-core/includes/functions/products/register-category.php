@@ -12,11 +12,11 @@ add_action('rest_api_init', function () {
 function clickjumbo_register_product_category(WP_REST_Request $request)
 {
     $params = $request->get_json_params();
-    $name = sanitize_text_field($params['name'] ?? '');
+    $nome = sanitize_text_field($params['nome'] ?? '');
     $slug = sanitize_title($params['slug'] ?? '');
     $parent_id = intval($params['parent'] ?? 0); // 0 = categoria raiz
 
-    if (!$name || !$slug) {
+    if (!$nome || !$slug) {
         return new WP_REST_Response([
             'success' => false,
             'message' => 'Nome e slug são obrigatórios.'
@@ -38,7 +38,7 @@ function clickjumbo_register_product_category(WP_REST_Request $request)
         $args['parent'] = $parent_id;
     }
 
-    $result = wp_insert_term($name, 'product_cat', $args);
+    $result = wp_insert_term($nome, 'product_cat', $args);
 
     if (is_wp_error($result)) {
         return new WP_REST_Response([

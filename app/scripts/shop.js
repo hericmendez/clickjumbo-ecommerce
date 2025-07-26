@@ -13,38 +13,37 @@ const totalFood = document.getElementById("totalFood");
 const notifyDiv = document.getElementById("notifyDiv");
 const trendingBtn = document.getElementsByName("trendingBtn");
 
-const totalAmount = document.getElementById("totalAmount");
+const qtdeTotal = document.getElementById("qtdeTotal");
 const clearCartBtn = document.getElementById("clearCartBtn");
 const pesoInfo = document.getElementById("pesoTotalInfo");
 const orderSelectContainer = document.getElementById("orderSelectContainer");
 
-const MAX_WEIGHT = 12;
-let cartData = JSON.parse(localStorage.getItem("cartData")) || [];
-let currentCategory = "Alimentos";
+const PESO_MAX = 12;
+let dadosCarrinho = JSON.parse(localStorage.getItem("dadosCarrinho")) || [];
+let currentCategory = {
+    "nome": "Alimentos",
+    "slug": "alimentos",
+};
 
 const urlParams = new URLSearchParams(window.location.search);
 
-let currentPrison =
+
+let slugPenitenciaria =
   urlParams.size === 0 ? null : decodeURIComponent(urlParams.get("p"));
-console.log("currentPrison ==> ", currentPrison);
-if (!currentPrison) {
+
+if (!slugPenitenciaria) {
   window.alert(`Penitenciária não informada. Redirecionando...`);
   window.location.href = "/";
 }
-
+console.log("slugPenitenciaria")
 const orderBySelect = document.getElementById("orderBySelect");
 if (orderBySelect) {
   orderBySelect.addEventListener("change", (e) => {
     currentOrder = e.target.value;
-    displayItems(currentPrison, currentCategory);
+    displayItems(slugPenitenciaria, currentCategory);
   });
-}
-trendingBtn.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    currentCategory = btn.value;
-    displayItems(currentPrison, currentCategory);
-  });
-});
+} 
+
 function showNotification(type, message) {
   const { wrapper, id } = notify(type, message);
   notifyDiv.appendChild(wrapper);
@@ -56,7 +55,7 @@ function showNotification(type, message) {
 }
 
 clearCartBtn.addEventListener("click", () => {
-  if (cartData.length === 0) {
+  if (dadosCarrinho.length === 0) {
     notifyDiv.innerHTML = notify("info", "O carrinho já está vazio.");
     showToast();
     return;
@@ -69,7 +68,10 @@ clearCartBtn.addEventListener("click", () => {
   }
 });
 
-async function displayItems(slug, category = "Alimentos") {
+
+
+
+async function displayItems(slug, categoria) {
   const spinner = document.getElementById("loadingSpinner");
 
   let data;
@@ -81,7 +83,7 @@ async function displayItems(slug, category = "Alimentos") {
       // Simula tempo de carregamento apenas quando buscando dados
       // await new Promise((resolve) => setTimeout(resolve, 800));
       const response = await fetch(
-        `${API_URL}/product-list?slug=${currentPrison}`,
+        `${API_URL}/product-list?categoria=${categoria?.slug}`,
         {
           method: "GET",
           headers: {
@@ -92,10 +94,11 @@ async function displayItems(slug, category = "Alimentos") {
       if (!response.ok) {
         throw new Error(`Erro HTTP: ${response.status}`);
       }
+      
       const text = await response.text();
 
       data = JSON.parse(text);
-      console.log("data ==> ", data);
+      console.log("data ==> ", data.content.length);
 
       cachedData = data;
     } catch (error) {
@@ -106,21 +109,22 @@ async function displayItems(slug, category = "Alimentos") {
   } else {
     data = cachedData;
   }
-  const prisonName = data.content[0].penitenciaria;
-  console.log("prison: ",data.content)
+ 
   
   if (!data || !Array.isArray(data.content)) {
     console.warn("Erro ao carregar produtos da API.");
     return;
   }
+        console.log("data.content",  data.content)    
+const items = data.content.filter(
+  (item) =>
+    item?.categoria?.toLowerCase() === categoria?.nome?.toLowerCase()
+);
 
-  const items = data.content.filter(
-    (item) =>
-      item.category?.trim().toLowerCase() === category.trim().toLowerCase()
-  );
+console.log("ITEMS", items)
   items.sort((a, b) => {
-    const nameA = a.subcategory?.toLowerCase() || "";
-    const nameB = b.subcategory?.toLowerCase() || "";
+    const nameA = a.subcategoria?.toLowerCase() || "";
+    const nameB = b.subcategoria?.toLowerCase() || "";
 
     if (currentOrder === "asc") {
       return nameA.localeCompare(nameB);
@@ -128,11 +132,10 @@ async function displayItems(slug, category = "Alimentos") {
       return nameB.localeCompare(nameA);
     }
   });
-
   if (items.length === 0) {
     display.innerHTML = `
       <div class="alert alert-warning text-center fw-bold my-4" role="alert">
-        Nenhum produto encontrado para <strong>${category}</strong> na <strong>${prisonName}</strong>.
+        Nenhum produto encontrado para <strong>${categoria.nome}</strong> na <strong>${slug}</strong>.
       </div>
     `;
 
@@ -141,93 +144,97 @@ async function displayItems(slug, category = "Alimentos") {
   }
 
   items.forEach((item) => {
-    item.weight = item.weight || parseFloat((Math.random() * 2 + 1).toFixed(2));
+    item.peso = item.peso || parseFloat((Math.random() * 2 + 1).toFixed(2));
   });
 
-  appendData(items, display, handleAddToCart, handleRemoveOne, cartData);
-  showTotal(cartData, totalFood);
-  updateCartSummaryBar(cartData);
+  appendData(items, display, handleAddToCart, handleRemoveOne, dadosCarrinho);
+  showTotal(dadosCarrinho, totalFood);
+  updateCartSummaryBar(dadosCarrinho);
   updatePesoInfo();
 }
 
 function handleAddToCart(item) {
-  const existing = cartData.find((i) => i.id === item.id);
-  const currentQty = existing?.qty || 0;
+  const itemExiste = dadosCarrinho.find((i) => i.id === item.id);
+  const currentQtde = itemExiste?.qtde || 0;
 
-  if (currentQty >= item.maxUnitsPerClient) {
+  if (currentQtde >= item.maximo_por_cliente) {
     notifyDiv.innerHTML = notify(
       "warning",
-      `Limite de ${item.maxUnitsPerClient} unidades por cliente para este item.`
+      `Limite de ${item.maximo_por_cliente} unidades por cliente para este item.`
     );
     showNotification("success", "Item adicionado com sucesso!");
 
     return;
   }
 
-  const totalWeight = calculateCartWeight();
-  const addedWeight = item.weight || 0;
-  if (totalWeight + addedWeight > MAX_WEIGHT) {
+  const pesoTotal = calculateCartWeight();
+  const pesoAcrescentado = item.peso || 0;
+  if (pesoTotal + pesoAcrescentado > PESO_MAX) {
     notifyDiv.innerHTML = notify(
       "danger",
-      `Limite de peso excedido! Máximo: ${MAX_WEIGHT}kg`
+      `Limite de peso excedido! Máximo: ${PESO_MAX}kg`
     );
     showToast();
     return;
   }
 
-  if (existing) {
-    existing.qty += 1;
+  if (itemExiste) {
+    itemExiste.qtde += 1;
   } else {
-    cartData.push({ ...item, qty: 1 });
+    dadosCarrinho.push({ ...item, qtde: 1 });
   }
 
   saveCart();
   notifyDiv.innerHTML = notify("success", "Item adicionado com sucesso!");
   showToast();
 
-  displayItems(currentPrison, currentCategory);
+  displayItems(slugPenitenciaria, currentCategory);
 }
 
 function handleRemoveOne(item) {
-  const index = cartData.findIndex((i) => i.id === item.id);
+  const index = dadosCarrinho.findIndex((i) => i.id === item.id);
   if (index !== -1) {
-    cartData[index].qty -= 1;
-    if (cartData[index].qty <= 0) {
-      cartData.splice(index, 1);
+    dadosCarrinho[index].qtde -= 1;
+    if (dadosCarrinho[index].qtde <= 0) {
+      dadosCarrinho.splice(index, 1);
     }
 
     saveCart();
-    displayItems(currentPrison, currentCategory);
+    displayItems(slugPenitenciaria, currentCategory);
   }
 }
 
 function saveCart() {
-  localStorage.setItem("cartData", JSON.stringify(cartData));
-  showTotal(cartData, totalFood);
-  updateCartSummaryBar(cartData);
+
+  localStorage.setItem("dadosCarrinho", JSON.stringify(dadosCarrinho));
+  showTotal(dadosCarrinho, totalFood);
+  updateCartSummaryBar(dadosCarrinho);
   updatePesoInfo();
 }
+// Inicialização
 
 function clearCartData() {
-  cartData = [];
+  dadosCarrinho = [];
   saveCart();
-  appendCartData([], display, totalAmount);
-  displayItems(currentPrison, currentCategory);
+  appendCartData([], display, qtdeTotal);
+  displayItems(slugPenitenciaria, currentCategory);
 }
 
 function calculateCartWeight() {
-  return cartData.reduce(
-    (acc, curr) => acc + (curr.weight || 0) * (curr.qty || 1),
+  return dadosCarrinho.reduce(
+    (acc, curr) => acc + (curr.peso || 0) * (curr.qtde || 1),
     0
   );
 }
 
 function updatePesoInfo() {
+  // Inicialização
+console.log("teste");
   const pesoTotal = calculateCartWeight();
   if (pesoInfo) {
     pesoInfo.innerText = `Peso total do carrinho: ${pesoTotal.toFixed(
       2
-    )}kg (máximo: ${MAX_WEIGHT}kg)`;
+    )}kg (máximo: ${PESO_MAX}kg)`;
   } else {
     const insertAfter = document.querySelector("#totalFood");
     if (insertAfter) {
@@ -236,7 +243,7 @@ function updatePesoInfo() {
       pesoDiv.className = "alert alert-info mt-2 fw-bold";
       pesoDiv.innerText = `Peso total do carrinho: ${pesoTotal.toFixed(
         2
-      )}kg (máximo: ${MAX_WEIGHT}kg)`;
+      )}kg (máximo: ${PESO_MAX}kg)`;
       insertAfter.parentElement.insertBefore(pesoDiv, insertAfter.nextSibling);
     }
   }
@@ -246,7 +253,63 @@ function showToast() {
   const toastEl = document.getElementById("liveToast");
   if (toastEl) new bootstrap.Toast(toastEl).show();
 }
+async function carregarCategorias() {
+console.log("carregarCategorias");
+  
+  const container = document.getElementById("trendingBtnDiv");
+  container.innerHTML = `<div class="text-muted">Carregando categorias...</div>`;
+
+  try {
+    const res = await fetch(`${API_URL}/get-categories`);
+    const json = await res.json();
+
+    if (!json.success || !Array.isArray(json.categories)) throw new Error("Formato inválido");
+
+    container.innerHTML = "";
+
+json.categories
+  .filter(c => c.qtde_produtos > 0)
+  .forEach(cat => {
+    console.log("cat ==> ", cat);
+    const btn = document.createElement("button");
+    btn.setAttribute("nome", "trendingBtn"); // <-- correção aqui
+    btn.type = "button";
+    btn.className = "btn btn-outline-primary";
+    btn.value = cat.nome;
+    btn.textContent = cat.nome === "Uncategorized" ? "Outros" : cat.nome;
+    
+    // Adiciona classe ativa se for a categoria atual
+    if (currentCategory.nome === cat.nome) {
+      btn.classList.add("active", "fw-bold");
+    }
+    
+    btn.addEventListener("click", () => {
+      // Remove "active" de todos os botões antes de aplicar no atual
+      document.querySelectorAll('button[nome="trendingBtn"]').forEach(b => {
+        b.classList.remove("active", "fw-bold");
+      });
+
+      btn.classList.add("active", "fw-bold");
+      currentCategory = { nome: cat.nome, slug: cat.slug };
+      console.log("currentCategory ==> ", currentCategory);
+      cachedData = null;
+      displayItems(slugPenitenciaria, currentCategory);
+    });
+
+    container.appendChild(btn);
+  });
+
+
+  } catch (err) {
+    console.error("Erro ao carregar categorias:", err);
+    container.innerHTML = `<div class="text-danger">Erro ao carregar categorias.</div>`;
+  }
+}
 
 // Inicialização
-displayItems(currentPrison, currentCategory);
+console.log("teste de inicialização");
+carregarCategorias(); 
+displayItems(slugPenitenciaria, currentCategory);
 updatePesoInfo();
+
+

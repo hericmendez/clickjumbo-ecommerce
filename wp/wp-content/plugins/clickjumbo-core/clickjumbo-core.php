@@ -56,6 +56,11 @@ add_action('admin_enqueue_scripts', function () {
  */
 add_action('plugins_loaded', 'clickjumbo_core_load_modules');
 
+add_action('init', function() {
+    if (!get_role('client')) {
+        add_role('client', 'Client', ['read' => true]);
+    }
+});
 function clickjumbo_core_load_modules()
 {
     $base_dir = plugin_dir_path(__FILE__) . 'includes/';

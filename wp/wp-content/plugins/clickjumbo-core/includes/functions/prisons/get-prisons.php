@@ -79,11 +79,12 @@ function clickjumbo_prison_list_full($request) {
             'id' => $term->term_id,
             'nome' => $term->name,
             'slug' => $term->slug,
+            'logradouro' => get_term_meta($term->term_id, 'logradouro', true) ?: 'não cadastrado',
+            'numero' => get_term_meta($term->term_id, 'numero', true) ?: 'não cadastrado',
+            'bairro' => get_term_meta($term->term_id, 'bairro', true) ?: 'não cadastrado',
             'cidade' => get_term_meta($term->term_id, 'cidade', true) ?: 'não cadastrado',
             'estado' => get_term_meta($term->term_id, 'estado', true) ?: 'não cadastrado',
             'cep' => get_term_meta($term->term_id, 'cep', true) ?: 'não cadastrado',
-            'logradouro' => get_term_meta($term->term_id, 'logradouro', true) ?: 'não cadastrado',
-            'numero' => get_term_meta($term->term_id, 'numero', true) ?: 'não cadastrado',
             'complemento' => get_term_meta($term->term_id, 'complemento', true) ?: '',
             'referencia' => get_term_meta($term->term_id, 'referencia', true) ?: '',
             'criado_em' => get_term_meta($term->term_id, 'criado_em', true) ?: '',
@@ -142,11 +143,13 @@ return rest_ensure_response([
     'content' => [
         'nome' => $term->name,
         'slug' => $term->slug,
-        'cidade' => get_term_meta($term->term_id, 'cidade', true) ?: 'não cadastrado',
-        'estado' => get_term_meta($term->term_id, 'estado', true) ?: 'não cadastrado',
-        'cep' => get_term_meta($term->term_id, 'cep', true) ?: 'não cadastrado',
-        'logradouro' => get_term_meta($term->term_id, 'logradouro', true) ?: 'não cadastrado',
-        'numero' => get_term_meta($term->term_id, 'numero', true) ?: 'não cadastrado',
+        'logradouro' => get_term_meta($term->term_id, 'logradouro', true) ?: '',
+        'numero' => get_term_meta($term->term_id, 'numero', true) ?: 'S/N',
+        'bairro' => get_term_meta($term->term_id, 'bairro', true) ?: '',
+        'cidade' => get_term_meta($term->term_id, 'cidade', true) ?: '',
+        'estado' => get_term_meta($term->term_id, 'estado', true) ?: '',
+        'cep' => get_term_meta($term->term_id, 'cep', true) ?: '',
+
         'complemento' => get_term_meta($term->term_id, 'complemento', true) ?: '',
         'referencia' => get_term_meta($term->term_id, 'referencia', true) ?: '',
         'criado_em' => get_term_meta($term->term_id, 'criado_em', true) ?: '',
@@ -219,12 +222,37 @@ function clickjumbo_get_prison_name_by_slug($slug) {
 
 // 🔍 Busca dados completos por slug
 function clickjumbo_get_prison_data_by_slug($slug) {
-    $res = wp_remote_get(home_url('https://clickjumbo.com.br/wp/wp-json/clickjumbo/v1/prison-list-full'));
-    if (is_wp_error($res)) return null;
+    $slug = sanitize_title($slug);
 
-    $items = json_decode(wp_remote_retrieve_body($res), true)['content'] ?? [];
-    foreach ($items as $p) {
-        if ($p['slug'] === $slug) return $p;
+    // Tenta buscar como termo cadastrado (taxonomia 'penitenciaria')
+    $term = get_term_by('slug', $slug, 'penitenciaria');
+    if ($term && !is_wp_error($term)) {
+        return [
+            'nome' => $term->name,
+            'slug' => $term->slug,
+            'logradouro' => get_term_meta($term->term_id, 'logradouro', true) ?: '',
+            'numero' => get_term_meta($term->term_id, 'numero', true) ?: 'S/N',
+            'bairro' => get_term_meta($term->term_id, 'bairro', true) ?: '',
+            'cidade' => get_term_meta($term->term_id, 'cidade', true) ?: '',
+            'estado' => get_term_meta($term->term_id, 'estado', true) ?: '',
+            'cep' => get_term_meta($term->term_id, 'cep', true) ?: '',
+            'complemento' => get_term_meta($term->term_id, 'complemento', true) ?: '',
+            'referencia' => get_term_meta($term->term_id, 'referencia', true) ?: '',
+            'criado_em' => get_term_meta($term->term_id, 'criado_em', true) ?: '',
+        ];
     }
+
+    // Se não achou, tenta na lista full da REST API (ajusta a URL se necessário)
+    $url = home_url('/wp-json/clickjumbo/v1/prison-list-full');
+    $res = wp_remote_get($url);
+    if (!is_wp_error($res)) {
+        $items = json_decode(wp_remote_retrieve_body($res), true)['content'] ?? [];
+        foreach ($items as $p) {
+            if ($p['slug'] === $slug) return $p;
+        }
+    }
+
+    // Se não achou em nenhum, retorna null
     return null;
 }
+

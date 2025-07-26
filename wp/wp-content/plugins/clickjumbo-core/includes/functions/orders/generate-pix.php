@@ -12,15 +12,15 @@ add_action('rest_api_init', function () {
 
 // Endpoint público
 function clickjumbo_generate_pix(WP_REST_Request $req) {
-    $payment_data = $req->get_json_params();
+    $dados_pagamento = $req->get_json_params();
     return new WP_REST_Response([
         'success' => true,
-        'pix' => generate_pix($payment_data)
+        'pix' => generate_pix($dados_pagamento)
     ]);
 }
 
 // Função interna reutilizável
-function generate_pix($payment_data) {
+function generate_pix($dados_pagamento) {
     $mock_pix_code = "00020126600014BR.GOV.BCB.PIX0123mock@pix.key520400005303986540625.005802BR5925ClickJumbo Loja6009Sao Paulo62100506PIX1236304B14F";
 
     return [

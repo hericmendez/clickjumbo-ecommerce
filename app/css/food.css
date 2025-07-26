@@ -76,7 +76,7 @@ main {
 }
 
 #trendingBtnDiv > button {
-  width: 100px;
+  width: fit-content;
 }
 
 #trendingBtnDiv > button:nth-child(2),

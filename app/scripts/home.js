@@ -1,73 +1,67 @@
 import { setItem } from "../functions/localStorage.js";
 import { API_URL } from "./baseUrl.js";
-const datalist = document.getElementById("penitenciariaOptions");
-const input = document.getElementById("penitenciariaInput");
-const buscarBtn = document.getElementById("buscarBtn");
 
-async function getToken(endpoint) {
+const select = document.getElementById("penitenciariaSelect");
+const buscarBtn = document.getElementById("buscarBtn");
+let penitenciariasData = [];
+
+async function getPenitenciarias(page = 1, perPage = 50) {
   try {
-    const response = await axios.get(`https://clickjumbo.com.br/wp/wp-json/clickjumbo/v1${endpoint}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const response = await axios.get(`https://clickjumbo.com.br/wp/wp-json/clickjumbo/v1/prison-list-full?page=${page}&per_page=${perPage}`, {
+      headers: { "Content-Type": "application/json" },
     });
-    return response.data;
+    return response.data.content;
   } catch (error) {
-    if (error.response) {
-      console.error(`Erro (${error.response.status}):`, error.response.data);
-    } else {
-      console.error("Erro na requisição:", error.message);
-    }
-    return null;
+    console.error("Erro na requisição:", error.response?.data || error.message);
+    return [];
   }
 }
 
-async function carregarPenitenciarias() {
-  const data = await getToken("/prison-list");
-  if (!data) return;
+async function carregarTodasPenitenciarias() {
+  let page = 1;
+  let resultados = [];
 
-  console.log("Penitenciárias:", data.content);
-  populatePenitenciariasList(data);
+  while (true) {
+    const penitenciarias = await getPenitenciarias(page);
+    if (!penitenciarias.length) break;
+
+    resultados = resultados.concat(penitenciarias);
+    page++;
+  }
+
+  penitenciariasData = resultados;
+  populatePenitenciariasSelect(resultados);
 }
 
-carregarPenitenciarias();
-let penitenciariasMap = {};
+function populatePenitenciariasSelect(penitenciarias) {
+  select.innerHTML = '<option value="" disabled selected>Escolha a penitenciária</option>';
 
-function populatePenitenciariasList(data) {
-  const penitenciarias = data.content;
-  datalist.innerHTML = "";
-
-  penitenciariasMap = {}; // zera o mapa
-  penitenciarias.forEach((prison) => {
+  penitenciarias.forEach(penitenciaria => {
     const option = document.createElement("option");
-    option.value = prison.label;
-    penitenciariasMap[prison.label] = prison.slug;
-    datalist.appendChild(option);
+    option.value = penitenciaria.slug;
+    option.textContent = penitenciaria.nome;
+
+    select.appendChild(option);
   });
 }
 
 buscarBtn.addEventListener("click", () => {
-  const selectedLabel = input.value.trim();
-  console.log("input ==> ", input.value);
+  const selectedSlug = select.value;
 
-  if (selectedLabel) {
-    const slug = penitenciariasMap[selectedLabel]; // aqui recupera o slug
-    console.log("slug ==> ", slug);
-    console.log("selectedLabel ==> ", selectedLabel);
-    if (!slug) {
-      alert("Penitenciária inválida. Selecione uma da lista.");
-      return;
-    }
-    const prisonData = {
-      label: selectedLabel,
-      slug: slug,
-    };
-    console.log("prisonData ==> ", prisonData);
-    setItem("prisonData", prisonData);
-    ("");
-    const encoded = encodeURIComponent(slug);
-    window.location.href = `shop.html?p=${encoded}`;
-  } else {
+  if (!selectedSlug) {
     alert("Por favor, selecione uma penitenciária.");
+    return;
   }
+
+  const dadosPenitenciaria = penitenciariasData.find(obj => obj.slug === selectedSlug);
+  if (!dadosPenitenciaria) {
+    alert("Penitenciária inválida. Tente novamente.");
+    return;
+  }
+
+  setItem("dadosPenitenciaria", dadosPenitenciaria);
+  window.location.href = `shop.html?p=${encodeURIComponent(selectedSlug)}`;
 });
+
+// Inicialização
+carregarTodasPenitenciarias();

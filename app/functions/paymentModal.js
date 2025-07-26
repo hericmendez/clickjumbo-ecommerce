@@ -1,18 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const submitBtn = document.getElementById("submitBtn");
+  const finalizarPedido = document.getElementById("finalizarPedido");
   const modalElement = document.getElementById("paymentModal");
   const modalBody = document.getElementById("paymentModalBody");
   const confirmBtn = document.getElementById("confirmPaymentBtn");
+const finalizarBtn = document.getElementById("btnFinalizarPedido");
 
   const modal = new bootstrap.Modal(modalElement, {
     backdrop: 'static',
     keyboard: false
   });
+  if (finalizarBtn) {
+    finalizarPedido.addEventListener("click", () => {
+    const metodoPagamento = document.querySelector('input[name="paymentMethod"]:checked')?.value;
 
-  submitBtn.addEventListener("click", () => {
-    const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-
-    if (method === "pix") {
+    if (metodoPagamento === "pix") {
       modalBody.innerHTML = `
         <h5>Pagamento via Pix</h5>
         <p>Escaneie o QR Code abaixo ou copie o código Pix:</p>
@@ -22,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('pixCode')">Copiar</button>
         </div>
       `;
-    } else if (method === "boleto") {
+    } else if (metodoPagamento === "boleto") {
       modalBody.innerHTML = `
         <h5>Pagamento via Boleto</h5>
         <p>Baixe seu boleto ou copie o código de barras:</p>
@@ -32,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('boletoCode')">Copiar</button>
         </div>
       `;
-    } else if (method === "card") {
+    } else if (metodoPagamento === "card") {
       const success = Math.random() > 0.3;
       modalBody.innerHTML = success
         ? `<h5 class="text-success">Pagamento aprovado!</h5><p>Obrigado pela sua compra.</p>`
@@ -41,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modal.show();
   });
-
+  }
   confirmBtn.addEventListener("click", () => {
     setTimeout(() => {
       modal.hide();

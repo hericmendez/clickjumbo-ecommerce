@@ -14,6 +14,11 @@ function clickjumbo_render_shipments_panel() {
         update_option('cj_shipping_comprimento', intval($_POST['comprimento']));
         echo '<div class="alert alert-success">Dimensões salvas com sucesso!</div>';
     }
+add_action('admin_notices', function() {
+  if (!get_option('melhor_envio_token')) {
+    echo '<div class="notice notice-error"><p><b>Token da Melhor Envio não está configurada!</b></p></div>';
+  }
+});
 
     $altura = get_option('cj_shipping_altura', 10);
     $largura = get_option('cj_shipping_largura', 15);

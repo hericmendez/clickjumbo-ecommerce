@@ -47,9 +47,9 @@ function clickjumbo_get_categories(WP_REST_Request $request)
     $result = array_map(function ($term) {
         return [
             'id' => $term->term_id,
-            'name' => $term->name,
+            'nome' => $term->name,
             'slug' => $term->slug,
-            'count' => $term->count,
+            'qtde_produtos' => $term->count,
         ];
     }, $terms);
 
@@ -99,15 +99,15 @@ function clickjumbo_get_categories_full(WP_REST_Request $request)
 
         $result[] = [
             'id' => $term->term_id,
-            'name' => $term->name,
+            'nome' => $term->name,
             'slug' => $term->slug,
-            'count' => $term->count,
+            'qtde_produtos' => $term->count,
             'children' => array_map(function ($child) {
                 return [
                     'id' => $child->term_id,
-                    'name' => $child->name,
+                    'nome' => $child->name,
                     'slug' => $child->slug,
-                    'count' => $child->count,
+                    'qtde_produtos' => $child->count,
                 ];
             }, $children)
         ];

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="css/wizard.css" />
+    <link rel="stylesheet" href="css/cart.css" />
+    <link rel="stylesheet" href="css/footer.css" />
+
+    <title>Produtos</title>
+</head>
+
+<body>
+    <div id="loadingSpinner" class="spinner-overlay min-vh-100" style="display: none">
+        <div class="spinner text-primary" role="status" style="width: 4rem; height: 4rem">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <div id="navbar"></div>
+    <main class="d-flex flex-column align-items-center min-h-100" background-color: #fff">
+        <div class="container">
+
+            <div class="wizard my-5">
+                <div class="text-center mb-5">
+                    <h2 class="display-5">Finalize sua Compra</h2>
+                </div>
+                <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+                    <li class="nav-item flex-fill" role="presentation" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Carrinho">
+                        <a class="nav-link active rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                            href="#step1" id="step1-tab" data-bs-toggle="tab" role="tab" aria-controls="step1"
+                            aria-selected="true">
+                            <i class="fas fa-shopping-cart"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Step 2">
+                        <a class="nav-link rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                            href="#step2" id="step2-tab" data-bs-toggle="tab" role="tab" aria-controls="step2"
+                            aria-selected="false" title="Step 2">
+                            <i class="fas fa-briefcase"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Step 3">
+                        <a class="nav-link rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                            href="#step3" id="step3-tab" data-bs-toggle="tab" role="tab" aria-controls="step3"
+                            aria-selected="false" title="Step 3">
+                            <i class="fas fa-star"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Step 4">
+                        <a class="nav-link rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                            href="#step4" id="step4-tab" data-bs-toggle="tab" role="tab" aria-controls="step4"
+                            aria-selected="false" title="Step 4">
+                            <i class="fas fa-flag-checkered"></i>
+                        </a>
+                    </li>
+
+
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Step 5">
+                        <a class="nav-link rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                            href="#step5" id="step5-tab" data-bs-toggle="tab" role="tab" aria-controls="step5"
+                            aria-selected="false" title="Step 5">
+                            <i class="fas fa-flag-checkered"></i>
+                        </a>
+                    </li>
+
+
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <!-- Carrinho -->
+                    <div class="tab-pane fade min-vh-100 show active" role="tabpanel" id="step1"
+                        aria-labelledby="step1-tab">
+                   <div class="py-4">
+                   <h5>step 1</h5>
+                   
+                                          <button class="next btn btn-success">
+                                            Próximo
+                                        </button>
+                        </div> 
+                    </div>
+                    <!-- Dados do Cliente -->
+                    <div class="tab-pane fade min-vh-100" role="tabpanel" id="step2" aria-labelledby="step2-tab">
+                        <div class="py-4">
+                            <h5>step 2</h5>
+                                                 <button class="previous btn btn-success">
+                                            Anterior
+                                        </button>
+                                          <button class="next btn btn-success">
+                                            Próximo
+                                        </button>
+                        </div>
+
+                    </div>
+                    <!-- Envio -->
+                    <div class="tab-pane fade min-vh-100" role="tabpanel" id="step3" aria-labelledby="step3-tab">
+                            <div class="py-4">
+                   <h5>step 3</h5>
+                                                 <button class="previous btn btn-success">
+                                            Anterior
+                                        </button>
+                                          <button class="next btn btn-success">
+                                            Próximo
+                                        </button>
+                        </div> 
+        
+                    </div>
+                    <!-- Pagamento -->
+                    <div class="tab-pane fade min-vh-100" role="tabpanel" id="step4" aria-labelledby="step4-tab">
+                   <div class="py-4">
+                   <h5>step 4</h5>
+                                                 <button class="previous btn btn-success">
+                                            Anterior
+                                        </button>
+                                          <button class="next btn btn-success">
+                                            Próximo
+                                        </button>
+                        </div> 
+                    </div>
+                    <!-- Sucesso -->
+                    <div class="tab-pane fade min-vh-100" role="tabpanel" id="step5" aria-labelledby="step5-tab">
+                        <div class="py-4">
+                   <h5>step 5</h5>
+                            
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Pagamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body" id="paymentModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmPaymentBtn">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+
+    <div id="footerDiv" class="mt-5"></div>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="components/navbar.js"></script>
+    <script type="module" src="components/footer.js"></script>
+    <script type="module" src="scripts/wizard.js"></script>
+    <script type="module" src="scripts/cart.js"></script>
+    <!--     <script type="module" src="scripts/checkout.js"></script>
+ -->
+</body>
+
+</html>

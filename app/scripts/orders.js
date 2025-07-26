@@ -27,16 +27,16 @@ async function viewOrder(id) {
       }
     );
 
-    const order = await res.json();
+    const pedido = await res.json();
 
-    if (!order || !order.id) {
+    if (!pedido || !pedido.id) {
       document.getElementById(
         "orderDetailsContent"
       ).innerHTML = `<p>Pedido não encontrado.</p>`;
       return;
     }
 
-    const produtosHtml = order.produtos
+    const produtosHtml = pedido.produtos
       .map(
         (p) => `
       <tr>
@@ -50,17 +50,17 @@ async function viewOrder(id) {
       .join("");
 
     const html = `
-      <p><strong>Status:</strong> ${order.status}</p>
-      <p><strong>Data:</strong> ${order.data}</p>
+      <p><strong>Status:</strong> ${pedido.status}</p>
+      <p><strong>Data:</strong> ${pedido.data}</p>
 
       <h5>Penitenciária</h5>
-      <p>${order.penitenciaria.nome} (${order.penitenciaria.slug})<br>
-      ${order.penitenciaria.cidade} - ${order.penitenciaria.estado}, CEP: ${
-      order.penitenciaria.cep
+      <p>${pedido.penitenciaria.nome} (${pedido.penitenciaria.slug})<br>
+      ${pedido.penitenciaria.cidade} - ${pedido.penitenciaria.estado}, CEP: ${
+      pedido.penitenciaria.cep
     }</p>
 
       <h5>Cliente</h5>
-      <p>${order.cliente.nome} (${order.cliente.email})</p>
+      <p>${pedido.cliente.nome} (${pedido.cliente.email})</p>
 
       <h5>Produtos</h5>
       <div class="table-responsive">
@@ -79,26 +79,26 @@ async function viewOrder(id) {
 
       <h5>Frete</h5>
       <p>
-        Método: ${order.shipping.method}<br>
-        Peso: ${order.shipping.cart_weight} kg<br>
-        De: ${order.shipping.sender_address.rua}, ${
-      order.shipping.sender_address.cidade
-    } - ${order.shipping.sender_address.estado}<br>
-        Valor: R$ ${parseFloat(order.shipping.frete_valor).toFixed(2)}
+        Método: ${pedido.envio.method}<br>
+        Peso: ${pedido.envio.peso_carrinho} kg<br>
+        De: ${pedido.envio.remetente.rua}, ${
+      pedido.envio.remetente.cidade
+    } - ${pedido.envio.remetente.estado}<br>
+        Valor: R$ ${parseFloat(pedido.envio.frete_valor).toFixed(2)}
       </p>
 
       <h5>Pagamento</h5>
-      <p>Método: ${order.pagamento.metodo}<br>Status: ${
-      order.pagamento.status
+      <p>Método: ${pedido.pagamento.metodo}<br>Status: ${
+      pedido.pagamento.status
     }
     aaa
     </p>
 
-<h5 class="text-end">Total: <strong>R$ ${parseFloat(order.total).toFixed(2)}</strong></h5>
+<h5 class="text-end">Total: <strong>R$ ${parseFloat(pedido.total).toFixed(2)}</strong></h5>
 
-${['pending', 'completed'].includes(order.pagamento.status) ? `
+${['pending', 'completed'].includes(pedido.pagamento.status) ? `
   <div class="text-end mt-3">
-    <button class="btn btn-success" onclick="generateReceipt(${order.id})">
+    <button class="btn btn-success" onclick="generateReceipt(${pedido.id})">
       Gerar Comprovante
     </button>
   </div>
@@ -150,16 +150,16 @@ async function fetchUserOrders() {
     }
 
     const rows = data
-      .map((order) => {
+      .map((pedido) => {
         return `
           <tr>
-            <td>#${order.id}</td>
-            <td>${order.penitenciaria?.nome || "N/A"}</td>
-            <td class="text-capitalize">${order.status}</td>
-            <td>R$ ${parseFloat(order.total).toFixed(2)}</td>
-            <td>${formatDate(order.data)}</td>
+            <td>#${pedido.id}</td>
+            <td>${pedido.penitenciaria?.nome || "N/A"}</td>
+            <td class="text-capitalize">${pedido.status}</td>
+            <td>R$ ${parseFloat(pedido.total).toFixed(2)}</td>
+            <td>${formatDate(pedido.data)}</td>
             <td><button class="btn btn-sm btn-primary" onclick="viewOrder(${
-              order.id
+              pedido.id
             })">Detalhes</button></td>
           </tr>
         `;

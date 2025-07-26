@@ -34,8 +34,8 @@ add_action('rest_api_init', function () {
 
 function clickjumbo_validate_cart(WP_REST_Request $request)
 {
-    $body = $request->get_params();
-    $raw_cart = $body['cart'] ?? null;
+$body = json_decode($request->get_body(), true);
+    $raw_cart = $body['carrinho'] ?? null;
 
 /*     error_log('REQUEST: ' . print_r($request, true));
 
@@ -53,43 +53,43 @@ function clickjumbo_validate_cart(WP_REST_Request $request)
     }
 
     $valid_products = get_all_products_flat();
-    $total_weight = 0;
+    $peso_total = 0;
     $errors = [];
 
     foreach ($products as $item) {
-        $product_id = intval($item['id'] ?? 0);
-        $qty = intval($item['qty'] ?? 0);
+        $produto_id = intval($item['id'] ?? 0);
+        $qtde = intval($item['qtde'] ?? 0);
 
-        if ($qty <= 0) {
-            $errors[] = "Quantidade inválida para o produto de ID $product_id.";
+        if ($qtde <= 0) {
+            $errors[] = "Quantidade inválida para o produto de ID $produto_id.";
             continue;
         }
 
-        $product_data = $valid_products[$product_id] ?? null;
+        $product_data = $valid_products[$produto_id] ?? null;
 
         if (!$product_data) {
-            $errors[] = "Produto com ID $product_id não encontrado.";
+            $errors[] = "Produto com ID $produto_id não encontrado.";
             continue;
         }
 
-        $max = $product_data['maxUnitsPerClient'] ?? 99;
-        if ($qty > $max) {
-            $errors[] = "Limite de unidades excedido para o produto {$product_data['name']}. Máximo permitido: $max.";
+        $max = $product_data['maximo_por_cliente'] ?? 99;
+        if ($qtde > $max) {
+            $errors[] = "Limite de unidades excedido para o produto {$product_data['nome']}. Máximo permitido: $max.";
         }
 
-        $total_weight += ($product_data['weight'] * $qty);
+        $peso_total += ($product_data['peso'] * $qtde);
 
         // ⚠️ Validação de preço desativada temporariamente para testes
         /*
-        $price_unit = $product_data['price'];
-        $expected_price = $price_unit * $qty;
-        if (abs($expected_price - ($item['price'] ?? $expected_price)) > 0.01) {
-            $errors[] = "Preço inválido para o produto {$product_data['name']}.";
+        $preco_unit = $product_data['preco'];
+        $expected_preco = $preco_unit * $qtde;
+        if (abs($expected_preco - ($item['preco'] ?? $expected_preco)) > 0.01) {
+            $errors[] = "Preço inválido para o produto {$product_data['nome']}.";
         }
         */
     }
 
-    if ($total_weight > 12.0) {
+    if ($peso_total > 12.0) {
         $errors[] = 'Peso total do carrinho excede 12kg.';
     }
 

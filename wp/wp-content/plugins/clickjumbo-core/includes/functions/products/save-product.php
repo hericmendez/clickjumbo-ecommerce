@@ -20,10 +20,10 @@ function clickjumbo_save_product($request)
         return new WP_Error('missing_title', 'O campo "nome" ou "name" é obrigatório.', ['status' => 400]);
     }
 
-    $preco = floatval($fields['preco'] ?? $fields['price'] ?? 0);
-    $peso = floatval($fields['peso'] ?? $fields['weight'] ?? 0);
+    $preco = floatval($fields['preco'] ?? $fields['preco'] ?? 0);
+    $peso = floatval($fields['peso'] ?? $fields['peso'] ?? 0);
     $sku = sanitize_text_field($fields['sku'] ?? '') ?: 'CJ-' . date('Ymd-His');
-    $max_units = intval($fields['maxUnitsPerClient'] ?? 1);
+    $max_units = intval($fields['maximo_por_cliente'] ?? 1);
 
 
     // --- NOVOS CAMPOS BOOLEANOS ---
@@ -114,8 +114,8 @@ if (!is_array($penitenciarias_input)) {
             ['status' => 400, 'categorias_disponiveis' => $categorias_disponiveis]
         );
     }
+        $post_data['id'] = $produto_id;
 if ($produto_id > 0) {
-    $post_data['id'] = $produto_id;
     $produto_id = wp_update_post($post_data);
     $is_editing = true;
 } else {
@@ -171,9 +171,9 @@ if ($produto_id > 0) {
 
 
     // --- METADADOS E TERMOS ---
-    update_post_meta($produto_id, '_price', $preco);
-    update_post_meta($produto_id, '_regular_price', $preco);
-    update_post_meta($produto_id, '_weight', $peso);
+    update_post_meta($produto_id, '_preco', $preco);
+    update_post_meta($produto_id, '_regular_preco', $preco);
+    update_post_meta($produto_id, '_peso', $peso);
     update_post_meta($produto_id, '_sku', $sku);
     update_post_meta($produto_id, '_cj_max_units', $max_units);
     update_post_meta($produto_id, '_stock_status', 'instock');

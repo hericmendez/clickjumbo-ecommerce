@@ -6,6 +6,14 @@ export const numberWithCommas = (x) => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
+export const formatarDecimal = (n) =>{
+    try {
+        return n.toFixed(2).replace('.',',')
+    } catch {
+        return n;
+    }
+}
+
 export const randomNumber = () => {
     const rating = (Math.random() * 5).toFixed(1);
     return rating <= 1 ? 1.4 : rating >= 5 ? 4.5 : rating;

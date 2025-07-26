@@ -28,6 +28,7 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/orders/\d+/cancel$#',
         '#^/clickjumbo/v1/orders/\d+/status$#',
         '#^/clickjumbo/v1/delete-order$#',
+        '#^/clickjumbo/v1/user(?:/[a-zA-Z0-9\-]+)?$#',
         '#^/clickjumbo/v1/users$#',
         '#^/clickjumbo/v1/reset-data$#',
         '#^/clickjumbo/v1/upload-product$#',
@@ -39,6 +40,9 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/get-categories$#',
         '#^/clickjumbo/v1/save-prison$#',
         '#^/clickjumbo/v1/save-prison(?:/[a-zA-Z0-9\-]+)?$#',
+        '#^/clickjumbo/v1/cliente$#',
+        '#^/clickjumbo/v1/cliente/login$#',
+        '#^/clickjumbo/v1/validate-shipping$#'
 
         
     ];

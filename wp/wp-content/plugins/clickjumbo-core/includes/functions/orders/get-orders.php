@@ -126,6 +126,36 @@ function clickjumbo_get_orders_by_user($request)
     return rest_ensure_response($result);
 }
 
+function clickjumbo_get_historico_compras_by_user($user_id) {
+    if (!$user_id) return [];
+    $args = [
+        'customer_id' => $user_id,
+        'status' => ['pending', 'processing', 'completed'],
+        'limit' => -1,
+        'orderby' => 'date',
+        'order' => 'DESC',
+        'type' => 'shop_order',
+        'return' => 'objects',
+        'post_status' => ['wc-pending', 'wc-processing', 'wc-completed'],
+    ];
+
+    $orders = function_exists('wc_get_orders') ? wc_get_orders($args) : [];
+    if (empty($orders)) return [];
+
+    return array_map(function ($order) {
+        return [
+            'id' => $order->get_id(),
+            'cliente' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+            'user_id' => $order->get_meta('user_id'),
+            'penitenciaria' => $order->get_meta('penitenciaria'),
+            'status' => $order->get_status(),
+            'total' => $order->get_total(),
+            'data' => $order->get_date_created()->date('Y-m-d H:i:s'),
+        ];
+    }, $orders);
+}
+
+
 
 // REGISTRO DAS ROTAS
 add_action('rest_api_init', function () {
@@ -147,3 +177,5 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true',
     ]);
 });
+
+

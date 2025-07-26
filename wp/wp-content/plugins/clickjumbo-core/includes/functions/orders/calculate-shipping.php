@@ -31,14 +31,13 @@ function get_prison_data($slug) {
     return (is_array($body) && !empty($body['cep'])) ? $body : null;
 }
 
-// Cálculo de frete com a API da Melhor Envio
 function calcular_frete_melhor_envio($cep_origem, $cep_destino, $peso, $comprimento, $largura, $altura) {
     $token = get_option('melhor_envio_token');
 
     if (!$token) {
         return [
             'error' => true,
-            'debug' => 'Token da Melhor Envio não configurado.'
+            'debug' => 'Token da Melhor Envio não configurado. Acesse o painel administrativo para cadastrar seu token.'
         ];
     }
 
@@ -71,41 +70,58 @@ function calcular_frete_melhor_envio($cep_origem, $cep_destino, $peso, $comprime
     if (is_wp_error($res)) {
         return [
             'error' => true,
-            'debug' => $res->get_error_message()
+            'message' => 'Erro na comunicação com a API da Melhor Envio.',
+            'debug' => $res->get_error_message(),
+            'tip' => 'Verifique sua conexão, credenciais e tente novamente.'
         ];
     }
 
     $body = json_decode(wp_remote_retrieve_body($res), true);
 
+    // Se não é array, deu ruim na resposta
     if (!is_array($body)) {
         return [
             'error' => true,
-            'debug' => 'Resposta inválida da Melhor Envio.'
+            'message' => 'Resposta inválida da API da Melhor Envio.',
+            'debug' => 'Corpo retornado: ' . substr(wp_remote_retrieve_body($res), 0, 300),
+            'tip' => 'Aguarde alguns instantes ou confira se a API está fora do ar.'
         ];
     }
 
     // Filtrar apenas PAC e SEDEX
     $fretes = [];
+    $errosTransportadora = [];
+    error_log('[CJ_DEBUG] Resposta bruta da Melhor Envio: ' . print_r($body, true));
+
     foreach ($body as $servico) {
         $nome = strtoupper($servico['name'] ?? '');
         if (in_array($nome, ['PAC', 'SEDEX'])) {
+            if (!empty($servico['error'])) {
+                $errosTransportadora[$nome] = $servico['error'];
+                continue;
+            }
             $fretes[$nome] = [
-                'valor' => floatval($servico['price']),
-                'prazo' => $servico['delivery_time']
+                'valor' => isset($servico['price']) ? floatval($servico['price']) : null,
+                'prazo' => $servico['delivery_time'] ?? null
             ];
         }
     }
 
+    // Se só veio erro nas transportadoras, retorna motivo
     if (empty($fretes)) {
+        $motivo = !empty($errosTransportadora) ? implode(' | ', $errosTransportadora)
+                                               : 'Nenhum serviço PAC ou SEDEX retornado para este trecho.';
         return [
             'error' => true,
-            'debug' => 'Nenhum serviço PAC ou SEDEX retornado.'
+            'message' => 'Nenhum frete disponível para o trecho informado.',
+            'debug' => $motivo,
+            'tip' => 'Verifique se os CEPs de origem/destino são válidos e atendidos pelos Correios. Considere também possíveis restrições temporárias de logística na Melhor Envio.'
         ];
     }
 
     return [
         'success' => true,
-        'frete' => $fretes
+        'frete' => $fretes,
     ];
 }
 
@@ -116,9 +132,9 @@ function clickjumbo_calculate_shipping(WP_REST_Request $request) {
     $cep_origem = preg_replace('/[^0-9]/', '', $data['cep_origem'] ?? '');
     $cep_destino = preg_replace('/[^0-9]/', '', $data['cep_destino'] ?? '');
     $peso = floatval($data['peso'] ?? 0);
-    $comprimento = intval($data['comprimento'] ?? 16);
-    $largura = intval($data['largura'] ?? 11);
-    $altura = intval($data['altura'] ?? 2);
+    $comprimento = intval(get_option('cj_shipping_comprimento', 25));
+    $largura = intval(get_option('cj_shipping_largura', 15));
+    $altura = intval(get_option('cj_shipping_altura', 10));
 
     // Se o CEP de destino não for válido, tenta obter pela penitenciária
     $prison_data = null;
@@ -127,7 +143,8 @@ function clickjumbo_calculate_shipping(WP_REST_Request $request) {
         if (!$prison_data || empty($prison_data['cep'])) {
             return new WP_REST_Response([
                 'success' => false,
-                'message' => 'Penitenciária não encontrada.'
+                'message' => 'Penitenciária não encontrada ou sem CEP cadastrado.',
+                'debug' => $data['cep_destino'] ?? ''
             ], 400);
         }
         $cep_destino = preg_replace('/[^0-9]/', '', $prison_data['cep']);
@@ -137,7 +154,12 @@ function clickjumbo_calculate_shipping(WP_REST_Request $request) {
     if (!$cep_origem || !$cep_destino || $peso <= 0) {
         return new WP_REST_Response([
             'success' => false,
-            'message' => 'Dados insuficientes ou inválidos.'
+            'message' => 'Dados insuficientes ou inválidos. Verifique origem, destino e peso.',
+            'debug' => [
+                'cep_origem' => $cep_origem,
+                'cep_destino' => $cep_destino,
+                'peso' => $peso
+            ]
         ], 400);
     }
 
@@ -156,14 +178,15 @@ function clickjumbo_calculate_shipping(WP_REST_Request $request) {
     if (!empty($resultado['error'])) {
         return new WP_REST_Response([
             'success' => false,
-            'message' => 'Erro ao calcular frete.',
-            'debug' => $resultado['debug']
+            'message' => $resultado['message'] ?? 'Erro ao calcular frete.',
+            'debug'   => $resultado['debug'] ?? '',
+            'tip'     => $resultado['tip'] ?? null
         ], 500);
     }
 
     $resposta = [
         'success' => true,
-        'frete' => $resultado['frete']
+        'frete' => $resultado['frete'],
     ];
 
     if ($prison_data) {

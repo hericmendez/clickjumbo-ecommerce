@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/cart.css" />
+  <link rel="stylesheet" href="css/footer.css" />
+
+  <title>Checkout - Carrinho</title>
+</head>
+
+<body>
+  <div id="loadingSpinner" class="spinner-overlay" style="display: none">
+    <div class="spinner text-primary" role="status" style="width: 4rem; height: 4rem">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+  </div>
+  <div id="navbar"></div>
+
+  <main class="container py-4">
+    <h3 class="mb-3">🛒 Seu Carrinho</h3>
+
+    <div class="card p-4">
+
+
+        <form id="form" novalidate>
+          <h5>Dados do Visitante </h5>
+          <div class="row g-3 mb-4">
+            <div class="col-md-12">
+              <input id="nome" name="nome" type="text" class="form-control" placeholder="Nome" required />
+            </div>
+            <div class="col-md-4">
+              <input id="email" name="email" type="email" class="form-control" placeholder="Email" required />
+            </div>
+            <div class="col-4">
+              <input id="telefone" name="telefone" type="tel" class="form-control" placeholder="Telefone" required />
+            </div>
+            <div class="col-md-4">
+              <input id="telefone" name="numero_carteirinha" type="text" class="form-control"
+                placeholder="Nº da Carteirinha" required />
+            </div>
+            <div class="col-md-10">
+              <input id="rua" name="rua" type="text" class="form-control" placeholder="Rua" required />
+            </div>
+            <div class="col-md-2">
+              <input id="rua" name="numero" type="text" class="form-control" placeholder="Nº" required />
+            </div>
+            <div class="col-md-4">
+              <input id="cidade" name="cidade" type="text" class="form-control" placeholder="Cidade" required />
+            </div>
+            <div class="col-md-4">
+              <input id="estado" name="estado" type="text" class="form-control" placeholder="Estado" required />
+            </div>
+            <div class="col-md-4">
+              <input id="cep" name="cep" type="text" class="form-control" placeholder="CEP" required />
+            </div>
+          </div>
+          <hr>
+          <h5>Dados do Beneficiário (Detento)</h5>
+          <div class="row g-3 mb-4 ">
+            <div class="col-md-12">
+              <input id="nome" name="nome" type="text" class="form-control" placeholder="Nome" required />
+            </div>
+            <div class="col-md-4">
+              <input id="matricula" name="matricula" type="text" class="form-control" placeholder="Matrícula"
+                required />
+            </div>
+            <div class="col-4">
+              <input id="raio" name="raio" type="tel" class="form-control" placeholder="Raio" required />
+            </div>
+            <div class="col-md-4">
+              <input id="cela" name="cela" type="text" class="form-control" placeholder="Cela" required />
+            </div>
+        
+          </div>    <hr>
+          <h5>Endereço de Entrega</h5>
+          <div class="mb-3 ">
+
+            <div class="btn-group d-flex flex-column" role="group" aria-label="Escolher endereço">
+              <div class="mb-2">
+                <input type="radio" class="btn-check" name="opcaoEndereco" id="btnRadioPenitenciaria"
+                  value="penitenciaria" autocomplete="off" checked>
+                <label class="btn btn-outline-primary w-100 text-start" for="btnRadioPenitenciaria">
+                  <span id="infoPenitenciariaBtn">
+                    <!-- Dados da penitenciária aqui -->
+                  </span>
+                </label>
+              </div>
+
+              <div>
+                <input type="radio" class="btn-check" name="opcaoEndereco" id="btnRadioOutro" value="outro"
+                  autocomplete="off">
+                <label class="btn btn-outline-primary w-100 text-start" for="btnRadioOutro">
+                  Enviar para outro endereço
+                </label>
+              </div>
+
+            </div>
+
+            <div id="formOutroEndereco" class="mt-3" style="display: none;">
+              <div class="row g-2">
+                <div class="col-12 mt-2">
+                  <input type="text" class="form-control" id="destinatario" placeholder="Nome do Destinatário">
+                </div>
+                <div class="col-md-10 mt-2">
+                  <input type="text" class="form-control" id="outroLogradouro" placeholder="Rua/Avenida">
+                </div>
+                <div class="col-md-2 mt-2">
+                  <input type="text" class="form-control" id="outroNumero" placeholder="Número">
+                </div>
+                <div class="col-md-6 mt-2">
+                  <input type="text" class="form-control" id="outroBairro" placeholder="Bairro">
+                </div>
+                <div class="col-md-6 mt-2">
+                  <input type="text" class="form-control" id="outroComplemento" placeholder="Complemento">
+                </div>
+                <div class="col-md-6">
+                  <input type="text" class="form-control" id="outraCidade" placeholder="Cidade">
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" id="outroEstado" placeholder="Estado">
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" id="outroCep" placeholder="CEP">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Opções de frete -->
+          <div id="freteContainer" class="mb-4" style="display: none">
+            <label class="form-label" id="shipping-label">Método de envio:</label>
+            <div id="freteCardsContainer" class="d-flex flex-column gap-3"></div>
+          </div>
+          <!-- Botões -->
+          <div class="d-grid gap-2">
+            <button type="button" id="btnCalcFrete" class="btn btn-outline-primary">
+              Calcular Frete
+            </button>
+            <button type="submit" id="btnContinuar" class="btn btn-success" disabled>
+              Continuar para pagamento
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <div id="notifyDiv1"></div>
+  <div id="notifyDiv2"></div>
+  <div id="footerDiv" class="mt-5"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="components/navbar.script.js"></script>
+  <script type="module" src="components/footer.script.js"></script>
+  <script type="module" src="scripts/cart.js"></script>
+</body>
+
+</html>

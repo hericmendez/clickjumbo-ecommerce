@@ -26,7 +26,7 @@ function clickjumbo_reset_data() {
     }
  */
     // Excluir termos das taxonomias personalizadas
-    $taxonomies = ['category', 'subcategory'];
+    $taxonomies = ['categoria', 'subcategoria'];
 /*     foreach ($taxonomies as $tax) {
         $terms = get_terms([
             'taxonomy' => $tax,

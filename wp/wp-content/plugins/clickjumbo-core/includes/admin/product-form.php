@@ -7,7 +7,7 @@ function clickjumbo_render_novo_produto_form()
     $categoriaSelecionada = $_GET['categoria'] ?? '';
 
     echo '<div class="wrap">';
-echo '<h1 style="margin-bottom: 20px;" id="form-title">Cadastrar novo produto</h1>';
+echo '<h1 style="margin-bottom: 20px;" class="mt-4 mb-4 fw-bold" id="form-title">Cadastrar novo produto</h1>';
 
     echo '<form id="produto-form">';
 ?>
@@ -318,7 +318,7 @@ const categoriaSelect = document.getElementById('categoria');
 const categoriaSelecionada = categoriaSelect.options[categoriaSelect.selectedIndex]?.textContent?.trim();
 formData.set('categoria', categoriaSelecionada || '');
 
-mostrarDebug(formData);
+//mostrarDebug(formData);
 
 
     try {

@@ -1,15 +1,15 @@
-function updateCartSummaryBar(cart) {
+function updateCartSummaryBar(carrinho) {
     const produtosCount = document.getElementById("produtosCount");
     const pesoResumo = document.getElementById("pesoResumo");
     const valorResumo = document.getElementById("valorResumo");
   
-    const totalProdutos = cart.reduce((acc, curr) => acc + (curr.qty || 1), 0);
-    const pesoTotal = cart.reduce(
-      (acc, curr) => acc + (curr.weight || 0) * (curr.qty || 1),
+    const totalProdutos = carrinho.reduce((acc, curr) => acc + (curr.qtde || 1), 0);
+    const pesoTotal = carrinho.reduce(
+      (acc, curr) => acc + (curr.peso || 0) * (curr.qtde || 1),
       0
     );
-    const valorTotal = cart.reduce(
-      (acc, curr) => acc + (curr.price || 0) * (curr.qty || 1),
+    const valorTotal = carrinho.reduce(
+      (acc, curr) => acc + (curr.preco || 0) * (curr.qtde || 1),
       0
     );
   

@@ -48,7 +48,7 @@ function clickjumbo_render_products_panel() {
        <div class="d-flex flex-row justify-content-between align-items-center">
                             <div class="text-muted mb-2" id="info-itens">Exibindo 0 de 0 itens.</div>
                             
-                    <a class="btn btn-primary ms-2" href="#" onclick="newPrison()">Cadastrar novo Produto</a>
+                    <a class="btn btn-primary ms-2" href="#" onclick="cadastrarProduto()">Cadastrar novo Produto</a>
         </div>
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
@@ -322,7 +322,9 @@ document.getElementById('filtro-itens-por-pagina').addEventListener('change', (e
     limitePorPagina = parseInt(e.target.value);
     carregarProdutos(1); // volta pra página 1
 });
-
+    function cadastrarProduto(id) {
+        window.location.href = `/wp/wp-admin/admin.php?page=clickjumbo-novo-produto`;
+    }
     function editarProduto(id) {
         window.location.href = `/wp/wp-admin/admin.php?page=clickjumbo-novo-produto&produto_id=${id}`;
     }

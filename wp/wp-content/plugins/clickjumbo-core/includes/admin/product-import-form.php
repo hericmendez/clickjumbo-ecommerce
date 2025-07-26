@@ -7,7 +7,7 @@ function clickjumbo_render_import_csv_form()
 
         if ($handle) {
             $header = fgetcsv($handle, 1000, ",");
-            $required = ['name', 'category', 'subcategory', 'penitenciaria', 'weight', 'price', 'maxUnitsPerClient', 'thumb'];
+            $required = ['name', 'category', 'subcategoria', 'penitenciaria', 'peso', 'preco', 'maximo_por_cliente', 'thumb'];
 
             // Verifica se os campos obrigatórios estão no CSV
             if (array_diff($required, $header)) {
@@ -21,7 +21,7 @@ function clickjumbo_render_import_csv_form()
                 $data = array_combine($header, $row);
 
                 // Validações básicas
-                if (!$data['name'] || !$data['penitenciaria'] || $data['weight'] <= 0 || $data['price'] <= 0) continue;
+                if (!$data['name'] || !$data['penitenciaria'] || $data['peso'] <= 0 || $data['preco'] <= 0) continue;
 
                 // Cria ou atualiza o produto
                 $post_id = wp_insert_post([
@@ -32,22 +32,22 @@ function clickjumbo_render_import_csv_form()
 
                 if (is_wp_error($post_id)) continue;
 
-                update_post_meta($post_id, '_price', floatval($data['price']));
-                update_post_meta($post_id, '_regular_price', floatval($data['price']));
-                update_post_meta($post_id, '_weight', floatval($data['weight']));
-                update_post_meta($post_id, 'maxUnitsPerClient', intval($data['maxUnitsPerClient']));
+                update_post_meta($post_id, '_price', floatval($data['preco']));
+                update_post_meta($post_id, '_regular_price', floatval($data['preco']));
+                update_post_meta($post_id, '_weight', floatval($data['peso']));
+                update_post_meta($post_id, 'maximo_por_cliente', intval($data['maximo_por_cliente']));
                 update_post_meta($post_id, 'penitenciaria', sanitize_text_field($data['penitenciaria']));
                 update_post_meta($post_id, '_sku', strtoupper(substr(sanitize_title($data['name']), 0, 5)) . '-' . strtoupper(wp_generate_password(4, false)));
                 update_post_meta($post_id, 'thumb', $data['thumb']);
 
                 // Termos
                 wp_set_object_terms($post_id, [$data['penitenciaria']], 'penitenciaria');
-                wp_set_object_terms($post_id, [$data['category']], 'product_cat');
+                wp_set_object_terms($post_id, [$data['categoria']], 'product_cat');
 
-                if ($data['subcategory']) {
-                    $subcat_term = term_exists($data['subcategory'], 'product_cat');
+                if ($data['subcategoria']) {
+                    $subcat_term = term_exists($data['subcategoria'], 'product_cat');
                     if (!$subcat_term) {
-                        $subcat_term = wp_insert_term($data['subcategory'], 'product_cat', ['parent' => intval($data['category'])]);
+                        $subcat_term = wp_insert_term($data['subcategoria'], 'product_cat', ['parent' => intval($data['categoria'])]);
                     }
                     if (!is_wp_error($subcat_term)) {
                         wp_set_object_terms($post_id, [$subcat_term['term_id']], 'product_cat', true);
