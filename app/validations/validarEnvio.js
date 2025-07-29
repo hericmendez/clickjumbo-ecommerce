@@ -2,9 +2,10 @@ import { API_URL } from '../scripts/baseUrl.js'
 
 const token = localStorage.getItem("token")
 
-export async function validarFreteAPI (payload, endpoint) {
+export async function validarFreteAPI (payload) {
+console.log("payload validation ==> ", payload);
   try {
-    const response = await fetch(`${API_URL}/${endpoint}`, {
+    const response = await fetch(`${API_URL}/validate-shipping`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -15,6 +16,7 @@ export async function validarFreteAPI (payload, endpoint) {
     const data = await response.json()
 
     console.log('response ==> ', data)
+    return data.success;
   } catch (error) {
     console.log('error ==> ', error)
   }

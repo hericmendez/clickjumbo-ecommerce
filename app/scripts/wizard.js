@@ -1,23 +1,38 @@
 // wizard.js
 
+import { getItem } from '../functions/localStorage.js'
 import {
   validarCarrinhoAPI,
-  validarClienteForm,
+
   validarEnvioForm,
   validarFreteAPI,
-  validarPagamento,
+
   montarPayloadFrete
 } from '../validations/index.js' // ajuste o caminho se necessário
 import {
   montarPayloadDetento,
   montarPayloadVisitante
 } from '../validations/montarPayload.js'
-let spinner = document.getElementById('loadingSpinner')
-let payload = {}
+import { obterDadosPagamento, processarPedido } from './checkout.js'
+import { inicializarEnvioForm } from './envio.js'
+const user = getItem("user")
+if(!user){
+  alert("Atenção! Faça login para continuar.")
+}
 
-console.log('spinner ==> ', spinner)
-//   spinner.style.display = "block";
-//   spinner.style.display = "none";
+let spinner = document.getElementById('loadingSpinner')
+let payload = { 
+  cliente_id: user.id,
+  carrinho:[],
+  envio:{},
+  detento: {},
+  envio: {},
+  pagamento:{}
+}
+const dadosCarrinho = getItem('dadosCarrinho') || []
+
+const dadosPenitenciaria = getItem('dadosPenitenciaria')
+
 document.addEventListener('DOMContentLoaded', function () {
   // Enable Tooltips (ok)
   var tooltipTriggerList = [].slice.call(
@@ -34,27 +49,30 @@ document.addEventListener('DOMContentLoaded', function () {
   // Funções de validação por step
   const validacoes = {
     step1: async function () {
+      const totalCarrinho = getItem('totalCarrinho') || {}
+      payload.envio = {}
       spinner.style.display = 'block'
-      const carrinho = JSON.parse(localStorage.getItem('dadosCarrinho') || '[]')
-      console.log('carrinho ==> ', carrinho)
-      if (!carrinho.length) {
-        alert('Seu carrinho está vazio!')
+      payload.envio.peso_carrinho = totalCarrinho?.peso
+
+      console.log('dadosCarrinho ==> ', dadosCarrinho)
+      if (!dadosCarrinho.length) {
+        alert('Seu dadosCarrinho está vazio!')
         return false
       }
 
       try {
-        const result = await validarCarrinhoAPI(carrinho)
-        console.log('carrinho ==> ', carrinho)
+        const result = await validarCarrinhoAPI(dadosCarrinho)
+        console.log('dadosCarrinho ==> ', dadosCarrinho)
 
         if (result.success) {
-          payload.carrinho = carrinho
+          payload.carrinho = dadosCarrinho
           console.log('result ==> ', result)
           return true
         }
         /*         if (result.missing) {
           alert('Campos obrigatórios ausentes: ' + result.missing.join(', '))
         } else {
-          alert(result.message || 'Erro ao validar carrinho.')
+          alert(result.message || 'Erro ao validar dadosCarrinho.')
         }
         return false */
       } catch (e) {
@@ -69,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
     step2: async function () {
       //spinner.style.display = 'block'
 
-      const formValido = true//await validarClienteForm()
+      const formValido = true //await validarClienteForm()
       console.log('formValido ==> ', formValido)
       if (formValido) {
         const { envio } = montarPayloadFrete()
@@ -77,54 +95,81 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('detentoObj ==> ', detentoObj)
         console.log('envio ==> ', envio?.remetente)
         payload.detento = detentoObj
-        payload.envio = {}
-        const visitante = montarPayloadVisitante()
-        payload.envio.remetente = visitante
-        console.log('visitante ==> ', visitante)
 
-        //payload.envio.remetente = montarPayloadVisitante()
+        const visitante = montarPayloadVisitante()
+
+        payload.envio.remetente = visitante
+        payload.envio.destinatario = dadosPenitenciaria
+        console.log('visitante ==> ', visitante)
       }
       console.log('payload step 2:', payload)
       spinner.style.display = 'none'
       return formValido
     },
     step3: async function () {
-      // Endereço: validação DOM E backend
+      inicializarEnvioForm()
+
+      // Validação visual dos campos do formulário de envio
       if (!validarEnvioForm()) return false
-      console.log("validarEnvioForm() ==> ", validarEnvioForm());
-      const payloadFrete = montarPayloadFrete()
-      console.log("payloadFrete ==> ", payloadFrete);
-      try {
-        spinner.style.display = 'block'
-        const result = await validarFreteAPI(payload)
-        if (result.success) return true
-        if (result.message) {
-          if (result.missing) {
-            alert('Campos obrigatórios ausentes: ' + result.missing.join(', '))
-          } else if (result.expected_frete_valor) {
-            alert(
-              `Valor do frete divergente!`
-            )
-          } else {
-            alert(result.message)
-          }
-        } else {
-          alert('Erro ao validar frete.')
-        }
+
+      // Verifica se o usuário selecionou uma opção de frete
+      const selecionado = document.querySelector(
+        'input[name="freteMetodo"]:checked'
+      )
+      if (!selecionado) {
+        alert('Selecione uma opção de frete antes de continuar.')
+
+        // Destaque visual nos cards (em vermelho)
+        document.querySelectorAll('.frete-card').forEach(c => {
+          c.classList.remove('border-success')
+          c.classList.add('border-danger')
+        })
+
         return false
-      } catch (e) {
-        alert('Erro de comunicação com o servidor.')
-        return false
-      } finally {
-        spinner.style.display = 'none'
       }
+
+      // Limpa qualquer erro visual anterior
+      document.querySelectorAll('.frete-card').forEach(c => {
+        c.classList.remove('border-danger')
+      })
+
+      // ✅ Obtemos o frete selecionado do localStorage
+      const freteSelecionado = getItem('dadosFrete')
+      if (!freteSelecionado) {
+        alert('Erro: nenhum frete selecionado encontrado.')
+        return false
+      }
+
+      // Monta o payload completo (remetente, destinatário, peso)
+      const payloadCompleto = montarPayloadFrete()
+
+      // Valida no backend
+      const valido = await validarFreteAPI(payloadCompleto)
+      if (!valido) {
+        alert('Erro ao validar frete. Verifique os dados e tente novamente.')
+        return false
+      }
+
+      // ✅ Adiciona frete ao payload principal
+      payload.envio.frete_valor = freteSelecionado.valor
+      payload.envio.forma_envio = freteSelecionado.metodo
+
+      console.log('payload step 3:', payload)
+      return true
     },
-    step4: async function () {
-      spinner.style.display = 'block'
-      const pagtoValido = await validarPagamento()
-      spinner.style.display = 'none'
-      return pagtoValido
-    }
+step4: async function () {
+  const {valorTotal, frete} = getItem('totalCarrinho') || {}
+  const totalCompra = valorTotal+frete;
+  const dadosPagamento = await obterDadosPagamento(totalCompra);
+
+  if (!dadosPagamento) return false;
+
+  payload.pagamento = dadosPagamento;
+
+  const resultado = await processarPedido(payload);
+  console.log("resultado ==> ", resultado);
+  return resultado?.success;
+}
     // step5 = sucesso, não precisa validar nada
   }
 

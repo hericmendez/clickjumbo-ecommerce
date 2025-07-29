@@ -37,23 +37,23 @@ export const envioForm = () => `
                                             placeholder="Rua/Avenida">
                                     </div>
                                     <div class="col-md-2 mt-2">
-                                        <input type="text" class="form-control" value="123" id="numeroDestinatario" placeholder="Número">
+                                        <input type="text" class="form-control" id="numeroDestinatario" placeholder="Número">
                                     </div>
                                     <div class="col-md-6 mt-2">
-                                        <input type="text" class="form-control" value="Centro" id="bairroDestinatario" placeholder="Bairro">
+                                        <input type="text" class="form-control" id="bairroDestinatario" placeholder="Bairro">
                                     </div>
                                     <div class="col-md-6 mt-2">
-                                        <input type="text" class="form-control"  id="complementoDestinatario"
+                                        <input type="text" class="form-control" id="complementoDestinatario"
                                             placeholder="Complemento">
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" value="matão" id="cidadeDestinatario" placeholder="Cidade">
+                                        <input type="text" class="form-control" id="cidadeDestinatario" placeholder="Cidade">
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="text" class="form-control" value="SP" id="estadoDestinatario" placeholder="Estado">
+                                        <input type="text" class="form-control" id="estadoDestinatario" placeholder="Estado">
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="text" class="form-control" value="15991534" id="cepDestinatario" placeholder="CEP">
+                                        <input type="text" class="form-control" id="cepDestinatario" placeholder="CEP">
                                     </div>
                                 </div>
                             </div>

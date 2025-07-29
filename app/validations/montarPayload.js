@@ -1,5 +1,16 @@
-  const dadosPenitenciaria = JSON.parse(localStorage.getItem("dadosPenitenciaria") || "{}");
-  const totalCarrinho = Number(localStorage.getItem("totalCarrinho")) || 0;
+import { getItem } from "../functions/localStorage.js";
+
+  const dadosPenitenciaria = getItem("dadosPenitenciaria") || {};
+  if (!dadosPenitenciaria.slug) {
+  console.warn("Penitenciária não selecionada corretamente.");
+}
+
+const totalCarrinho = getItem("totalCarrinho") || {
+  peso: 0,
+  valorTotal: 0,
+  frete: 0
+};
+
 
 
   export function montarPayloadFrete() {
@@ -10,11 +21,11 @@
  
 
   // Campo de frete selecionado (ajuste conforme sua lógica)
-  let forma_envio = null, frete_valor = null;
+  let forma_envio = null, frete_valor = totalCarrinho.frete || null;
   document.querySelectorAll('input[name="freteMetodo"]').forEach(radio => {
     if(radio.checked) {
       forma_envio = radio.value;
-      frete_valor = Number(radio.dataset.valor) || null; // coloque o valor no data-valor ou pegue de onde já estiver salvo
+      frete_valor = getItem("dadosFrete").valor || null; // 
     }
   });
 

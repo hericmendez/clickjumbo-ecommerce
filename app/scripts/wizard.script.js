@@ -1,4 +1,4 @@
-// scripts/main-cart.js
+
 import { cartMenu, initCartMenu } from "../components/cartMenu.js";
 
 const cartMenuDiv = document.getElementById("cartMenuDiv");
@@ -23,3 +23,8 @@ import { pagamentoForm } from "../components/pagamentoForm.js";
 const pagamentoFormDiv = document.getElementById("pagamentoFormDiv");
 
 pagamentoFormDiv.innerHTML = pagamentoForm();
+
+import { inicializarEnvioForm } from "../scripts/envio.js"; // ou o caminho correto
+
+envioFormDiv.innerHTML = envioForm();
+inicializarEnvioForm(); // <== ✅ aqui está a mágica

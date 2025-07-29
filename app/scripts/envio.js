@@ -1,223 +1,164 @@
+// envio.js
 import { getItem, setItem } from "../functions/localStorage.js";
 import { montarPayloadFrete } from "../validations/montarPayload.js";
 import { API_URL } from "./baseUrl.js";
 
-// DOM Elements
-const btnCalcFrete = document.getElementById("btnCalcFrete");
-const freteContainer = document.getElementById("freteContainer");
-const freteCardsContainer = document.getElementById("freteCardsContainer");
-const campoPenitenciaria = document.getElementById("campoPenitenciaria");
-
-// Dados iniciais
-let dadosCarrinho = getItem("dadosCarrinho") || [];
+const token = getItem("token");
 const dadosPenitenciaria = getItem("dadosPenitenciaria");
-let dadosFrete = {}; // Salvo no localStorage
-
-// Exibe penitenciária (se existir campo)
-if (campoPenitenciaria) {
-  campoPenitenciaria.value = dadosPenitenciaria.nome;
-}
 
 function showSpinner() {
-  document.getElementById("loadingSpinner").style.display = "flex";
+  const spinner = document.getElementById("loadingSpinner");
+  if (spinner) spinner.style.display = "block";
 }
-function hideSpinner() {
-  document.getElementById("loadingSpinner").style.display = "none";
-}
-    const remetente = {
-      nome: document.getElementById("nomeVisitante")?.value,
-      email: document.getElementById("emailVisitante")?.value,
-      telefone: document.getElementById("telefoneVisitante")?.value,
-      rua: document.getElementById("ruaVisitante")?.value,
-      cidade: document.getElementById("cidadeVisitante")?.value,
-      estado: document.getElementById("estadoVisitante")?.value,
-      cep_origem: document.getElementById("cepVisitante")?.value,
-      nome_detento: document.getElementById("nomeDetento")?.value,
-      matricula_detento: document.getElementById("matriculaDetento")?.value,
-      raio_detento: document.getElementById("raioDetento")?.value,
-      cela_detento: document.getElementById("celaDetento")?.value,
-      nome_penitenciaria: dadosPenitenciaria.nome,
-      slug_penitenciaria: dadosPenitenciaria.slug,
-    };
-    const btnClienteForm = document.getElementById("btnClienteForm");
-    btnClienteForm.addEventListener("click", (e)=>{
-      e.preventDefault();
-    
-    })
 
-    
-if (btnCalcFrete) {
-  btnCalcFrete.addEventListener("click", async () => {
+function hideSpinner() {
+  const spinner = document.getElementById("loadingSpinner");
+  if (spinner) spinner.style.display = "none";
+}
+
+export async function calcularFrete(payloadFrete) {
+  console.log("calcularFrete()")
+  try {
     showSpinner();
 
-    const token = getItem("token");
-    if (!token) {
-      alert("Faça login para continuar.");
-      window.location.href = "login.html";
-      return hideSpinner();
+    const res = await fetch(`${API_URL}/calculate-shipping`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payloadFrete),
+    });
+
+    const freteJson = await res.json();
+    console.log("freteJson ==> ", freteJson);
+
+    if (!freteJson.success || !freteJson.frete) {
+      console.warn("Resposta inválida da API:", freteJson);
+      alert("Erro ao calcular frete.");
+      return null;
     }
 
-    if (!dadosCarrinho.length) {
-      alert("Carrinho vazio.");
-      return hideSpinner();
-    }
+    renderizarCardsFrete(freteJson.frete, payloadFrete.cep_origem, dadosPenitenciaria.slug);
 
-    // Calcula peso total do carrinho
-    const pesoTotal = dadosCarrinho.reduce(
-      (acc, item) => acc + (item.peso || 0) * (item.peso || 1),
-      0
-    );
-    if (pesoTotal > 12) {
-      alert(`Peso total (${pesoTotal.toFixed(2)}kg) excede o limite de 12kg.`);
-      return hideSpinner();
-    }
-
-    // Coleta dados do formulário de envio
-
-
-    const payload = {
-      carrinho: dadosCarrinho.map((item) => ({
-        id: item.id,
-        peso: item.peso || 1,
-      })),
-    };
-
-    try {
-      // 🔐 Valida carrinho
-      const validateRes = await fetch(
-        `${API_URL}/validate-cart`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-      const validateJson = await validateRes.json();
-      setItem("carrinhoValido", validateJson);
-    } catch (error) {
-      alert("Erro ao validar carrinho:", error);
-      return hideSpinner();
-    }
-
-    try {
-      // 🚚 Calcula frete
-      const res = await fetch(
-        `${API_URL}/prison-details/${dadosPenitenciaria.slug}`
-      );
-      const penitenciaria = await res.json();
-
-      const freteRes = await fetch(
-        `${API_URL}/calculate-shipping`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            cep_origem: remetente.cep_origem,
-            cep_destino: penitenciaria.content.cep,
-            peso: Number(pesoTotal.toFixed(2)),
-            comprimento: 25,
-            largura: 15,
-            altura: 10,
-          }),
-        }
-      );
-      const freteJson = await freteRes.json();
-
-      if (!freteJson.success || !freteJson.frete) {
-        alert("Erro ao calcular frete.");
-        return hideSpinner();
-      }
-
-      // 💳 Exibe cards de envio
-      freteCardsContainer.innerHTML = "";
-      Object.entries(freteJson.frete).forEach(([metodo, dados], index) => {
-        const id = `frete_${metodo}`;
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "card p-3 frete-card";
-        wrapper.style.cursor = "pointer";
-        wrapper.innerHTML = `
-          <input type="radio" name="freteMetodo" id="${id}" value="${metodo}" class="form-check-input d-none" ${index === 0 ? "checked" : ""}>
-          <label for="${id}" class="d-flex justify-content-between align-items-center mb-0 w-100">
-            <div>
-              <strong>${metodo}</strong><br/>
-              Valor: R$ ${dados.valor.toFixed(2)}<br/>
-              Prazo: ${dados.prazo} dias úteis
-            </div>
-            <i class="bi bi-truck" style="font-size: 1.5rem;"></i>
-          </label>
-        `;
-
-        wrapper.addEventListener("click", () => {
-          document
-            .querySelectorAll(".frete-card")
-            .forEach((c) => c.classList.remove("border-success"));
-          wrapper.classList.add("border-success");
-          wrapper.querySelector("input").checked = true;
-
-          dadosFrete = {
-            ...dados,
-            metodo,
-            cep_destino: dadosPenitenciaria.slug,
-            cep_origem: remetente.cep_origem,
-          };
-          setItem("dadosFrete", dadosFrete);
-        });
-
-        if (index === 0) {
-          wrapper.classList.add("border-success");
-          dadosFrete = {
-            ...dados,
-            metodo,
-            cep_destino: dadosPenitenciaria.slug,
-            cep_origem: remetente.cep_origem,
-          };
-          setItem("dadosFrete", dadosFrete); // salva o primeiro frete por padrão
-        }
-
-        freteCardsContainer.appendChild(wrapper);
-      });
-
-      setItem("dadosUsuario", remetente);
-      freteContainer.style.display = "block";
-    } catch (err) {
-      console.error("Erro ao calcular frete:", err);
-      alert("Erro inesperado. Tente novamente.");
-    } finally {
-      hideSpinner();
-    }
-  });
+    
+    return freteJson;
+  } catch (err) {
+    console.error("Erro ao calcular frete:", err);
+    alert("Erro inesperado. Tente novamente.");
+    return null;
+  } finally {
+    hideSpinner();
+  }
 }
 
-
-document.addEventListener("DOMContentLoaded", function() {
+export function inicializarEnvioForm() {
+  const campoPenitenciaria = document.getElementById("campoPenitenciaria");
+  const formEnvio = document.getElementById("formEnvio");
+  const btnRadioOutro = document.getElementById("btnRadioOutro");
+  const btnRadioPenitenciaria = document.getElementById("btnRadioPenitenciaria");
   const infoPenitenciariaBtn = document.getElementById("infoPenitenciariaBtn");
+
+  if (campoPenitenciaria && dadosPenitenciaria) {
+    campoPenitenciaria.value = dadosPenitenciaria.nome;
+  }
+
+  const toggleOutroEndereco = () => {
+    if (formEnvio) formEnvio.style.display = btnRadioOutro?.checked ? "block" : "none";
+    console.log("btnRadioOutro?.checked ==> ", btnRadioOutro?.checked);
+  };
+
+  btnRadioPenitenciaria?.addEventListener("change", toggleOutroEndereco);
+  btnRadioOutro?.addEventListener("change", toggleOutroEndereco);
+  toggleOutroEndereco();
+
   if (infoPenitenciariaBtn && dadosPenitenciaria) {
     infoPenitenciariaBtn.innerHTML = renderPenitenciariaInfo(dadosPenitenciaria);
   }
 
-  const btnRadioPenitenciaria = document.getElementById("btnRadioPenitenciaria");
-  const btnRadioOutro = document.getElementById("btnRadioOutro");
-  const formEnvio = document.getElementById("formEnvio");
+  // 🧩 ADICIONE ISSO AQUI:
+  const btnCalcFrete = document.getElementById("btnCalcFrete");
+  if (btnCalcFrete) {
+    btnCalcFrete.addEventListener("click", async () => {
+      console.log("👉 CLICOU EM CALCULAR FRETE");
 
-  function toggleOutroEndereco() {
-    if (btnRadioOutro?.checked) {
-      formEnvio.style.display = "block";
-    } else if (formEnvio) {
-      formEnvio.style.display = "none";
-    }
+      const payload = montarPayloadFrete();
+      const {remetente, destinatario, peso_carrinho} = payload.envio;
+      console.log("remetente, destinatario, peso_carrinho ==> ", remetente, destinatario, peso_carrinho);
+
+      const miniPayload = {
+
+        cep_origem: remetente.cep,
+        cep_destino: destinatario.cep,
+        peso: peso_carrinho,
+      }
+
+      console.log("payload inicializarEnvioForm ==> ", payload);
+            console.log("miniPayload ==> ", miniPayload);
+      if (!payload || !payload.envio) {
+        alert("Erro ao montar o payload de frete.");
+        return;
+      }
+
+      const resultado = await calcularFrete(miniPayload);
+      if (!resultado) {
+        alert("Erro ao calcular frete. Verifique os dados e tente novamente.");
+      }
+    });
+  } else {
+    console.warn("❌ Botão #btnCalcFrete não encontrado!");
   }
+}
 
-  btnRadioPenitenciaria && btnRadioPenitenciaria.addEventListener("change", toggleOutroEndereco);
-  btnRadioOutro && btnRadioOutro.addEventListener("change", toggleOutroEndereco);
-  toggleOutroEndereco();
-});
+function renderizarCardsFrete(fretes, cep_origem, cep_destino) {
+  const freteCardsContainer = document.getElementById("freteCardsContainer");
+  if (!freteCardsContainer) return;
+
+  freteCardsContainer.innerHTML = "";
+
+  Object.entries(fretes).forEach(([metodo, dados]) => {
+    const id = `frete_${metodo}`;
+    const wrapper = document.createElement("div");
+    wrapper.className = "card p-3 frete-card";
+    wrapper.style.cursor = "pointer";
+    wrapper.innerHTML = `
+      <input type="radio" name="freteMetodo" id="${id}" value="${metodo}" class="form-check-input d-none">
+      <label for="${id}" class="d-flex justify-content-between align-items-center mb-0 w-100">
+        <div>
+          <strong>${metodo}</strong><br/>
+          Valor: R$ ${dados?.valor.toFixed(2)}<br/>
+          Prazo: ${dados?.prazo} dias úteis
+        </div>
+        <i class="bi bi-truck" style="font-size: 1.5rem;"></i>
+      </label>
+    `;
+
+    wrapper.addEventListener("click", () => {
+      // Remove destaque de todos os cards
+      document.querySelectorAll(".frete-card").forEach((c) =>
+        c.classList.remove("border-success", "border-danger")
+      );
+
+      // Marca este como selecionado
+      wrapper.classList.add("border-success");
+      wrapper.querySelector("input").checked = true;
+
+      const freteSelecionado = { ...dados, metodo, cep_origem, cep_destino };
+      setItem("dadosFrete", freteSelecionado);
+      const totalCarrinho = getItem("totalCarrinho");
+      totalCarrinho.frete = freteSelecionado.valor;
+      setItem("totalCarrinho", totalCarrinho)
+      // Habilita o botão de avançar
+      document.getElementById("btnAvancarStep3").disabled = false;
+    });
+
+    freteCardsContainer.appendChild(wrapper);
+  });
+
+  // Desabilita botão "Próximo" por padrão
+  document.getElementById("btnAvancarStep3").disabled = true;
+}
+
 
 function renderPenitenciariaInfo(dados) {
   return `

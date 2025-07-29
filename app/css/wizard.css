@@ -65,3 +65,7 @@
   pointer-events: none;
   cursor: not-allowed;
 }
+
+.frete-card.border-danger {
+  border: 2px solid #dc3545 !important;
+}

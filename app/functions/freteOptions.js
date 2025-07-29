@@ -1,5 +1,6 @@
 // Gera opções de frete
 export function renderFreteOptions(dadosFrete) {
+console.log("dadosFrete ==> ", dadosFrete);
     const container = document.getElementById("frete-opcoes");
     if (!container) return;
   
