@@ -3,7 +3,8 @@ import { appendData } from "../functions/appendData.js";
 import { showTotal } from "../functions/showTotal.js";
 import { appendCartData } from "../functions/appendCartData.js";
 import updateCartSummaryBar from "../functions/updateCartSummaryBar.js";
-import { API_URL } from "./baseUrl.js";
+import { API_URL } from "../api/baseUrl.js";
+import { apiFetch } from "../api/apiFetch.js";
 console.log("API_URL ==> ", API_URL);
 let cachedData = null;
 let currentOrder = "asc"; // padrão
@@ -82,14 +83,15 @@ async function displayItems(slug, categoria) {
     try {
       // Simula tempo de carregamento apenas quando buscando dados
       // await new Promise((resolve) => setTimeout(resolve, 800));
-      const response = await fetch(
-        `${API_URL}/product-list?categoria=${categoria?.slug}`,
+      const response = await apiFetch(
+        `/product-list?categoria=${categoria?.slug}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
+         true
       );
       if (!response.ok) {
         throw new Error(`Erro HTTP: ${response.status}`);
@@ -260,7 +262,7 @@ console.log("carregarCategorias");
   container.innerHTML = `<div class="text-muted">Carregando categorias...</div>`;
 
   try {
-    const res = await fetch(`${API_URL}/get-categories`);
+    const res = await apiFetch(`/get-categories`);
     const json = await res.json();
 
     if (!json.success || !Array.isArray(json.categories)) throw new Error("Formato inválido");

@@ -1,9 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-// Inclua aqui os requires/imports necessários (products, validações, payment, etc)
-// ... seus requires ...
-
 add_action('rest_api_init', function () {
     register_rest_route('clickjumbo/v1', '/process-order', [
         'methods' => 'POST',
@@ -16,12 +13,12 @@ function clickjumbo_handle_process_order($request)
 {
     $data = $request->get_json_params();
 
-    // Novos nomes conforme seu payload
-    $user_id = intval($data['cliente_id'] ?? 0);
-    $carrinho = $data['carrinho'] ?? [];
-    $envio = $data['envio'] ?? [];
+    // --- Payload ---
+    $user_id   = intval($data['cliente_id'] ?? 0);
+    $carrinho  = $data['carrinho'] ?? [];
+    $envio     = $data['envio'] ?? [];
     $pagamento = $data['pagamento'] ?? [];
-    $detento = $data['detento'] ?? [];
+    $detento   = $data['detento'] ?? [];
 
     // Validação básica
     if (!$user_id || empty($carrinho) || empty($envio) || empty($pagamento)) {
@@ -33,8 +30,35 @@ function clickjumbo_handle_process_order($request)
         return new WP_REST_Response(['success' => false, 'message' => 'Usuário inválido'], 401);
     }
 
-    // Valida penitenciária se for envio para penitenciária
+    // Carrega penitenciária por slug (mesmo se enviar_para_penitenciaria = false)
+    $slug = sanitize_title(
+        $envio['slug_penitenciaria'] ??
+        $detento['slug_penitenciaria'] ??
+        ($envio['destinatario']['slug'] ?? '')
+    );
+
     $penitenciaria_obj = null;
+    if (!empty($slug) && function_exists('clickjumbo_get_prison_data_by_slug')) {
+        $penitenciaria_obj = clickjumbo_get_prison_data_by_slug($slug);
+    }
+
+    // Fallback: usa os dados do destinatário
+    if (!$penitenciaria_obj && !empty($envio['destinatario'])) {
+        $penitenciaria_obj = [
+            'nome'        => $envio['destinatario']['nome'] ?? ($envio['nome_penitenciaria'] ?? $detento['nome_penitenciaria'] ?? ''),
+            'slug'        => $slug,
+            'cep'         => $envio['destinatario']['cep'] ?? '',
+            'cidade'      => $envio['destinatario']['cidade'] ?? '',
+            'estado'      => $envio['destinatario']['estado'] ?? '',
+            'referencia'  => $envio['destinatario']['referencia'] ?? '',
+            'complemento' => $envio['destinatario']['complemento'] ?? '',
+            'logradouro'  => $envio['destinatario']['logradouro'] ?? '',
+            'bairro'      => $envio['destinatario']['bairro'] ?? '',
+            'numero'      => $envio['destinatario']['numero'] ?? '',
+        ];
+    }
+
+    // Se explicitamente enviar_para_penitenciaria = true, valida o slug
     if (!empty($envio['enviar_para_penitenciaria'])) {
         $slug = sanitize_title($envio['slug_penitenciaria'] ?? '');
         $penitenciaria_obj = function_exists('clickjumbo_get_prison_data_by_slug') ? clickjumbo_get_prison_data_by_slug($slug) : null;
@@ -43,81 +67,108 @@ function clickjumbo_handle_process_order($request)
         }
     }
 
-    // Validação do carrinho (ajuste para seu validate-cart se necessário)
+    // --- Valida carrinho (sem frete aqui) ---
     $req_cart = new WP_REST_Request('POST', '/clickjumbo/v1/validate-cart');
-    $req_cart->set_body_params(['carrinho' => $carrinho]);
+    $req_cart->set_body(wp_json_encode(['carrinho' => $carrinho]));
     $cart_validation = function_exists('clickjumbo_validate_cart') ? clickjumbo_validate_cart($req_cart) : null;
+
     if (is_wp_error($cart_validation) || !($cart_validation->get_data()['success'] ?? false)) {
-        return new WP_REST_Response(['success' => false, 'message' => 'Carrinho inválido', 'debug' => $cart_validation->get_data() ?? null], 400);
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Carrinho inválido',
+            'debug'   => $cart_validation instanceof WP_REST_Response ? $cart_validation->get_data() : null
+        ], 400);
     }
 
-    // Validação do frete (opcional: ajuste se necessário)
-    $req_frete = new WP_REST_Request();
-    $req_frete->set_body(json_encode(['envio' => $envio]));
-    $frete_valido = function_exists('clickjumbo_validate_shipping') ? clickjumbo_validate_shipping($req_frete) : null;
-    if (is_wp_error($frete_valido) || !($frete_valido->get_data()['success'] ?? false)) {
-        return new WP_REST_Response(['success' => false, 'message' => 'Frete inválido', 'debug' => $frete_valido->get_data() ?? null], 400);
+    // --- Guard-rails simples para envio (sem recalcular) ---
+    $valorFrete = isset($envio['frete_valor']) ? (float)$envio['frete_valor'] : 0.0;
+    $formaEnvio = strtoupper(trim((string)($envio['forma_envio'] ?? '')));
+    if ($valorFrete < 0 || $formaEnvio === '') {
+        return new WP_REST_Response(['success' => false, 'message' => 'Dados de envio inválidos'], 400);
     }
 
-    // Processa o pagamento
-    $forma_envio = $envio['forma_envio'] ?? null;
-    $pagamento_response = null;
-    switch ($pagamento['method'] ?? $pagamento['forma_envio'] ?? $forma_envio) {
-        case 'pix':
-            $pagamento_response = function_exists('generate_pix') ? generate_pix($pagamento['payment_data'] ?? []) : ['status' => 'confirmado'];
-            break;
-        case 'boleto':
-            $pagamento_response = function_exists('generate_boleto') ? generate_boleto($pagamento['payment_data'] ?? []) : ['status' => 'confirmado'];
-            break;
-        case 'credit-card':
-        case 'debt-card':
-            $pagamento_response = ["status" => "confirmado", "message" => "Pagamento aprovado"];
-            if (function_exists('generate_receipt')) generate_receipt($wp_user->user_email);
-            break;
-        default:
-            return new WP_REST_Response(['success' => false, 'message' => 'Método de pagamento não reconhecido'], 400);
-    }
-
-    // Recalcula produtos detalhados
+    // --- Recalcula produtos detalhados ---
     $produtos_completos = [];
     $pesoTotal = 0;
     $valorCarrinho = 0;
+
     foreach ($carrinho as $item) {
         $product_id = $item['id'] ?? null;
-        $qtde = $item['qtde'] ?? $item['qty'] ?? 1;
+        $qtde       = $item['qtde'] ?? $item['qty'] ?? 1;
         if (!$product_id) continue;
+
         $produto = function_exists('clickjumbo_get_product_by_id') ? clickjumbo_get_product_by_id($product_id) : null;
         if ($produto) {
-            $produto['qtde'] = $qtde;
-            $produto['preco'] = round(floatval($produto['preco']), 2);
-            $produto['peso'] = round(floatval($produto['peso']), 3);
+            $produto['qtde']     = $qtde;
+            $produto['preco']    = round((float)$produto['preco'], 2);
+            $produto['peso']     = round((float)$produto['peso'], 3);
             $produto['subtotal'] = round($produto['preco'] * $qtde, 2);
-            $pesoTotal += $produto['peso'] * $qtde;
+
+            $pesoTotal     += $produto['peso'] * $qtde;
             $valorCarrinho += $produto['subtotal'];
             $produtos_completos[] = $produto;
         }
     }
 
-    $valorFrete = floatval($envio['frete_valor'] ?? 0);
     $valorTotal = $valorCarrinho + $valorFrete;
 
-    // Cria o pedido no WooCommerce
+    // --- Cria o pedido no WooCommerce antes do gateway ---
     $pedido = wc_create_order();
     foreach ($produtos_completos as $item) {
         $product = wc_get_product($item['id']);
         if ($product) $pedido->add_product($product, $item['qtde']);
     }
-
-    // Dados de cobrança (ajuste conforme seu fluxo)
     $pedido->set_billing_first_name($wp_user->first_name ?: $wp_user->display_name);
     $pedido->set_billing_email($wp_user->user_email);
-
-    // Define status conforme o gateway
-    $pedido->set_status(($pagamento_response['status'] ?? '') === 'confirmado' ? 'wc-completed' : 'wc-pending');
-    $pedido->set_payment_method($pagamento['method'] ?? $pagamento['forma_envio'] ?? $forma_envio);
     $pedido->set_customer_id($user_id);
 
-    // Salva todos os metadados principais do pedido
+    // --- Payload base p/ Mercado Pago ---
+    $order_payload = [
+        'id'            => $pedido->get_id(),
+        'valor_total'   => round($valorTotal, 2),
+        'cliente'       => [
+            'nome'  => $wp_user->first_name ?: $wp_user->display_name,
+            'email' => $wp_user->user_email,
+            // 'cpf' => ... // (se você tiver)
+        ],
+        'destinatario'  => $envio['destinatario'] ?? [],
+        'envio'         => $envio,
+        'produtos'      => $produtos_completos,
+        'detento'       => $detento,
+        'penitenciaria' => $penitenciaria_obj,
+    ];
+
+    // --- Gateway ---
+    require_once __DIR__ . '/../payments/mercadopago.php';
+    $payment_method = $pagamento['method'] ?? 'pix';
+
+    if ($payment_method === 'pix') {
+        $mp_resp = cj_mp_pay_pix($order_payload);
+    } elseif ($payment_method === 'boleto') {
+        $mp_resp = cj_mp_pay_boleto($order_payload);
+    } elseif (in_array($payment_method, ['credit-card','debt-card','card'], true)) {
+        $dados_pagamento = $pagamento['dados_pagamento'] ?? [];
+        $mp_resp = cj_mp_pay_card($order_payload, $dados_pagamento);
+    } else {
+        return new WP_REST_Response(['success' => false, 'message' => 'Método de pagamento não reconhecido'], 400);
+    }
+
+    if (!empty($mp_resp['error'])) {
+        return new WP_REST_Response(['success' => false, 'message' => 'Falha no gateway de pagamento', 'gateway' => $mp_resp], 400);
+    }
+
+    // --- Metadados & status ---
+    $pedido->update_meta_data('_cj_mp_gateway', 'mercadopago');
+    $pedido->update_meta_data('_cj_mp_method', $payment_method);
+    $pedido->update_meta_data('_cj_mp_payment_id', $mp_resp['payment_id'] ?? '');
+    $pedido->update_meta_data('_cj_mp_status', $mp_resp['status'] ?? '');
+    $pedido->update_meta_data('_cj_mp_status_detail', $mp_resp['status_detail'] ?? '');
+    $pedido->update_meta_data('_cj_mp_raw', $mp_resp['raw'] ?? []);
+
+    $pedido->set_status(cj_mp_wc_status($mp_resp['status'] ?? 'pending'));
+
+    // Metas suas
+    $pedido->set_payment_method($payment_method);
     $pedido->update_meta_data('cliente_id', $user_id);
     $pedido->update_meta_data('produtos', $produtos_completos);
     $pedido->update_meta_data('peso_total', round($pesoTotal, 3));
@@ -132,37 +183,43 @@ function clickjumbo_handle_process_order($request)
     $pedido->update_meta_data('destinatario', $envio['destinatario'] ?? []);
     $pedido->update_meta_data('remetente', $envio['remetente'] ?? []);
     $pedido->update_meta_data('pagamento', $pagamento);
-    $pedido->update_meta_data('pagamento_response', $pagamento_response);
-    if (isset($pagamento_response['qrcode_url'])) $pedido->update_meta_data('comprovante_url', $pagamento_response['qrcode_url']);
+    $pedido->update_meta_data('pagamento_response', $mp_resp);
+
+    if (!empty($mp_resp['qr_code_base64'])) {
+        $pedido->update_meta_data('comprovante_url', $mp_resp['ticket_url'] ?? '');
+    }
 
     $pedido->calculate_totals();
     $pedido->save();
 
-    // Payload final de resposta
+    // --- Resposta ---
     $order_data = [
-        'id' => $pedido->get_id(),
-        'status' => $pedido->get_status(),
-        'penitenciaria' => $penitenciaria_obj,
-        'detento' => $detento,
+        'id'                   => $pedido->get_id(),
+        'status'               => $pedido->get_status(),
+        'penitenciaria'        => $penitenciaria_obj,
+        'detento'              => $detento,
         'enviar_para_penitenciaria' => $envio['enviar_para_penitenciaria'] ?? false,
-        'destinatario' => $envio['destinatario'] ?? [],
-        'remetente' => $envio['remetente'] ?? [],
-        'produtos' => $produtos_completos,
-        'peso_total' => round($pesoTotal, 3),
-        'valor_carrinho' => round($valorCarrinho, 2),
-        'valor_frete' => round($valorFrete, 2),
-        'valor_total' => round($valorTotal, 2),
-        'forma_envio' => $envio['forma_envio'] ?? '',
-        'pagamento' => $pagamento,
-        'pagamento_response' => $pagamento_response,
-        'comprovante_url' => $pagamento_response['qrcode_url'] ?? '',
-        'data' => current_time('d-m-Y H:i:s'),
+        'destinatario'         => $envio['destinatario'] ?? [],
+        'remetente'            => $envio['remetente'] ?? [],
+        'produtos'             => $produtos_completos,
+        'peso_total'           => round($pesoTotal, 3),
+        'valor_carrinho'       => round($valorCarrinho, 2),
+        'valor_frete'          => round($valorFrete, 2),
+        'valor_total'          => round($valorTotal, 2),
+        'forma_envio'          => $envio['forma_envio'] ?? '',
+        'pagamento'            => $pagamento,
+        'pagamento_response'   => $mp_resp,
+        'qrcode'               => $mp_resp['qr_code'] ?? null,
+        'qrcode_base64'        => $mp_resp['qr_code_base64'] ?? null,
+        'boleto_url'           => $mp_resp['boleto_url'] ?? null,
+        'ticket_url'           => $mp_resp['ticket_url'] ?? null,
+        'data'                 => current_time('d-m-Y H:i:s'),
     ];
 
     return new WP_REST_Response([
-        'success' => true,
-        'message' => 'Pedido processado com sucesso',
+        'success'  => true,
+        'message'  => 'Pedido processado com sucesso',
         'order_id' => $pedido->get_id(),
-        'data' => $order_data,
+        'data'     => $order_data,
     ]);
 }

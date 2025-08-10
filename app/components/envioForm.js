@@ -29,7 +29,7 @@ export const envioForm = () => `
                             <div id="formEnvio" class="mt-3" style="display: none;">
                                 <div class="row g-2">
                                     <div class="col-12 mt-2">
-                                        <input type="text" class="form-control" value=-"José Silva" id="destinatario"
+                                        <input type="text" class="form-control" value="João Silva" id="destinatario"
                                             placeholder="Nome do Destinatário">
                                     </div>
                                     <div class="col-md-10 mt-2">
@@ -53,7 +53,7 @@ export const envioForm = () => `
                                         <input type="text" class="form-control" value="SP" id="estadoDestinatario" placeholder="Estado">
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="text" class="form-control" value="15991534" id="cepDestinatario" placeholder="CEP">
+                                        <input type="text" class="form-control" value="22222222" id="cepDestinatario" placeholder="CEP">
                                     </div>
                                 </div>
                             </div>

@@ -1,4 +1,5 @@
-import { API_URL } from "./baseUrl";
+import { apiFetch } from "../api/apiFetch.js";
+import { API_URL } from "../api/baseUrl.js";
 
 function formatDate(dataString) {
   const [data, hora] = dataString.split(" ");
@@ -19,10 +20,10 @@ async function viewOrder(id) {
       return;
     }
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_URL}/orders/${id}`,
       {
-        credentials: "include",
+ 
         headers: { Accept: "application/json" },
       }
     );
@@ -131,10 +132,10 @@ async function fetchUserOrders() {
 
     
   try {
-    const response = await fetch(
-      `${API_URL}/orders/by-user?user_id=${user.id}`,
+    const response = await apiFetch(
+      `/orders/by-user?user_id=${user.id}`,
       {
-        credentials: "include",
+
         headers: {
           Accept: "application/json",
         },

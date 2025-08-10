@@ -1,4 +1,5 @@
-import { API_URL } from '../scripts/baseUrl.js'
+import { apiFetch } from '../api/apiFetch.js'
+import { API_URL } from '../api/baseUrl.js'
 import {getItem} from '../functions/localStorage.js'
 
 
@@ -9,7 +10,7 @@ export async function validarCarrinhoAPI (dadosCarrinho) {
       carrinho: dadosCarrinho
     }
     const token = getItem('token')
-    const response = await fetch(`${API_URL}/validate-cart`, {
+    const response = await apiFetch(`/validate-cart`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

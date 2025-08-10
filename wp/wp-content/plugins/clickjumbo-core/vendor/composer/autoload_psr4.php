@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'MercadoPago\\' => array($vendorDir . '/mercadopago/dx-php/src/MercadoPago'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
     'ClickJumbo\\' => array($baseDir . '/includes'),
 );

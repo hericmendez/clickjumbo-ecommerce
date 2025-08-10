@@ -28,6 +28,28 @@ add_action('init', function () {
     }
 });
 
+//Debug do gateway de pagamento:
+add_action('admin_init', function () {
+    if (!current_user_can('manage_options')) return;
+
+    // Onde está o vendor?
+    $candidates = [
+        dirname(__FILE__) . '/vendor/autoload.php',
+        dirname(__FILE__, 2) . '/vendor/autoload.php',
+        WP_CONTENT_DIR . '/vendor/autoload.php',
+        ABSPATH . 'vendor/autoload.php',
+    ];
+    foreach ($candidates as $c) {
+        error_log('[ClickJumbo] Check autoload: ' . $c . ' => ' . (file_exists($c) ? 'FOUND' : 'MISS'));
+    }
+
+    // Token ok?
+    error_log('[ClickJumbo] MP_ACCESS_TOKEN defined? ' . (defined('MP_ACCESS_TOKEN') ? 'YES' : 'NO'));
+
+    // Classe disponível?
+    error_log('[ClickJumbo] class_exists(MercadoPago\\SDK)? ' . (class_exists('MercadoPago\\SDK') ? 'YES' : 'NO'));
+});
+
 /**
  * 🔐 Expõe nonce para uso em scripts JS
  */

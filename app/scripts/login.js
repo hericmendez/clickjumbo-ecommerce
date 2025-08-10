@@ -1,4 +1,5 @@
-import { API_URL } from "./baseUrl.js";
+import { apiFetch } from "../api/apiFetch.js";
+import { API_URL } from "../api/baseUrl.js";
 import { setItem } from "../functions/localStorage.js";
 
 const form = document.getElementById("form");
@@ -15,15 +16,16 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
-    const response = await fetch(
-      `${API_URL}/login`,
+    const response = await apiFetch(
+      `/login`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
-      }
+      },
+      true
     );
 
     const data = await response.json();

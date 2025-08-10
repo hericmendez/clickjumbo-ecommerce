@@ -1,0 +1,88 @@
+app/
+    ├── assets/
+    │   ├── logo.png
+    │   ├── logo_full.png
+    │   ├── logo_transparent.png
+    │   ├── noResult.gif
+    │   ├── order-placed.gif
+    │   └── product_placeholder.png
+    ├── cart.html
+    ├── checkout.html
+    ├── clientForm.html
+    ├── comingSoon.html
+    ├── components/
+    │   ├── cartMenu.js
+    │   ├── clientForm.js
+    │   ├── envioForm copy.js
+    │   ├── envioForm.js
+    │   ├── footer.js
+    │   ├── footer.script.js
+    │   ├── loading.js
+    │   ├── loading.script.js
+    │   ├── navbar.js
+    │   ├── navbar.script.js
+    │   ├── notify.js
+    │   ├── pagamentoForm.js
+    │   ├── pixScreen.js
+    │   └── searchImage.js
+    ├── css/
+    │   ├── cart.css
+    │   ├── comingSoon.css
+    │   ├── food.css
+    │   ├── footer.css
+    │   ├── home.css
+    │   ├── loading.css
+    │   ├── login.css
+    │   ├── orderPlaced.css
+    │   ├── search.css
+    │   ├── signup.css
+    │   └── wizard.css
+    ├── edit copy.html
+    ├── edit.html
+    ├── favicon.ico
+    ├── functions/
+    │   ├── appendCartData.js
+    │   ├── appendData.js
+    │   ├── clearCart.js
+    │   ├── createOrderSelect.js
+    │   ├── extraFunctions.js
+    │   ├── freteOptions.js
+    │   ├── generateURLImage.js
+    │   ├── getCoupon.js
+    │   ├── handleGetRequest.js
+    │   ├── isLogin.js
+    │   ├── localStorage.js
+    │   ├── paymentModal.js
+    │   ├── shippingForm.js
+    │   ├── showTotal.js
+    │   ├── signupForm.js
+    │   └── updateCartSummaryBar.js
+    ├── generate-tree.js
+    ├── index.html
+    ├── login.html
+    ├── orderPlaced.html
+    ├── orders.html
+    ├── scripts/
+    │   ├── baseUrl.js
+    │   ├── cart.js
+    │   ├── checkout.js
+    │   ├── envio.js
+    │   ├── home.js
+    │   ├── login.js
+    │   ├── orderPlaced.js
+    │   ├── orders.js
+    │   ├── shop.js
+    │   ├── signup.js
+    │   ├── wizard copy.js
+    │   ├── wizard.js
+    │   └── wizard.script.js
+    ├── shop.html
+    ├── signup.html
+    ├── validations/
+    │   ├── index.js
+    │   ├── montarPayload.js
+    │   ├── validarCarrinhoAPI.js
+    │   ├── validarClienteForm.js
+    │   ├── validarEnvio.js
+    │   └── validarPagamento.js
+    └── wizard.html

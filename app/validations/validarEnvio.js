@@ -1,11 +1,12 @@
-import { API_URL } from '../scripts/baseUrl.js'
+import { apiFetch } from '../api/apiFetch.js';
+import { API_URL } from '../api/baseUrl.js'
 
 const token = localStorage.getItem("token")
 
 export async function validarFreteAPI (payload) {
 console.log("payload validation ==> ", payload);
   try {
-    const response = await fetch(`${API_URL}/validate-shipping`, {
+    const response = await apiFetch(`/validate-shipping`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

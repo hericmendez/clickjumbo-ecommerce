@@ -42,13 +42,16 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/save-prison(?:/[a-zA-Z0-9\-]+)?$#',
         '#^/clickjumbo/v1/cliente$#',
         '#^/clickjumbo/v1/cliente/login$#',
-        '#^/clickjumbo/v1/validate-shipping$#'
+        '#^/clickjumbo/v1/validate-shipping$#',
+        '#^/clickjumbo/v1/mp-locate$#',
+        '#^/clickjumbo/v1/mp-token$#',
+        '#^/clickjumbo/v1/order-status$#'
 
         
     ];
 }
 
-
+///mp-locate
 
 
 add_filter('rest_pre_dispatch', 'clickjumbo_check_token', 10, 3);

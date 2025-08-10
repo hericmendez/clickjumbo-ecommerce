@@ -1,7 +1,8 @@
 // envio.js
 import { getItem, setItem } from "../functions/localStorage.js";
 import { montarPayloadFrete } from "../validations/montarPayload.js";
-import { API_URL } from "./baseUrl.js";
+import { API_URL } from "../api/baseUrl.js";
+import { apiFetch } from "../api/apiFetch.js";
 
 const token = getItem("token");
 const dadosPenitenciaria = getItem("dadosPenitenciaria");
@@ -21,7 +22,7 @@ export async function calcularFrete(payloadFrete) {
   try {
     showSpinner();
 
-    const res = await fetch(`${API_URL}/calculate-shipping`, {
+    const res = await apiFetch(`/calculate-shipping`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -65,7 +66,7 @@ export function inicializarEnvioForm() {
 
   const toggleOutroEndereco = () => {
     if (formEnvio) formEnvio.style.display = btnRadioOutro?.checked ? "block" : "none";
-    console.log("btnRadioOutro?.checked ==> ", btnRadioOutro?.checked);
+    console.log("enviar para penitenciária?", !btnRadioOutro?.checked);
   };
 
   btnRadioPenitenciaria?.addEventListener("change", toggleOutroEndereco);

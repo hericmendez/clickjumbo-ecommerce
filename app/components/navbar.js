@@ -45,7 +45,7 @@ background: linear-gradient(265deg,rgba(211, 204, 255, 1) 0%, rgba(110, 130, 207
 
           <!-- Right Icons -->
           <div class="navbar-nav align-items-center fs-5">
-            <a style="color: #003399;" class="nav-icon nav-link" href="cart.html" title="Carrinho">
+            <a style="color: #003399;" class="nav-icon nav-link" href="wizard.html" title="Carrinho">
               <i class="fas fa-shopping-cart"></i>
             </a>
             <a style="color: #003399; display: ${

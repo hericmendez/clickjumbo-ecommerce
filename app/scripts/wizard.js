@@ -3,36 +3,40 @@
 import { getItem } from '../functions/localStorage.js'
 import {
   validarCarrinhoAPI,
-
   validarEnvioForm,
   validarFreteAPI,
-
   montarPayloadFrete
 } from '../validations/index.js' // ajuste o caminho se necessário
 import {
   montarPayloadDetento,
   montarPayloadVisitante
 } from '../validations/montarPayload.js'
-import { obterDadosPagamento, processarPedido } from './checkout.js'
+import {
+  obterDadosPagamento,
+  popularResumoCompra,
+  processarPedido
+} from './checkout.js'
+import { renderPaymentScreen } from '../functions/paymentRouter.js'
+
 import { inicializarEnvioForm } from './envio.js'
-const user = getItem("user")
-if(!user){
-  alert("Atenção! Faça login para continuar.")
+const user = getItem('user')
+if (!user) {
+  alert('Atenção! Faça login para continuar.')
 }
 
 let spinner = document.getElementById('loadingSpinner')
-let payload = { 
-  cliente_id: user.id,
-  carrinho:[],
-  envio:{},
-  detento: {},
-  envio: {},
-  pagamento:{}
-}
+
 const dadosCarrinho = getItem('dadosCarrinho') || []
 
 const dadosPenitenciaria = getItem('dadosPenitenciaria')
-
+let payload = {
+  cliente_id: user.id,
+  carrinho: [],
+  envio: {},
+  detento: {},
+  envio: {},
+  pagamento: {}
+}
 document.addEventListener('DOMContentLoaded', function () {
   // Enable Tooltips (ok)
   var tooltipTriggerList = [].slice.call(
@@ -43,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 
   // Lista dos steps
-  const steps = ['step1', 'step2', 'step3', 'step4', 'step5']
+  const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6']
   let maxStepValidado = 0
 
   // Funções de validação por step
@@ -100,7 +104,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         payload.envio.remetente = visitante
         payload.envio.destinatario = dadosPenitenciaria
-        console.log('visitante ==> ', visitante)
+        payload.envio.nome_penitenciaria = dadosPenitenciaria.nome
+        payload.envio.slug_penitenciaria = dadosPenitenciaria.slug
       }
       console.log('payload step 2:', payload)
       spinner.style.display = 'none'
@@ -142,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Monta o payload completo (remetente, destinatário, peso)
       const payloadCompleto = montarPayloadFrete()
+      console.log("payloadCompleto ==> ", payloadCompleto);
 
       // Valida no backend
       const valido = await validarFreteAPI(payloadCompleto)
@@ -153,23 +159,32 @@ document.addEventListener('DOMContentLoaded', function () {
       // ✅ Adiciona frete ao payload principal
       payload.envio.frete_valor = freteSelecionado.valor
       payload.envio.forma_envio = freteSelecionado.metodo
-
+      const enviarParaPenitenciaria =
+        !document.getElementById('btnRadioOutro').checked
+      payload.envio.enviar_para_penitenciaria = enviarParaPenitenciaria
+      console.log('enviarParaPenitenciaria ==> ', enviarParaPenitenciaria)
       console.log('payload step 3:', payload)
+      popularResumoCompra(payload)
       return true
     },
-step4: async function () {
-  const {valorTotal, frete} = getItem('totalCarrinho') || {}
-  const totalCompra = valorTotal+frete;
-  const dadosPagamento = await obterDadosPagamento(totalCompra);
+    step4: async function () {
+      const { valorTotal, frete } = getItem('totalCarrinho') || {}
+      const totalCompra = valorTotal + frete
 
-  if (!dadosPagamento) return false;
+      const dadosPagamento = await obterDadosPagamento(totalCompra)
 
-  payload.pagamento = dadosPagamento;
+      if (!dadosPagamento) return false
 
-  const resultado = await processarPedido(payload);
-  console.log("resultado ==> ", resultado);
-  return resultado?.success;
-}
+      payload.pagamento = dadosPagamento
+
+      const resultado = await processarPedido(payload)
+      console.log('resultado ==> ', resultado)
+      const container = document.getElementById('paymentUiDiv')
+      if (container) {
+        renderPaymentScreen(resultado, container) // <- decide e desenha a UI conforme method
+      }
+      return resultado?.success
+    }
     // step5 = sucesso, não precisa validar nada
   }
 

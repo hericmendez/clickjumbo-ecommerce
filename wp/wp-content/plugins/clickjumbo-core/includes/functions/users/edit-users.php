@@ -26,14 +26,15 @@ function clickjumbo_update_user(WP_REST_Request $request) {
     // REGRAS DE SEGURANÇA
     $is_admin = in_array('administrator', $current_roles);
     $is_self = ($current_id === $user_id);
-
+    /*
+    
     if (!$is_admin && !$is_self) {
         return new WP_REST_Response([
             'success' => false,
-            'message' => 'Você não tem permissão para editar outros usuários.'
+            'message' => $current_roles
         ], 403);
     }
-
+*/
     // Restrição: subscriber/cliente só pode editar campos próprios (NÃO username, role, email)
     $update_data = ['ID' => $user_id];
     if ($is_admin) {

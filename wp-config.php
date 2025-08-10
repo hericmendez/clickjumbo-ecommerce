@@ -57,6 +57,12 @@ define( 'SECURE_AUTH_SALT', 'FXf0 ,^a=ky}5N&a.Av}+$jH(+?r>9<??=jiSYGVdW*e4DY5c?.
 define( 'LOGGED_IN_SALT',   '-{Bb&*u?ZKx=t$ERt %G3$HjZ%PSwIEz1G}M5>s4KOttxnSam-Bx?iBuU]inNfh<' );
 define( 'NONCE_SALT',       ',1G~*K>pJt`[ClrmooHC!o,jo5$r&G1Cpxnsg{bU|G9,$c3b{OSg$bEG$HuA$<Yy' );
 
+
+
+// === Mercado Pago (sandbox) ===
+define('MP_PUBLIC_KEY',  'TEST-6e041f0c-cfa6-4a04-be30-54e476fc5b6a');
+define('MP_ACCESS_TOKEN','TEST-6040830559220129-080715-8a82b26be922559b4c5e71093ade1632-131073727');
+
 /**#@-*/
 
 /**
@@ -86,7 +92,8 @@ $table_prefix = 'wp_';
  * @link https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/
  */
 define( 'WP_DEBUG', true );
-define('WP_DEBUG_DISPLAY', true);
+define('WP_DEBUG_LOG', true);
+define('WP_DEBUG_DISPLAY', false); 
 
 /* Add any custom values between this line and the "stop editing" line. */
 

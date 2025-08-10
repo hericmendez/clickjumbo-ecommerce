@@ -23,19 +23,22 @@ const mockedCart = [
   }
 ]
 let carrinhoResumido = []
-btnCarrinho.addEventListener('click', async e => {
-  e.preventDefault()
-  carrinhoResumido = dadosCarrinho.map(item => ({
-    id: item.id,
-    qtde: item.qtde
-  }))
-/*   const carrinhoValido = await validarCarrinhoAPI(mockedCart)
-  console.log('carrinhoValido ==> ', carrinhoValido)
-  if (!carrinhoValido.success) {
-    window.alert(`${carrinhoValido?.message}\n
-${carrinhoValido?.errors?.join('\n\n')}`)
-  } */
-})
+document.addEventListener('DOMContentLoaded', () => {
+  const btnCarrinho = document.getElementById('btnCarrinho');
+  if (!btnCarrinho) {
+    console.warn('btnCarrinho não encontrado!');
+    return;
+  }
+
+  btnCarrinho.addEventListener('click', async e => {
+    e.preventDefault();
+    carrinhoResumido = dadosCarrinho.map(item => ({
+      id: item.id,
+      qtde: item.qtde
+    }));
+
+  });
+});
 // Renderiza carrinho
 appendCartData(dadosCarrinho, display, qtdeTotal)
 getTotalOrderAmount(dadosCarrinho, qtdeTotal)

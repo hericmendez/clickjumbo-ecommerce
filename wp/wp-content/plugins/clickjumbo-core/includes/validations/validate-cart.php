@@ -37,10 +37,10 @@ function clickjumbo_validate_cart(WP_REST_Request $request)
 $body = json_decode($request->get_body(), true);
     $raw_cart = $body['carrinho'] ?? null;
 
-/*     error_log('REQUEST: ' . print_r($request, true));
+     //error_log('REQUEST: ' . print_r($request, true));
 
-    error_log('BODY: ' . print_r($body, true));
-    error_log('RAW CART: ' . print_r($raw_cart, true)); */
+   // error_log('BODY: ' . print_r($body, true));
+//    error_log('RAW CART: ' . print_r($raw_cart, true)); 
     if (is_array($raw_cart) && isset($raw_cart[0]['id'])) {
         $products = $raw_cart;
     } else {

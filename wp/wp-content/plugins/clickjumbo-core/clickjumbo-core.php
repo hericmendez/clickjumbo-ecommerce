@@ -66,7 +66,7 @@ function clickjumbo_core_load_modules()
     $base_dir = plugin_dir_path(__FILE__) . 'includes/';
 
     // Carrega pastas principais (utils, auth, validations)
-    $autoload_folders = ['utils', 'auth', 'validations'];
+    $autoload_folders = ['utils', 'auth', 'validations', 'debug'];
     foreach ($autoload_folders as $folder) {
         $folder_path = $base_dir . $folder . '/';
         if (is_dir($folder_path)) {
@@ -77,7 +77,7 @@ function clickjumbo_core_load_modules()
     }
 
     // Carrega funções agrupadas por categoria (exceto admin)
-    $function_categories = ['prisons', 'orders', 'products', 'utils', 'users']; //faltou inccluir users
+    $function_categories = ['prisons', 'orders', 'products', 'utils', 'users', 'payments'];
     foreach ($function_categories as $category) {
         $category_path = $base_dir . "functions/$category/";
         if (is_dir($category_path)) {
