@@ -24,7 +24,6 @@ console.log("payload validation ==> ", payload);
 }
 
 export function validarEnvioForm(){
-      // Só valida se opção "outro endereço" estiver marcada
     const outroEnderecoSelecionado = document.getElementById('btnRadioOutro')?.checked;
     if (!outroEnderecoSelecionado) return true;
 

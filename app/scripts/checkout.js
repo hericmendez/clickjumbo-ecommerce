@@ -17,37 +17,37 @@ function toMoney (n) {
 }
 
 // === PAGAMENTO ===
+// scripts/checkout.js
+// (ALTERE SOMENTE A PARTE DE PAGAMENTO)
+
 export async function obterDadosPagamento (valorTotal) {
-  const metodo = document.querySelector(
-    "input[name='paymentMethod']:checked"
-  )?.value
+const metodo = document.querySelector(
+  "input[name='paymentMethod']:checked"
+)?.value
+
   if (!metodo) {
     alert('Selecione uma forma de pagamento.')
     return null
   }
 
-  // Em PIX/BOLETO, o backend gera tudo no /process-order
-  const dados_pagamento = {
-    valor_recebido: Number(valorTotal),
-    id_transacao: `${metodo.toUpperCase()}_${Date.now()}`
+  // Para Pix/Boleto, o backend gera tudo no /process-order
+  if (metodo === 'pix' || metodo === 'boleto') {
+    const dados_pagamento = {
+      valor_recebido: Number(valorTotal),
+      id_transacao: `${metodo.toUpperCase()}_${Date.now()}`
+    }
+    return { method: metodo, dados_pagamento }
   }
+
+// Para Cartão: quem resolve é o Card Brick (tokenização + POST no seu endpoint).
 
   if (metodo === 'card') {
-    // (futuro) usar SDK do MP para tokenizar
-    const nome = document.querySelector("input[name='cardName']")?.value
-    const numero = document.querySelector("input[name='cardNumber']")?.value
-    const validade = document.querySelector(
-      "input[name='cardExpiration']"
-    )?.value
-    const cvv = document.querySelector("input[name='cardCVV']")?.value
-    if (!nome || !numero || !validade || !cvv) {
-      alert('Preencha todos os dados do cartão.')
-      return null
-    }
-    Object.assign(dados_pagamento, { nome, numero, validade, cvv })
+return { method: 'card' } // sem dados locais
+
   }
 
-  return { method: metodo, dados_pagamento }
+return null
+
 }
 
 // === RESUMO DO CARRINHO ===
@@ -277,3 +277,61 @@ export async function processarPedido (payload) {
     return { success: false, message: 'network-error' }
   }
 }
+// polling slim usando ETag do seu /order-status
+export function watchOrderSlim (
+  orderId,
+  { onApproved, interval = 4000, timeoutMs = 15 * 60_000 } = {}
+) {
+  let stopped = false
+  let etag = null
+  const start = Date.now()
+
+  async function tick () {
+    if (stopped) return
+
+    const headers = {}
+    if (etag) headers['If-None-Match'] = etag
+
+    let resp
+    try {
+      resp = await fetch(
+        `/wp-json/clickjumbo/v1/order-status?id=${encodeURIComponent(orderId)}`,
+        { headers }
+      )
+    } catch {
+      // rede falhou? tenta de novo no próximo tick
+      return
+    }
+
+    if (resp.status === 304) {
+      // nada mudou
+    } else if (resp.ok) {
+      etag = resp.headers.get('ETag') || etag
+      const data = await resp.json()
+      if (data?.success) {
+        const status = String(data.status || '').toLowerCase() // ex: 'processing', 'completed'
+        const gw =
+          data.gateway && data.gateway.status
+            ? String(data.gateway.status).toLowerCase()
+            : ''
+        const paid =
+          ['processing', 'completed'].includes(status) || gw === 'approved'
+
+        if (paid) {
+          stopped = true
+          onApproved?.(data)
+        }
+      }
+    }
+
+    if (!stopped && Date.now() - start < timeoutMs) {
+      setTimeout(tick, interval)
+    }
+  }
+
+  tick()
+  return () => {
+    stopped = true
+  }
+}
+

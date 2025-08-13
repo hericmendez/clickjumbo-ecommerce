@@ -195,10 +195,11 @@ console.log("appendData items:", data)
     // Adiciona o container ao DOM
 
     
-    const details = document.createElement("details");
+const div = document.createElement('div')
+
     
     
-    details.innerHTML = dadosPenitenciaria? `
+    div.innerHTML = dadosPenitenciaria? `
     
       <summary>Ver endereço de ${dadosPenitenciaria?.nome}</summary>
       <div class="p-2 border border-rounded-4 flex borde">
@@ -213,7 +214,8 @@ console.log("appendData items:", data)
   </p>
 </div>
     `: "Endereço indisponível."
-    parent.appendChild(details);
+parent.appendChild(div)
+
     parent.appendChild(hr);
 
     // Container específico dos subcats

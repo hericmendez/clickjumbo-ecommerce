@@ -1,11 +1,14 @@
 // wizard.js
+import { watchOrderSlim } from './checkout.js'
+
 
 import { getItem } from '../functions/localStorage.js'
 import {
   validarCarrinhoAPI,
   validarEnvioForm,
   validarFreteAPI,
-  montarPayloadFrete
+montarPayloadFrete, validarClienteForm
+
 } from '../validations/index.js' // ajuste o caminho se necessário
 import {
   montarPayloadDetento,
@@ -49,7 +52,25 @@ document.addEventListener('DOMContentLoaded', function () {
   // Lista dos steps
   const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6']
   let maxStepValidado = 0
+  function gotoStep (step) {
+    // step pode ser número (1..6) ou string ('step5')
+    const targetId = typeof step === 'number' ? `step${step}` : String(step)
+    const idx = steps.indexOf(targetId)
+    if (idx === -1) return
 
+    // libera as abas até o destino
+    if (idx > maxStepValidado) maxStepValidado = idx
+    updateWizardTabs(idx)
+
+    // mostra a tab
+    const link = document.querySelector(`a[href="#${targetId}"]`)
+    if (link) {
+      const tab = bootstrap.Tab.getOrCreateInstance(link)
+      tab.show()
+    }
+  }
+  // expõe global pra outros módulos (checkout.js etc.)
+  window.gotoStep = gotoStep
   // Funções de validação por step
   const validacoes = {
     step1: async function () {
@@ -91,7 +112,8 @@ document.addEventListener('DOMContentLoaded', function () {
     step2: async function () {
       //spinner.style.display = 'block'
 
-      const formValido = true //await validarClienteForm()
+const formValido = await validarClienteForm()
+
       console.log('formValido ==> ', formValido)
       if (formValido) {
         const { envio } = montarPayloadFrete()
@@ -147,7 +169,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Monta o payload completo (remetente, destinatário, peso)
       const payloadCompleto = montarPayloadFrete()
-      console.log("payloadCompleto ==> ", payloadCompleto);
+console.log('payloadCompleto ==> ', payloadCompleto)
+
 
       // Valida no backend
       const valido = await validarFreteAPI(payloadCompleto)
@@ -169,21 +192,59 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     step4: async function () {
       const { valorTotal, frete } = getItem('totalCarrinho') || {}
-      const totalCompra = valorTotal + frete
+const totalCompra = (valorTotal || 0) + (frete || 0)
+
+// 1) Descobre método
+
 
       const dadosPagamento = await obterDadosPagamento(totalCompra)
 
       if (!dadosPagamento) return false
 
+// 2) Se for CARTÃO -> usa o Brick e NÃO chama processarPedido()
+if (dadosPagamento.method === 'card') {
+  try {
+    // garante que o Brick está pronto
+    await window.__mpCard?.ensure?.()
+    if (!window.__mpCard?.isReady?.()) {
+      alert(
+        'Carregando componente de cartão. Tente novamente em alguns segundos.'
+      )
+      return false
+    }
+    // dispara o fluxo do Brick (onSubmit no pagamentoForm.js cuidará do resto)
+    await window.__mpCard.submit()
+    // se aprovado, onApproved() já envia ao Step 6; se in_process, Step 5.
+    return true
+  } catch (e) {
+    console.error(e)
+    alert('Erro ao enviar pagamento do cartão.')
+    return false
+  }
+}
+
+// 3) Caso contrário (PIX/BOLETO): segue o fluxo normal
+
       payload.pagamento = dadosPagamento
 
       const resultado = await processarPedido(payload)
-      console.log('resultado ==> ', resultado)
+if (!resultado?.success) return false
+
+// vai pro Step 5 e desenha a UI (pix/boleto)
+gotoStep(5)
+
       const container = document.getElementById('paymentUiDiv')
       if (container) {
-        renderPaymentScreen(resultado, container) // <- decide e desenha a UI conforme method
+renderPaymentScreen(resultado, container)
+
       }
-      return resultado?.success
+// começa a escutar o status até aprovar
+watchOrderSlim(resultado.order_id, {
+  onApproved: () => gotoStep(6)
+})
+
+return true
+
     }
     // step5 = sucesso, não precisa validar nada
   }

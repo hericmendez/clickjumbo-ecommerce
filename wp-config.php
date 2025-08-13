@@ -59,11 +59,19 @@ define( 'NONCE_SALT',       ',1G~*K>pJt`[ClrmooHC!o,jo5$r&G1Cpxnsg{bU|G9,$c3b{OS
 
 
 
-// === Mercado Pago (sandbox) ===
-define('MP_PUBLIC_KEY',  'TEST-6e041f0c-cfa6-4a04-be30-54e476fc5b6a');
-define('MP_ACCESS_TOKEN','TEST-6040830559220129-080715-8a82b26be922559b4c5e71093ade1632-131073727');
 
-/**#@-*/
+
+// === Mercado Pago (Production, conta: heric.mendez00@gmail.com) ===
+//define('MP_PUBLIC_KEY',  'APP_USR-359d4e42-3954-48a8-b3ed-dd530b360e42');
+//define('MP_ACCESS_TOKEN','APP_USR-6040830559220129-080715-27feb6c3e190b1d3c990226669c51836-131073727');
+
+// === Mercado Pago (Production, conta: clickjumbo@gmail.com) ===
+//Public Key
+define('MP_PUBLIC_KEY', 'APP_USR-b4b8a9c2-5315-4b51-8f1b-ec60973a4047');
+
+//Access Token
+define('MP_ACCESS_TOKEN', 'APP_USR-221760481323034-080817-73f8e7f86e5ba9596426ed20ada53b21-2507400590');
+
 
 /**
  * WordPress database table prefix.

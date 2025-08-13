@@ -15,27 +15,20 @@ if (!defined('ABSPATH')) exit;
 /*--------------------------------------------------------------
 # Helpers de ambiente/credenciais
 --------------------------------------------------------------*/
-function cj_mp_get_token() {
-  // tenta options (site)
-  $t = get_option('mp_access_token');
-  if (!$t) $t = get_option('mercadopago_access_token');
-
-  // multisite (rede)
-  if (!$t && is_multisite()) {
-    $t = get_site_option('mp_access_token');
-    if (!$t) $t = get_site_option('mercadopago_access_token');
+if (!function_exists('cj_mp_get_token')) {
+  function cj_mp_get_token() {
+    $t = get_option('mp_access_token');
+    if (!$t) $t = get_option('mercadopago_access_token');
+    if (!$t && is_multisite()) {
+      $t = get_site_option('mp_access_token') ?: get_site_option('mercadopago_access_token');
+    }
+    if (!$t && defined('MP_ACCESS_TOKEN'))      $t = MP_ACCESS_TOKEN;
+    if (!$t && defined('CJ_MP_ACCESS_TOKEN'))   $t = CJ_MP_ACCESS_TOKEN;
+    if (!$t && getenv('MP_ACCESS_TOKEN'))       $t = getenv('MP_ACCESS_TOKEN');
+    if (!$t && getenv('MERCADOPAGO_ACCESS_TOKEN')) $t = getenv('MERCADOPAGO_ACCESS_TOKEN');
+    $t = trim((string)$t);
+    return $t !== '' ? $t : null;
   }
-
-  // constantes (wp-config.php)
-  if (!$t && defined('MP_ACCESS_TOKEN'))      $t = MP_ACCESS_TOKEN;        // <- a sua
-  if (!$t && defined('CJ_MP_ACCESS_TOKEN'))   $t = CJ_MP_ACCESS_TOKEN;     // compat
-
-  // env vars (caso use)
-  if (!$t && getenv('MP_ACCESS_TOKEN'))            $t = getenv('MP_ACCESS_TOKEN');
-  if (!$t && getenv('MERCADOPAGO_ACCESS_TOKEN'))   $t = getenv('MERCADOPAGO_ACCESS_TOKEN');
-
-  $t = trim((string)$t);
-  return $t !== '' ? $t : null;
 }
 
 function cj_mp_get_public_key() {
@@ -92,19 +85,21 @@ add_action('rest_api_init', function () {
 /*--------------------------------------------------------------
 # Mapping de status MP -> WooCommerce
 --------------------------------------------------------------*/
-function cj_mp_wc_status($mp_status) {
-  $mp = strtolower((string)$mp_status);
-  switch ($mp) {
-    case 'approved':     return 'processing'; // ou 'completed' se não tiver entrega
-    case 'authorized':   return 'on-hold';
-    case 'in_process':   return 'on-hold';
-    case 'in_mediation': return 'on-hold';
-    case 'pending':      return 'pending';
-    case 'rejected':     return 'failed';
-    case 'cancelled':    return 'cancelled';
-    case 'refunded':     return 'refunded';
-    case 'charged_back': return 'refunded';
-    default:             return 'pending';
+if (!function_exists('cj_mp_wc_status')) {
+  function cj_mp_wc_status($mp_status) {
+    $mp = strtolower((string)$mp_status);
+    switch ($mp) {
+      case 'approved':     return 'processing'; // ou 'completed' se não tiver entrega
+      case 'authorized':   return 'on-hold';
+      case 'in_process':   return 'on-hold';
+      case 'in_mediation': return 'on-hold';
+      case 'pending':      return 'pending';
+      case 'rejected':     return 'failed';
+      case 'cancelled':    return 'cancelled';
+      case 'refunded':     return 'refunded';
+      case 'charged_back': return 'refunded';
+      default:             return 'pending';
+    }
   }
 }
 

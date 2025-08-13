@@ -25,8 +25,8 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/export-products$#',
         '#^/clickjumbo/v1/orders$#',
         '#^/clickjumbo/v1/orders/\d+$#',
+        '#^/clickjumbo/v1/orders/\d+/full$#',
         '#^/clickjumbo/v1/orders/\d+/cancel$#',
-        '#^/clickjumbo/v1/orders/\d+/status$#',
         '#^/clickjumbo/v1/delete-order$#',
         '#^/clickjumbo/v1/user(?:/[a-zA-Z0-9\-]+)?$#',
         '#^/clickjumbo/v1/users$#',
@@ -45,13 +45,14 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/validate-shipping$#',
         '#^/clickjumbo/v1/mp-locate$#',
         '#^/clickjumbo/v1/mp-token$#',
-        '#^/clickjumbo/v1/order-status$#'
+        '#^/clickjumbo/v1/mp-webhook#',
+        '#^/clickjumbo/v1/order-status$#',
+        '#^/mp/create-card-payment$#'
+        
 
         
     ];
 }
-
-///mp-locate
 
 
 add_filter('rest_pre_dispatch', 'clickjumbo_check_token', 10, 3);

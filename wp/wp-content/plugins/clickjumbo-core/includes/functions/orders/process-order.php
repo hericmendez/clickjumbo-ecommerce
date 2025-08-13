@@ -9,6 +9,13 @@ add_action('rest_api_init', function () {
     ]);
 });
 
+
+
+/**
+ * Helper para obter o Access Token do MP quando for útil aos wrappers.
+ */
+
+
 function clickjumbo_handle_process_order($request)
 {
     $data = $request->get_json_params();
@@ -118,42 +125,68 @@ function clickjumbo_handle_process_order($request)
         $product = wc_get_product($item['id']);
         if ($product) $pedido->add_product($product, $item['qtde']);
     }
+    // adiciona frete como taxa para bater total
+    if ($valorFrete > 0) {
+        $fee = new WC_Order_Item_Fee();
+        $fee->set_name('Frete - ' . $formaEnvio);
+        $fee->set_total($valorFrete);
+        $pedido->add_item($fee);
+    }
+
     $pedido->set_billing_first_name($wp_user->first_name ?: $wp_user->display_name);
     $pedido->set_billing_email($wp_user->user_email);
     $pedido->set_customer_id($user_id);
+    // opcional: deixe o gateway "genérico" aqui; título informa o método
+    $pedido->set_payment_method('mercadopago');
+    $pedido->set_payment_method_title('Mercado Pago (' . strtoupper($pagamento['method'] ?? '') . ')');
 
     // --- Payload base p/ Mercado Pago ---
+    $order_id = $pedido->get_id();
+    $notification_url = rest_url('clickjumbo/v1/mp-webhook'); // webhook do MP
+
     $order_payload = [
-        'id'            => $pedido->get_id(),
-        'valor_total'   => round($valorTotal, 2),
-        'cliente'       => [
+        'id'                  => $order_id,
+        'valor_total'         => round($valorTotal, 2),
+        'cliente'             => [
             'nome'  => $wp_user->first_name ?: $wp_user->display_name,
             'email' => $wp_user->user_email,
             // 'cpf' => ... // (se você tiver)
         ],
-        'destinatario'  => $envio['destinatario'] ?? [],
-        'envio'         => $envio,
-        'produtos'      => $produtos_completos,
-        'detento'       => $detento,
-        'penitenciaria' => $penitenciaria_obj,
+        'destinatario'        => $envio['destinatario'] ?? [],
+        'envio'               => $envio,
+        'produtos'            => $produtos_completos,
+        'detento'             => $detento,
+        'penitenciaria'       => $penitenciaria_obj,
+
+        // >>> CHAVES NOVAS PARA O WRAPPER DO MERCADO PAGO <<<
+        'external_reference'  => (string)$order_id,
+        'notification_url'    => $notification_url,
     ];
 
     // --- Gateway ---
     require_once __DIR__ . '/../payments/mercadopago.php';
-    $payment_method = $pagamento['method'] ?? 'pix';
+    $payment_method = strtolower(trim($pagamento['method'] ?? 'pix'));
 
+    // Cartão AGORA é pelo endpoint do Brick (não por aqui)
+    if (in_array($payment_method, ['credit-card','debt-card','card'], true)) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Pagamento por cartão deve ser iniciado pelo endpoint /mp/create-card-payment (Brick).'
+        ], 400);
+    }
+
+    // PIX e BOLETO continuam aqui (como você já fazia),
+    // mas AGORA os wrappers devem incluir external_reference e notification_url no POST /v1/payments.
     if ($payment_method === 'pix') {
         $mp_resp = cj_mp_pay_pix($order_payload);
     } elseif ($payment_method === 'boleto') {
         $mp_resp = cj_mp_pay_boleto($order_payload);
-    } elseif (in_array($payment_method, ['credit-card','debt-card','card'], true)) {
-        $dados_pagamento = $pagamento['dados_pagamento'] ?? [];
-        $mp_resp = cj_mp_pay_card($order_payload, $dados_pagamento);
     } else {
         return new WP_REST_Response(['success' => false, 'message' => 'Método de pagamento não reconhecido'], 400);
     }
 
     if (!empty($mp_resp['error'])) {
+        // mantém seu formato de erro + debug
         return new WP_REST_Response(['success' => false, 'message' => 'Falha no gateway de pagamento', 'gateway' => $mp_resp], 400);
     }
 
@@ -165,10 +198,13 @@ function clickjumbo_handle_process_order($request)
     $pedido->update_meta_data('_cj_mp_status_detail', $mp_resp['status_detail'] ?? '');
     $pedido->update_meta_data('_cj_mp_raw', $mp_resp['raw'] ?? []);
 
+    // também salva external_reference (útil p/ debug)
+    $pedido->update_meta_data('_mp_external_reference', (string)$order_id);
+
+    // aplica status inicial compatível com o retorno do MP
     $pedido->set_status(cj_mp_wc_status($mp_resp['status'] ?? 'pending'));
 
     // Metas suas
-    $pedido->set_payment_method($payment_method);
     $pedido->update_meta_data('cliente_id', $user_id);
     $pedido->update_meta_data('produtos', $produtos_completos);
     $pedido->update_meta_data('peso_total', round($pesoTotal, 3));
@@ -179,7 +215,6 @@ function clickjumbo_handle_process_order($request)
     $pedido->update_meta_data('penitenciaria', $penitenciaria_obj);
     $pedido->update_meta_data('detento', $detento);
     $pedido->update_meta_data('forma_envio', $envio['forma_envio'] ?? '');
-    $pedido->update_meta_data('frete_valor', $valorFrete);
     $pedido->update_meta_data('destinatario', $envio['destinatario'] ?? []);
     $pedido->update_meta_data('remetente', $envio['remetente'] ?? []);
     $pedido->update_meta_data('pagamento', $pagamento);
@@ -192,7 +227,7 @@ function clickjumbo_handle_process_order($request)
     $pedido->calculate_totals();
     $pedido->save();
 
-    // --- Resposta ---
+    // --- Resposta (mantendo seu formato) ---
     $order_data = [
         'id'                   => $pedido->get_id(),
         'status'               => $pedido->get_status(),
