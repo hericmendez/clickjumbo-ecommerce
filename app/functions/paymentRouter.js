@@ -27,7 +27,20 @@ export function renderPaymentScreen(apiData, container) {
     const r = await apiFetch(`/order-status?id=${id}`);
     return await r.json(); // { status: 'wc-...' }
   };
-  const onPaid = (id) => { window.location.href = `/checkout/sucesso.html?order=${id}`; };
+
+const onPaid = (id) => {
+  try { sessionStorage.setItem('cj_last_order', String(id)); } catch {}
+  if (typeof window.gotoStep === 'function') {
+    // opcional: mostrar o # do pedido no Step 6
+    const el = document.getElementById('cjOrderId');
+    if (el) el.textContent = `#${id}`;
+    window.gotoStep(6);
+  } else {
+    // fallback, caso o wizard não esteja na página
+    window.location.href = `/app/orderPlaced.html`;
+  }
+};
+
 
   if (method === 'pix') {
     const expiresAt = d.pagamento_response?.raw?.date_of_expiration || null;

@@ -79,10 +79,10 @@ export const navigationBar = (token, name) => {
     </style>
 
     <nav class="navbar navbar-expand-lg navbar-dark"
-      style="  background-image:
-        linear-gradient(0deg, rgba(0,0,0,.18), rgba(0,0,0,.18)),
-        linear-gradient(265deg, rgba(211,204,255,1) 0%, rgba(110,130,207,1) 40%, rgba(0,50,154,1) 100%);
-      background-blend-mode: multiply, normal; border-bottom: 1px solid black;">
+     style="  background-image:
+                                      linear-gradient(0deg, rgba(0,0,0,.18), rgba(0,0,0,.18)),
+                                      linear-gradient(265deg, rgba(211,204,255,1) 0%, rgba(110,130,207,1) 40%, rgb(0, 81, 255) 100%);
+                                    background-blend-mode: multiply, normal; ">
       <div class="container-fluid">
 
         <!-- Logo -->

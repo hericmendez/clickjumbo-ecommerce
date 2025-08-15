@@ -28,7 +28,7 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/orders/\d+/full$#',
         '#^/clickjumbo/v1/orders/\d+/cancel$#',
         '#^/clickjumbo/v1/delete-order$#',
-        '#^/clickjumbo/v1/user(?:/[a-zA-Z0-9\-]+)?$#',
+        '#^/clickjumbo/v1/user(?:/[a-zA-Z0-9\-]+)$#',
         '#^/clickjumbo/v1/users$#',
         '#^/clickjumbo/v1/reset-data$#',
         '#^/clickjumbo/v1/upload-product$#',
@@ -46,7 +46,7 @@ function clickjumbo_public_routes()
         '#^/clickjumbo/v1/mp-locate$#',
         '#^/clickjumbo/v1/mp-token$#',
         '#^/clickjumbo/v1/mp-webhook#',
-        '#^/clickjumbo/v1/order-status$#',
+        '#^/clickjumbo/v1/orders/\d+/status$#',
         '#^/mp/create-card-payment$#'
         
 

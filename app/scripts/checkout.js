@@ -24,8 +24,9 @@ export async function obterDadosPagamento (valorTotal) {
 const metodo = document.querySelector(
   "input[name='paymentMethod']:checked"
 )?.value
-
+  console.log("metodo ==> ", metodo);
   if (!metodo) {
+
     alert('Selecione uma forma de pagamento.')
     return null
   }
@@ -223,7 +224,7 @@ export async function processarPedido (payload) {
   }
 
   // Se método = boleto, injeta CPF no destinatário
-  // Se método = boleto, injeta CPF no destinatário
+  
   const metodo = payload?.pagamento?.method
   if (metodo === 'boleto') {
     const cpfInput = document.getElementById('cpfBoleto')

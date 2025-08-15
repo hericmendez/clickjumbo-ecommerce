@@ -1,5 +1,6 @@
 export function validarPagamento() {
   const metodo = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+  console.log("metodo ==> ", metodo);
 
   if (!metodo) {
     alert("Selecione a forma de pagamento!");

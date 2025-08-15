@@ -173,18 +173,24 @@ const p1 = d.slice(0, 3),
   };
 
   const toggleUI = () => {
+    
     const isBoleto = !!boletoRadio?.checked;
     const isCard   = !!cardRadio?.checked;
+
     cpfGroup?.classList.toggle('d-none', !isBoleto);
     cardWrap?.classList.toggle('d-none', !isCard);
   };
-
+const btnPagamentoForm = document.getElementById('btnPagamentoForm')
 // listeners rádio + cpf
+
 pixRadio?.addEventListener('change', toggleUI)
 boletoRadio?.addEventListener('change', toggleUI)
 cardRadio?.addEventListener('change', () => {
   toggleUI()
-  if (cardRadio.checked) mountCardBrick()
+  if (cardRadio.checked) {
+    btnPagamentoForm.classList.toggle('d-none', cardRadio.checked)
+    mountCardBrick()
+  }
 })
 
 

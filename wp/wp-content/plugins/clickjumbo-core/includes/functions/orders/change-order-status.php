@@ -16,7 +16,7 @@ function clickjumbo_change_order_status($request) {
     $data = $request->get_json_params();
     $novo_status = sanitize_text_field($data['status'] ?? '');
 
-    $permitidos = ['pending', 'processing', 'completed', 'cancelled'];
+    $permitidos = ['pending', 'processing', 'completed', 'cancelled','failed','refunded','sent','awaiting_shipment'];
 
     if (!$order_id || !in_array($novo_status, $permitidos)) {
         return new WP_REST_Response(['success' => false, 'message' => 'Dados inválidos.'], 400);
